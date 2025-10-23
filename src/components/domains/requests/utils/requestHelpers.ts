@@ -3,7 +3,13 @@
  *
  * Pure functions for request-related calculations and transformations.
  * No side effects, no API calls - just data transformations.
+ *
+ * NOTE: This is a placeholder/reference implementation. Some functions use
+ * field names that don't exist in the actual API schema. These should be
+ * updated when building the actual Request domain features.
  */
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { RequestViewModel, RequestStatus, RequestActions } from '../types/request.types'
 import type { components } from '@/lib/api/generated/schema'
@@ -13,21 +19,26 @@ type ApiRequest = components['schemas']['response.Request']
 /**
  * Transform API request to view model
  * Adds computed properties for UI consumption
+ *
+ * NOTE: This is a placeholder implementation. The actual API schema uses different
+ * field names than this reference implementation. Update this when building the
+ * actual Request domain features.
  */
 export function toRequestViewModel(apiRequest: ApiRequest): RequestViewModel {
   const now = new Date()
-  const eventDate = new Date(apiRequest.event_date)
+  // TODO: Update to use actual field from API schema (e.g., requestedDates)
+  const eventDate = new Date((apiRequest as any).event_date || apiRequest.createdAt || now)
   const daysUntilEvent = Math.ceil((eventDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
 
   return {
     ...apiRequest,
-    isActive: apiRequest.status === 'active',
-    isPending: apiRequest.status === 'pending',
-    canEdit: ['draft', 'pending'].includes(apiRequest.status),
-    canCancel: !['cancelled', 'completed'].includes(apiRequest.status),
-    statusLabel: getStatusLabel(apiRequest.status as RequestStatus),
-    statusColor: getStatusColor(apiRequest.status as RequestStatus),
-    eventDateFormatted: formatEventDate(apiRequest.event_date),
+    isActive: (apiRequest.status as any) === 'active',
+    isPending: (apiRequest.status as any) === 'pending',
+    canEdit: ['draft', 'pending'].includes(apiRequest.status as any),
+    canCancel: !['cancelled', 'completed'].includes(apiRequest.status as any),
+    statusLabel: getStatusLabel(apiRequest.status as unknown as RequestStatus),
+    statusColor: getStatusColor(apiRequest.status as unknown as RequestStatus),
+    eventDateFormatted: formatEventDate((apiRequest as any).event_date || apiRequest.createdAt || ''),
     daysUntilEvent,
   }
 }
@@ -86,18 +97,18 @@ export function getRequestActions(
   userPermissions: string[]
 ): RequestActions {
   const canEdit = userPermissions.includes('requests:update') &&
-    ['draft', 'pending'].includes(request.status)
+    ['draft', 'pending'].includes(request.status as any)
 
   const canCancel = userPermissions.includes('requests:cancel') &&
-    !['cancelled', 'completed'].includes(request.status)
+    !['cancelled', 'completed'].includes(request.status as any)
 
   const canDuplicate = userPermissions.includes('requests:create')
 
   const canViewOffers = userPermissions.includes('offers:read') &&
-    request.status !== 'draft'
+    (request.status as any) !== 'draft'
 
   const canAcceptOffer = userPermissions.includes('offers:accept') &&
-    request.status === 'active'
+    (request.status as any) === 'active'
 
   return {
     canEdit,
@@ -129,14 +140,15 @@ export function filterRequestsBySearch(
 
 /**
  * Sort requests by event date
+ * TODO: Update to use actual API field
  */
 export function sortRequestsByEventDate(
   requests: ApiRequest[],
   direction: 'asc' | 'desc' = 'asc'
 ): ApiRequest[] {
   return [...requests].sort((a, b) => {
-    const dateA = new Date(a.event_date).getTime()
-    const dateB = new Date(b.event_date).getTime()
+    const dateA = new Date((a as any).event_date || a.createdAt || 0).getTime()
+    const dateB = new Date((b as any).event_date || b.createdAt || 0).getTime()
 
     return direction === 'asc' ? dateA - dateB : dateB - dateA
   })
@@ -158,9 +170,10 @@ export function groupRequestsByStatus(
 
 /**
  * Check if request is expiring soon (within 7 days)
+ * TODO: Update to use actual API field
  */
 export function isRequestExpiringSoon(request: ApiRequest): boolean {
-  const eventDate = new Date(request.event_date)
+  const eventDate = new Date((request as any).event_date || request.createdAt || new Date())
   const now = new Date()
   const daysUntil = Math.ceil((eventDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
 

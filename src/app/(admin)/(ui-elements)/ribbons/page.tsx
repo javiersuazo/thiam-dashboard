@@ -1,5 +1,5 @@
-import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import RibbonExample from "@/components/ui/ribbons";
+import PageBreadcrumb from "@/components/shared/common/PageBreadCrumb";
+import RibbonExample from "@/components/shared/ui/ribbons";
 
 import { Metadata } from "next";
 import React from "react";

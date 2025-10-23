@@ -1,5 +1,5 @@
-import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import AddProductForm from "@/components/ecommerce/AddProductForm";
+import PageBreadcrumb from "@/components/shared/common/PageBreadCrumb";
+import AddProductForm from "@/components/_template/ecommerce/AddProductForm";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

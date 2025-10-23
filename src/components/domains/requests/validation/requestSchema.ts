@@ -48,18 +48,7 @@ export const requestFormSchema = z.object({
   dietaryRequirements: z.array(z.string()).optional(),
 
   budgetMin: z.number().positive().optional(),
-
-  budgetMax: z
-    .number()
-    .positive()
-    .optional()
-    .refine(
-      (max, ctx) => {
-        const min = ctx.parent.budgetMin
-        return !min || !max || max >= min
-      },
-      { message: 'Max budget must be greater than min budget' }
-    ),
+  budgetMax: z.number().positive().optional(),
 
   location: locationSchema,
 })

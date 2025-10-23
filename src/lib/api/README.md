@@ -1,13 +1,17 @@
 # Thiam API Client
 
-Type-safe, auto-generated API client for the Thiam API. Provides full TypeScript autocomplete for all endpoints, requests, and responses.
+Production-ready, type-safe API client for the Thiam API following Next.js 15 best practices.
 
 ## 🚀 Features
 
 - ✅ **100% Type Safe** - All endpoints, requests, and responses are fully typed
 - ✅ **Auto-Generated** - Types are generated directly from the API's OpenAPI spec
 - ✅ **Auto-Complete** - Full IDE autocomplete for all API operations
-- ✅ **React Query Integration** - Pre-built hooks for common operations
+- ✅ **React Query Integration** - Pre-built hooks with smart caching
+- ✅ **Server & Client Support** - Works in Server Components, Server Actions, and Client Components
+- ✅ **Authentication** - Built-in auth with httpOnly cookies (secure)
+- ✅ **Error Handling** - Automatic retry, 401 redirect, error formatting
+- ✅ **Middleware** - Logging, request IDs, content-type handling
 - ✅ **Always in Sync** - Regenerate types anytime the API changes
 
 ## 📦 What's Included
@@ -16,16 +20,22 @@ Type-safe, auto-generated API client for the Thiam API. Provides full TypeScript
 src/lib/api/
 ├── generated/
 │   └── schema.ts          # Auto-generated types (451KB) - DO NOT EDIT
-├── index.ts               # Main API client
+├── index.ts               # Main API client (client & server)
+├── server.ts              # Server-side utilities (cookies, auth)
+├── provider.tsx           # React Query provider
+├── middleware.ts          # Request/response interceptors
+├── utils.ts               # Helper functions
 ├── hooks.ts               # React Query hooks
 └── README.md              # This file
 ```
 
 ## 🎯 Quick Start
 
-### Basic Usage (Direct API Calls)
+### 1. Client-Side (Browser) - Direct API Calls
 
 ```tsx
+'use client'
+
 import { api } from '@/lib/api'
 
 // GET request with full type safety
@@ -58,31 +68,68 @@ async function createAccount() {
   if (error) throw error
   return data // Fully typed Account object
 }
+```
 
-// PUT request
-async function updateAccount(id: string) {
-  const { data, error } = await api.PUT('/accounts/{id}', {
-    params: {
-      path: { id }
-    },
-    body: {
-      name: 'Updated Name'
-    }
-  })
+### 2. Server-Side (Server Components)
 
-  if (error) throw error
-  return data
+```tsx
+import { createServerClient } from '@/lib/api/server'
+import { redirect } from 'next/navigation'
+
+export default async function AccountsPage() {
+  // Get authenticated API client
+  const api = await createServerClient()
+
+  if (!api) {
+    redirect('/signin')
+  }
+
+  // Fetch data server-side
+  const { data: accounts, error } = await api.GET('/accounts')
+
+  if (error) {
+    return <div>Error loading accounts</div>
+  }
+
+  return (
+    <div>
+      {accounts?.map(account => (
+        <div key={account.id}>{account.name}</div>
+      ))}
+    </div>
+  )
 }
+```
 
-// DELETE request
-async function deleteAccount(id: string) {
-  const { error } = await api.DELETE('/accounts/{id}', {
-    params: {
-      path: { id }
+### 3. Server Actions
+
+```tsx
+'use server'
+
+import { createServerClient } from '@/lib/api/server'
+import { revalidatePath } from 'next/cache'
+
+export async function createAccountAction(formData: FormData) {
+  const api = await createServerClient()
+
+  if (!api) {
+    throw new Error('Not authenticated')
+  }
+
+  const { data, error } = await api.POST('/accounts', {
+    body: {
+      name: formData.get('name') as string,
+      type: 'caterer',
+      email: formData.get('email') as string,
     }
   })
 
-  if (error) throw error
+  if (error) {
+    throw new Error('Failed to create account')
+  }
+
+  revalidatePath('/accounts')
+  return data
 }
 ```
 
@@ -178,50 +225,70 @@ function CreateAccountForm() {
 
 ## 🔑 Authentication
 
-### Client-Side (Browser)
+### Login (Server Action)
 
 ```tsx
-import { setAuthToken, api } from '@/lib/api'
+'use server'
 
-// After login, set the token
+import { setServerAuthToken } from '@/lib/api/server'
+import { redirect } from 'next/navigation'
+import { api } from '@/lib/api'
+
+export async function loginAction(email: string, password: string) {
+  // Call login endpoint (this is unauthenticated)
+  const { data, error } = await api.POST('/auth/login', {
+    body: { email, password }
+  })
+
+  if (error || !data?.token) {
+    return { error: 'Invalid credentials' }
+  }
+
+  // Store token in httpOnly cookie (secure!)
+  await setServerAuthToken(data.token)
+
+  // Redirect to dashboard
+  redirect('/dashboard')
+}
+```
+
+### Logout (Server Action)
+
+```tsx
+'use server'
+
+import { clearServerAuthToken } from '@/lib/api/server'
+import { redirect } from 'next/navigation'
+
+export async function logoutAction() {
+  // Clear auth cookie
+  await clearServerAuthToken()
+
+  // Redirect to login
+  redirect('/signin')
+}
+```
+
+### Client-Side Token Management (Less Secure - Use Server Actions Instead!)
+
+```tsx
+import { setAuthToken, logout } from '@/lib/api'
+
+// After login (in client component)
 function handleLogin(token: string) {
-  setAuthToken(token)
+  setAuthToken(token) // Stores in sessionStorage
 
   // Now all API calls will include the token
   api.GET('/accounts') // Authenticated request
 }
 
-// Clear token on logout
+// Logout
 function handleLogout() {
-  setAuthToken(null)
+  logout() // Clears token and redirects
 }
 ```
 
-### Server-Side (Next.js Server Components/API Routes)
-
-```tsx
-import { createAuthenticatedClient } from '@/lib/api'
-
-// In a server component or API route
-export async function GET(request: Request) {
-  const token = request.headers.get('authorization')?.replace('Bearer ', '')
-
-  if (!token) {
-    return new Response('Unauthorized', { status: 401 })
-  }
-
-  // Create authenticated client for this request
-  const authenticatedApi = createAuthenticatedClient(token)
-
-  const { data, error } = await authenticatedApi.GET('/accounts')
-
-  if (error) {
-    return Response.json({ error }, { status: 500 })
-  }
-
-  return Response.json(data)
-}
-```
+**⚠️ Note:** For production, use server-side authentication with httpOnly cookies (see Login/Logout Server Actions above). Client-side tokens are less secure.
 
 ## 🔄 Updating API Types
 
@@ -317,44 +384,120 @@ const { data } = await api.GET('/accounts')
 
 ## 🛠️ Advanced Usage
 
-### Custom Error Handling
+### Error Handling Utilities
 
-Add global error handling in `src/lib/api/index.ts`:
+Use the built-in utility functions for better error handling:
 
-```ts
-const errorMiddleware: Middleware = {
-  async onResponse({ response }) {
-    if (response.status === 401) {
-      // Redirect to login
-      window.location.href = '/login'
-    }
+```tsx
+import { formatApiError, unwrapResponse, hasError, hasData } from '@/lib/api/utils'
 
-    if (response.status >= 500) {
-      // Track error in analytics
-      trackError('API Error', response.status)
-    }
+// Format errors for display
+const { error } = await api.GET('/accounts')
+if (error) {
+  toast.error(formatApiError(error))
+}
 
-    return response
-  },
+// Type guards
+const response = await api.GET('/accounts')
+if (hasError(response)) {
+  // TypeScript knows response.error exists
+  console.error(response.error)
+}
+
+if (hasData(response)) {
+  // TypeScript knows response.data exists
+  console.log(response.data)
+}
+
+// Unwrap responses (throws on error)
+const data = unwrapResponse(await api.GET('/accounts'))
+// data is guaranteed to exist, or an error is thrown
+```
+
+### Pagination Helper
+
+```tsx
+import { getPaginationParams, getTotalPages } from '@/lib/api/utils'
+
+function AccountsList({ page = 1, pageSize = 10 }) {
+  const { data } = useAccounts(getPaginationParams(page, pageSize))
+
+  // Calculate total pages
+  const totalPages = getTotalPages(data?.total || 0, pageSize)
+
+  return (
+    <div>
+      {/* ... render accounts ... */}
+      <Pagination page={page} totalPages={totalPages} />
+    </div>
+  )
 }
 ```
 
-### Custom Hooks
+### Custom React Query Hooks
 
-Create your own hooks following the same pattern:
+Create domain-specific hooks:
 
 ```ts
-// src/lib/api/hooks.ts
+// src/components/domains/accounts/hooks/useAccountFilters.ts
+import { useQuery } from '@tanstack/react-query'
+import { api } from '@/lib/api'
+import { buildQueryParams } from '@/lib/api/utils'
 
-export function useMyCustomHook(params: any) {
+export function useFilteredAccounts(filters: {
+  type?: 'caterer' | 'customer'
+  status?: 'active' | 'inactive'
+  search?: string
+}) {
   return useQuery({
-    queryKey: ['my-custom-key', params],
+    queryKey: ['accounts', 'filtered', filters],
     queryFn: async () => {
-      const { data, error } = await api.GET('/my-endpoint', {
-        params: { query: params }
+      const { data, error } = await api.GET('/accounts', {
+        params: { query: buildQueryParams(filters) }
       })
       if (error) throw error
       return data!
+    },
+  })
+}
+```
+
+### Optimistic Updates
+
+```tsx
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+
+function useUpdateAccount() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ id, ...updates }) => {
+      const { data, error } = await api.PUT('/accounts/{id}', {
+        params: { path: { id } },
+        body: updates
+      })
+      if (error) throw error
+      return data
+    },
+    onMutate: async (variables) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['accounts', variables.id] })
+
+      // Snapshot previous value
+      const previous = queryClient.getQueryData(['accounts', variables.id])
+
+      // Optimistically update
+      queryClient.setQueryData(['accounts', variables.id], variables)
+
+      return { previous }
+    },
+    onError: (err, variables, context) => {
+      // Rollback on error
+      queryClient.setQueryData(['accounts', variables.id], context?.previous)
+    },
+    onSettled: (data, error, variables) => {
+      // Refetch after mutation
+      queryClient.invalidateQueries({ queryKey: ['accounts', variables.id] })
     },
   })
 }
@@ -366,13 +509,123 @@ Access all types directly:
 
 ```ts
 import type { paths, components } from '@/lib/api'
+import type { ApiResponse, ApiRequestBody } from '@/lib/api/utils'
 
 // Use component types
 type Account = components['schemas']['response.Account']
 type CreateAccountRequest = components['schemas']['request.CreateAccount']
 
-// Use path types
-type AccountsResponse = paths['/accounts']['get']['responses']['200']['content']['application/json']
+// Use helper types
+type AccountsResponse = ApiResponse<'/accounts', 'get'>
+type CreateAccountBody = ApiRequestBody<'/accounts', 'post'>
+```
+
+## 🎯 Best Practices
+
+### 1. Use Server Components for Initial Data
+
+Fetch data server-side when possible for better performance:
+
+```tsx
+// ✅ Good - Server Component
+export default async function Page() {
+  const api = await createServerClient()
+  const { data } = await api.GET('/accounts')
+  return <AccountsList initialData={data} />
+}
+
+// ❌ Avoid - Client Component for initial load
+'use client'
+export default function Page() {
+  const { data } = useAccounts() // Fetches client-side
+  return <AccountsList data={data} />
+}
+```
+
+### 2. Use React Query for Interactive Features
+
+Use hooks for data that updates frequently or needs caching:
+
+```tsx
+// ✅ Good - Interactive list with filters
+'use client'
+export function AccountsList() {
+  const [filters, setFilters] = useState({})
+  const { data, refetch } = useAccounts(filters)
+
+  return <div>{/* Interactive UI */}</div>
+}
+```
+
+### 3. Handle Errors Gracefully
+
+```tsx
+// ✅ Good - User-friendly error handling
+const { data, error } = await api.GET('/accounts')
+if (error) {
+  toast.error(formatApiError(error))
+  return <ErrorState message="Failed to load accounts" retry={refetch} />
+}
+
+// ❌ Avoid - Silent failures
+const { data } = await api.GET('/accounts')
+// What if there's an error? User sees nothing!
+```
+
+### 4. Use Server Actions for Mutations
+
+```tsx
+// ✅ Good - Server Action with validation
+'use server'
+export async function createAccount(formData: FormData) {
+  const api = await requireServerAuth()
+  // Validation, authorization, etc.
+  const { data, error } = await api.POST('/accounts', { body: validated })
+  if (error) throw error
+  revalidatePath('/accounts')
+  return data
+}
+
+// ❌ Avoid - Client-side mutations (less secure)
+'use client'
+function createAccount() {
+  const { data } = await api.POST('/accounts', { body })
+}
+```
+
+### 5. Always Validate User Input
+
+```tsx
+import { z } from 'zod'
+
+const schema = z.object({
+  name: z.string().min(1).max(100),
+  email: z.string().email(),
+})
+
+export async function createAccount(formData: FormData) {
+  // Validate before sending to API
+  const validated = schema.parse({
+    name: formData.get('name'),
+    email: formData.get('email'),
+  })
+
+  const api = await requireServerAuth()
+  return api.POST('/accounts', { body: validated })
+}
+```
+
+### 6. Use Proper Query Keys
+
+```tsx
+// ✅ Good - Descriptive, hierarchical keys
+queryKey: ['accounts', 'list', { status: 'active', page: 1 }]
+queryKey: ['accounts', accountId]
+queryKey: ['accounts', accountId, 'offers']
+
+// ❌ Avoid - Generic or flat keys
+queryKey: ['data']
+queryKey: ['list']
 ```
 
 ## ❓ FAQ

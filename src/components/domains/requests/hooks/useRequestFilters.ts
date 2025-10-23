@@ -5,6 +5,9 @@
  * Handles URL sync, local storage, and filter logic.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { useState, useCallback, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import type { RequestFilters } from '../types/request.types'

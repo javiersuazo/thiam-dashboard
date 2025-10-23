@@ -8,9 +8,9 @@ import {
   NotionIcon,
   TrelloIcon,
   ZoomIcon,
-} from "@/components/integration/icon";
-import IntegrationBreadcrumb from "@/components/integration/IntegrationBreadcrumb";
-import IntegrationCard from "@/components/integration/IntegrationCard";
+} from "@/components/_template/integration/icon";
+import IntegrationBreadcrumb from "@/components/_template/integration/IntegrationBreadcrumb";
+import IntegrationCard from "@/components/_template/integration/IntegrationCard";
 import { Metadata } from "next";
 import React from "react";
 

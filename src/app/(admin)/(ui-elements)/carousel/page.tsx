@@ -1,9 +1,9 @@
-import ComponentCard from "@/components/common/ComponentCard";
-import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import SlideOnly from "@/components/ui/carousel/SlideOnly";
-import WithControl from "@/components/ui/carousel/WithControl";
-import WithControlAndIndicators from "@/components/ui/carousel/WithControlAndIndicators";
-import WithIndicators from "@/components/ui/carousel/WithIndicators";
+import ComponentCard from "@/components/shared/common/ComponentCard";
+import PageBreadcrumb from "@/components/shared/common/PageBreadCrumb";
+import SlideOnly from "@/components/shared/ui/carousel/SlideOnly";
+import WithControl from "@/components/shared/ui/carousel/WithControl";
+import WithControlAndIndicators from "@/components/shared/ui/carousel/WithControlAndIndicators";
+import WithIndicators from "@/components/shared/ui/carousel/WithIndicators";
 import { Metadata } from "next";
 import React from "react";
 

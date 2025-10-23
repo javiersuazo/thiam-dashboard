@@ -1,9 +1,9 @@
-import ComponentCard from "@/components/common/ComponentCard";
-import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import DefaultProgressbarExample from "@/components/progress-bar/DefaultProgressbarExample";
-import ProgressBarInMultipleSizes from "@/components/progress-bar/ProgressBarInMultipleSizes";
-import ProgressBarWithInsideLabel from "@/components/progress-bar/ProgressBarWithInsideLabel";
-import ProgressBarWithOutsideLabel from "@/components/progress-bar/ProgressBarWithOutsideLabel";
+import ComponentCard from "@/components/shared/common/ComponentCard";
+import PageBreadcrumb from "@/components/shared/common/PageBreadCrumb";
+import DefaultProgressbarExample from "@/components/shared/progress-bar/DefaultProgressbarExample";
+import ProgressBarInMultipleSizes from "@/components/shared/progress-bar/ProgressBarInMultipleSizes";
+import ProgressBarWithInsideLabel from "@/components/shared/progress-bar/ProgressBarWithInsideLabel";
+import ProgressBarWithOutsideLabel from "@/components/shared/progress-bar/ProgressBarWithOutsideLabel";
 import { Metadata } from "next";
 import React from "react";
 

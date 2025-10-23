@@ -1,9 +1,9 @@
-import CrmMetrics from "@/components/crm/CrmMetrics";
-import CrmRecentOrderTable from "@/components/crm/CrmRecentOrderTable";
-import CrmStatisticsChart from "@/components/crm/CrmStatisticsChart";
-import EstimatedRevenue from "@/components/crm/EstimatedRevenue";
-import SalePieChart from "@/components/crm/SalePieChart";
-import UpcomingSchedule from "@/components/crm/UpcomingSchedule";
+import CrmMetrics from "@/components/_template/crm/CrmMetrics";
+import CrmRecentOrderTable from "@/components/_template/crm/CrmRecentOrderTable";
+import CrmStatisticsChart from "@/components/_template/crm/CrmStatisticsChart";
+import EstimatedRevenue from "@/components/_template/crm/EstimatedRevenue";
+import SalePieChart from "@/components/_template/crm/SalePieChart";
+import UpcomingSchedule from "@/components/_template/crm/UpcomingSchedule";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

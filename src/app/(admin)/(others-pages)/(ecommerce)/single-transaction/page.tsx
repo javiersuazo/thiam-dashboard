@@ -1,8 +1,8 @@
-import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import CustomerDetails from "@/components/transactions/CustomerDetails";
-import OrderDetailsTable from "@/components/transactions/OrderDetailsTable";
-import OrderHistory from "@/components/transactions/OrderHistory";
-import TransactionHeader from "@/components/transactions/TransactionHeader";
+import PageBreadcrumb from "@/components/shared/common/PageBreadCrumb";
+import CustomerDetails from "@/components/_template/transactions/CustomerDetails";
+import OrderDetailsTable from "@/components/_template/transactions/OrderDetailsTable";
+import OrderHistory from "@/components/_template/transactions/OrderHistory";
+import TransactionHeader from "@/components/_template/transactions/TransactionHeader";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

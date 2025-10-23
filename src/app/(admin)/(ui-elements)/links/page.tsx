@@ -1,8 +1,8 @@
-import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import ColoredLinkWithUnderline from "@/components/ui/links/ColoredLinkWithUnderline";
-import DefaultLinkExample from "@/components/ui/links/DefaultLinkExample";
-import LinkOpacityExample from "@/components/ui/links/LinkOpacityExample";
-import LinkOpacityHover from "@/components/ui/links/LinkOpacityHover";
+import PageBreadcrumb from "@/components/shared/common/PageBreadCrumb";
+import ColoredLinkWithUnderline from "@/components/shared/ui/links/ColoredLinkWithUnderline";
+import DefaultLinkExample from "@/components/shared/ui/links/DefaultLinkExample";
+import LinkOpacityExample from "@/components/shared/ui/links/LinkOpacityExample";
+import LinkOpacityHover from "@/components/shared/ui/links/LinkOpacityHover";
 import { Metadata } from "next";
 import React from "react";
 

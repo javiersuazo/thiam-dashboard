@@ -1,8 +1,8 @@
-import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import CardWithIconExample from "@/components/cards/card-with-icon/CardWithIconExample";
-import CardWithImage from "@/components/cards/card-with-image/CardWithImage";
-import CardWithLinkExample from "@/components/cards/card-with-link/CardWithLinkExample";
-import HorizontalCardWithImage from "@/components/cards/horizontal-card/HorizontalCardWithImage";
+import PageBreadcrumb from "@/components/shared/common/PageBreadCrumb";
+import CardWithIconExample from "@/components/shared/cards/card-with-icon/CardWithIconExample";
+import CardWithImage from "@/components/shared/cards/card-with-image/CardWithImage";
+import CardWithLinkExample from "@/components/shared/cards/card-with-link/CardWithLinkExample";
+import HorizontalCardWithImage from "@/components/shared/cards/horizontal-card/HorizontalCardWithImage";
 import React from "react";
 import { Metadata } from "next";
 

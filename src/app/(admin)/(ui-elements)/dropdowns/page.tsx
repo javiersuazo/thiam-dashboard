@@ -1,9 +1,9 @@
-import ComponentCard from "@/components/common/ComponentCard";
-import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import AccountMenuDropdown from "@/components/example/DropdownExample/AccountMenuDropdown";
-import DropdownWithDivider from "@/components/example/DropdownExample/DropdownWithDivider";
-import DropdownWithIcon from "@/components/example/DropdownExample/DropdownWithIcon";
-import DropdownWithIconAndDivider from "@/components/example/DropdownExample/DropdownWithIconAndDivider";
+import ComponentCard from "@/components/shared/common/ComponentCard";
+import PageBreadcrumb from "@/components/shared/common/PageBreadCrumb";
+import AccountMenuDropdown from "@/components/_template/example/DropdownExample/AccountMenuDropdown";
+import DropdownWithDivider from "@/components/_template/example/DropdownExample/DropdownWithDivider";
+import DropdownWithIcon from "@/components/_template/example/DropdownExample/DropdownWithIcon";
+import DropdownWithIconAndDivider from "@/components/_template/example/DropdownExample/DropdownWithIconAndDivider";
 import { Metadata } from "next";
 import React from "react";
 

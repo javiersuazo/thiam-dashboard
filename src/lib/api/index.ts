@@ -1,10 +1,10 @@
 /**
  * Thiam API Client
  *
- * Type-safe API client generated from OpenAPI spec.
- * Auto-completes endpoints, requests, and responses.
+ * Type-safe API client using openapi-fetch with full TypeScript support.
+ * Works in both client-side and server-side contexts (Server Components, Server Actions, etc.)
  *
- * @example
+ * @example Client-side usage
  * ```ts
  * import { api } from '@/lib/api'
  *
@@ -18,86 +18,85 @@
  *   body: { name: 'My Company', type: 'caterer' }
  * })
  * ```
+ *
+ * @example Server-side usage
+ * ```ts
+ * import { createServerClient } from '@/lib/api'
+ *
+ * // In a Server Component or Server Action
+ * const api = await createServerClient()
+ * const { data } = await api.GET('/accounts')
+ * ```
  */
 
-import createClient, { type Middleware } from 'openapi-fetch'
+import createClient from 'openapi-fetch'
 import type { paths } from './generated/schema'
+import {
+  authMiddleware,
+  errorMiddleware,
+  loggingMiddleware,
+  createRetryMiddleware,
+  requestIdMiddleware,
+  contentTypeMiddleware,
+} from './middleware'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
 
 /**
- * Authentication middleware
- * Automatically adds Authorization header to all requests
- */
-const authMiddleware: Middleware = {
-  async onRequest({ request }) {
-    // In a real app, get token from session/cookie/localStorage
-    // For now, we'll check for a token in the request headers or get it from session
-    const token = request.headers.get('Authorization')?.replace('Bearer ', '')
-
-    if (token) {
-      request.headers.set('Authorization', `Bearer ${token}`)
-    }
-
-    return request
-  },
-}
-
-/**
- * Error handling middleware
- * Logs errors and can be extended for global error handling
- */
-const errorMiddleware: Middleware = {
-  async onResponse({ response }) {
-    if (!response.ok) {
-      console.error(`API Error: ${response.status} ${response.statusText}`)
-
-      // You can add global error handling here:
-      // - Show toast notifications
-      // - Redirect to login on 401
-      // - Track errors in analytics
-    }
-
-    return response
-  },
-}
-
-/**
- * Create the API client with all middleware
+ * Main API client for client-side usage
+ *
+ * Automatically includes:
+ * - Authentication (from sessionStorage)
+ * - Error handling (401 redirect, etc.)
+ * - Request logging (dev mode)
+ * - Request IDs
+ * - Content-Type headers
+ * - Retry logic for failed requests
  */
 const client = createClient<paths>({
   baseUrl: `${API_BASE_URL}/v1`,
 })
 
-// Add middleware
+// Add middleware in order
+client.use(requestIdMiddleware)
+client.use(contentTypeMiddleware)
 client.use(authMiddleware)
+client.use(loggingMiddleware)
 client.use(errorMiddleware)
+client.use(createRetryMiddleware(3)) // Retry up to 3 times
 
 /**
- * Type-safe API client
+ * Type-safe API client for browser usage
  *
- * Provides full TypeScript autocomplete for:
- * - All API endpoints
- * - Request parameters (path, query, body)
- * - Response data structures
- * - Error responses
+ * Use this in:
+ * - Client Components
+ * - React Query hooks
+ * - Event handlers
+ * - Client-side utilities
  */
 export const api = client
 
 /**
- * Helper to set auth token for requests
+ * Set authentication token
+ *
+ * Stores the token for future API requests.
+ * Token is stored in sessionStorage (client-side only).
  *
  * @example
  * ```ts
  * import { setAuthToken } from '@/lib/api'
  *
- * setAuthToken('your-jwt-token')
+ * // After successful login
+ * setAuthToken(loginResponse.token)
  * ```
  */
-export function setAuthToken(token: string | null) {
+export function setAuthToken(token: string | null): void {
+  if (typeof window === 'undefined') {
+    console.warn('setAuthToken called on server-side - this is a no-op')
+    return
+  }
+
   if (token) {
-    // Store token for middleware to use
-    // In a real app, this might set it in a cookie or localStorage
     sessionStorage.setItem('auth_token', token)
   } else {
     sessionStorage.removeItem('auth_token')
@@ -105,7 +104,9 @@ export function setAuthToken(token: string | null) {
 }
 
 /**
- * Helper to get current auth token
+ * Get current authentication token
+ *
+ * @returns The current auth token or null
  */
 export function getAuthToken(): string | null {
   if (typeof window === 'undefined') return null
@@ -113,15 +114,46 @@ export function getAuthToken(): string | null {
 }
 
 /**
- * Create an authenticated API client with a specific token
- * Useful for server-side requests where you have the token from session
+ * Clear authentication token and logout
+ *
+ * Removes the token and redirects to login page.
  *
  * @example
  * ```ts
+ * import { logout } from '@/lib/api'
+ *
+ * function handleLogout() {
+ *   logout()
+ * }
+ * ```
+ */
+export function logout(): void {
+  setAuthToken(null)
+
+  if (typeof window !== 'undefined') {
+    window.location.href = '/signin'
+  }
+}
+
+/**
+ * Create an authenticated API client with a specific token
+ *
+ * Useful for:
+ * - Server-side requests with a known token
+ * - Testing
+ * - Service-to-service calls
+ *
+ * @param token - JWT token to use for authentication
+ *
+ * @example Server Action
+ * ```ts
  * import { createAuthenticatedClient } from '@/lib/api'
  *
- * const authenticatedApi = createAuthenticatedClient(userToken)
- * const { data } = await authenticatedApi.GET('/accounts')
+ * export async function getAccounts(token: string) {
+ *   const api = createAuthenticatedClient(token)
+ *   const { data, error } = await api.GET('/accounts')
+ *   return data
+ * }
  * ```
  */
 export function createAuthenticatedClient(token: string) {
@@ -132,7 +164,12 @@ export function createAuthenticatedClient(token: string) {
     },
   })
 
+  // Add middleware (except auth middleware since we have the token)
+  authenticatedClient.use(requestIdMiddleware)
+  authenticatedClient.use(contentTypeMiddleware)
+  authenticatedClient.use(loggingMiddleware)
   authenticatedClient.use(errorMiddleware)
+  authenticatedClient.use(createRetryMiddleware(3))
 
   return authenticatedClient
 }

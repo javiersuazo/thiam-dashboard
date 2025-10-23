@@ -1,5 +1,5 @@
-import CountdownTimer from "@/components/common/CountdownTimer";
-import GridShape from "@/components/common/GridShape";
+import CountdownTimer from "@/components/shared/common/CountdownTimer";
+import GridShape from "@/components/shared/common/GridShape";
 import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";

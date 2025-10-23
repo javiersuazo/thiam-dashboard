@@ -1,5 +1,5 @@
-import ApiKeyTable from "@/components/api-keys/ApiKeyTable";
-import PageBreadcrumb from "@/components/common/PageBreadCrumb";
+import ApiKeyTable from "@/components/_template/api-keys/ApiKeyTable";
+import PageBreadcrumb from "@/components/shared/common/PageBreadCrumb";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

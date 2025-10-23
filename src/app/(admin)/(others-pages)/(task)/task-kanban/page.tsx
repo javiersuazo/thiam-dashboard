@@ -1,6 +1,6 @@
-import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import KanbanBoard from "@/components/task/kanban/KanbanBoard";
-import TaskHeader from "@/components/task/TaskHeader";
+import PageBreadcrumb from "@/components/shared/common/PageBreadCrumb";
+import KanbanBoard from "@/components/_examples/task/kanban/KanbanBoard";
+import TaskHeader from "@/components/_examples/task/TaskHeader";
 import { Metadata } from "next";
 import React from "react";
 

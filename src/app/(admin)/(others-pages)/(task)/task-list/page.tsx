@@ -1,7 +1,7 @@
-import PageBreadcrumb from "@/components/common/PageBreadCrumb";
+import PageBreadcrumb from "@/components/shared/common/PageBreadCrumb";
 import React from "react";
 import { Metadata } from "next";
-import TaskList from "@/components/task/task-list/TaskList";
+import TaskList from "@/components/_examples/task/task-list/TaskList";
 
 export const metadata: Metadata = {
   title: "Next.js Task List | TailAdmin - Next.js Dashboard Template",

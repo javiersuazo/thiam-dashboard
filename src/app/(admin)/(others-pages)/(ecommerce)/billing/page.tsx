@@ -1,8 +1,8 @@
-import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import BillingInfo from "@/components/ecommerce/billing/BillingInfo";
-import BillingPlan from "@/components/ecommerce/billing/BillingPlan";
-import InvoiceTable from "@/components/ecommerce/billing/InvoiceTable";
-import PaymentMethod from "@/components/ecommerce/billing/PaymentMethod";
+import PageBreadcrumb from "@/components/shared/common/PageBreadCrumb";
+import BillingInfo from "@/components/_template/ecommerce/billing/BillingInfo";
+import BillingPlan from "@/components/_template/ecommerce/billing/BillingPlan";
+import InvoiceTable from "@/components/_template/ecommerce/billing/InvoiceTable";
+import PaymentMethod from "@/components/_template/ecommerce/billing/PaymentMethod";
 import { Metadata } from "next";
 import React from "react";
 

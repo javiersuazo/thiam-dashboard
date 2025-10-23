@@ -1,7 +1,7 @@
-import ComponentCard from "@/components/common/ComponentCard";
-import FaqsOneExample from "@/components/faqs/FaqOneExample";
-import FaqsThree from "@/components/faqs/FaqsThree";
-import FaqsTwo from "@/components/faqs/FaqsTwo";
+import ComponentCard from "@/components/shared/common/ComponentCard";
+import FaqsOneExample from "@/components/_template/faqs/FaqOneExample";
+import FaqsThree from "@/components/_template/faqs/FaqsThree";
+import FaqsTwo from "@/components/_template/faqs/FaqsTwo";
 import { Metadata } from "next";
 import React from "react";
 

@@ -1,11 +1,11 @@
-import ComponentCard from "@/components/common/ComponentCard";
-import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import ButtonGroupWithLeftIcon from "@/components/ui/buttons-group/ButtonGroupWithLeftIcon";
-import ButtonGroupWithRightIcon from "@/components/ui/buttons-group/ButtonGroupWithRightIcon";
-import PrimaryButtonGroup from "@/components/ui/buttons-group/PrimaryButtonGroup";
-import SecondaryButtonGroup from "@/components/ui/buttons-group/SecondaryButtonGroup";
-import SecondaryButtonGroupWithLeftIcon from "@/components/ui/buttons-group/SecondaryButtonGroupWithLeftIcon";
-import SecondaryButtonGroupWithRightIcon from "@/components/ui/buttons-group/SecondaryButtonGroupWithRightIcon";
+import ComponentCard from "@/components/shared/common/ComponentCard";
+import PageBreadcrumb from "@/components/shared/common/PageBreadCrumb";
+import ButtonGroupWithLeftIcon from "@/components/shared/ui/buttons-group/ButtonGroupWithLeftIcon";
+import ButtonGroupWithRightIcon from "@/components/shared/ui/buttons-group/ButtonGroupWithRightIcon";
+import PrimaryButtonGroup from "@/components/shared/ui/buttons-group/PrimaryButtonGroup";
+import SecondaryButtonGroup from "@/components/shared/ui/buttons-group/SecondaryButtonGroup";
+import SecondaryButtonGroupWithLeftIcon from "@/components/shared/ui/buttons-group/SecondaryButtonGroupWithLeftIcon";
+import SecondaryButtonGroupWithRightIcon from "@/components/shared/ui/buttons-group/SecondaryButtonGroupWithRightIcon";
 import { Metadata } from "next";
 import React from "react";
 

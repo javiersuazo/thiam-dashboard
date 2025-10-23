@@ -1,6 +1,6 @@
-import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import EmailWrapper from "@/components/email/EmailDetails/EmailWrapper";
-import EmailSidebar from "@/components/email/EmailSidebar/EmailSidebar";
+import PageBreadcrumb from "@/components/shared/common/PageBreadCrumb";
+import EmailWrapper from "@/components/_examples/email/EmailDetails/EmailWrapper";
+import EmailSidebar from "@/components/_examples/email/EmailSidebar/EmailSidebar";
 
 import { Metadata } from "next";
 import React from "react";

@@ -1,9 +1,9 @@
-import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import InvoicePreviewModal from "@/components/ecommerce/invoices/InvoicePreviewModal";
-import Input from "@/components/form/input/InputField";
-import Label from "@/components/form/Label";
-import CreateInvoiceTable from "@/components/invoice/CreateInvoiceTable";
-import Button from "@/components/ui/button/Button";
+import PageBreadcrumb from "@/components/shared/common/PageBreadCrumb";
+import InvoicePreviewModal from "@/components/_template/ecommerce/invoices/InvoicePreviewModal";
+import Input from "@/components/shared/form/input/InputField";
+import Label from "@/components/shared/form/Label";
+import CreateInvoiceTable from "@/components/_examples/invoice/CreateInvoiceTable";
+import Button from "@/components/shared/ui/button/Button";
 import { Metadata } from "next";
 import React from "react";
 

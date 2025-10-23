@@ -1,6 +1,6 @@
-import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import SupportTicketsList from "@/components/support/SupportList";
-import SupportMetrics from "@/components/support/SupportMetrics";
+import PageBreadcrumb from "@/components/shared/common/PageBreadCrumb";
+import SupportTicketsList from "@/components/_examples/support/SupportList";
+import SupportMetrics from "@/components/_examples/support/SupportMetrics";
 import { Metadata } from "next";
 import React from "react";
 

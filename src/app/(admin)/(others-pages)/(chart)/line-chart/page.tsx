@@ -1,8 +1,8 @@
-import LineChartOne from "@/components/charts/line/LineChartOne";
-import LineChartThree from "@/components/charts/line/LineChartThree";
-import LineChartTwo from "@/components/charts/line/LineChartTwo";
-import ComponentCard from "@/components/common/ComponentCard";
-import PageBreadcrumb from "@/components/common/PageBreadCrumb";
+import LineChartOne from "@/components/shared/charts/line/LineChartOne";
+import LineChartThree from "@/components/shared/charts/line/LineChartThree";
+import LineChartTwo from "@/components/shared/charts/line/LineChartTwo";
+import ComponentCard from "@/components/shared/common/ComponentCard";
+import PageBreadcrumb from "@/components/shared/common/PageBreadCrumb";
 import { Metadata } from "next";
 import React from "react";
 

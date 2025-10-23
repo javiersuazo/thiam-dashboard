@@ -1,6 +1,6 @@
-import AiLayout from "@/components/ai/AiLayout";
-import AiPageBreadcrumb from "@/components/ai/AiPageBreadcrumb";
-import ImageGeneratorContent from "@/components/ai/ImageGeneratorContent";
+import AiLayout from "@/components/_template/ai/AiLayout";
+import AiPageBreadcrumb from "@/components/_template/ai/AiPageBreadcrumb";
+import ImageGeneratorContent from "@/components/_template/ai/ImageGeneratorContent";
 import { Metadata } from "next";
 import React from "react";
 

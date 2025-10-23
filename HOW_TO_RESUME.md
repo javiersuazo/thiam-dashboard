@@ -13,13 +13,16 @@ Hi Claude! Let's continue building Thiam Dashboard.
 
 Please read these files for context:
 1. SESSION_NOTES.md - Current state & progress
-2. ROUTING_STRATEGY.md - URL structure
-3. ARCHITECTURE.md - System design
+2. CHANGELOG.md - What changed recently
+3. ROUTING_STRATEGY.md - URL structure
+4. ARCHITECTURE.md - System design
 
 Today we're working on: [DESCRIBE WHAT YOU WANT TO BUILD]
 
 Reference the Request domain (src/components/domains/requests/)
 as the pattern to follow.
+
+Note: If commands are slow, check CLAUDE_CLI_SETUP.md for permission setup.
 ```
 
 ---
@@ -113,21 +116,29 @@ Follow the style in existing docs (ARCHITECTURE.md, etc.)
 ### Always Have These Open
 
 1. **SESSION_NOTES.md** - What's done, what's next, decisions made
-2. **ROUTING_STRATEGY.md** - All URL patterns
-3. **ARCHITECTURE.md** - System design principles
+2. **CHANGELOG.md** - What changed in each session
+3. **ROUTING_STRATEGY.md** - All URL patterns
+4. **ARCHITECTURE.md** - System design principles
 
 ### When Writing Code
 
-4. **CODING_GUIDELINES.md** - Templates for every pattern
-5. **src/components/domains/requests/** - Reference implementation
-6. **src/lib/api/hooks.ts** - Available API hooks
-7. **src/lib/api/examples.tsx** - Working code examples
+5. **CODING_GUIDELINES.md** - Templates for every pattern
+6. **src/components/domains/requests/** - Reference implementation
+7. **src/lib/api/hooks.ts** - Available API hooks
+8. **src/lib/api/examples.tsx** - Working code examples
 
 ### When Starting a New Domain
 
-8. **QUICKSTART.md** - Step-by-step guide
-9. **src/components/domains/requests/types/request.types.ts** - Type patterns
-10. **src/components/domains/requests/utils/requestHelpers.ts** - Utility patterns
+9. **QUICKSTART.md** - Step-by-step guide
+10. **src/components/domains/requests/types/request.types.ts** - Type patterns
+11. **src/components/domains/requests/utils/requestHelpers.ts** - Utility patterns
+
+### Project Setup & Configuration
+
+12. **CAPABILITY_ASSESSMENT.md** - Project feasibility & timeline
+13. **TEMPLATE_REORGANIZATION.md** - How template is organized
+14. **CLAUDE_CLI_SETUP.md** - Speed up Claude CLI permissions
+15. **FOUNDATION_COMPLETE.md** - What's already built
 
 ---
 

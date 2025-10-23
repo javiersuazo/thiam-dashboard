@@ -1,9 +1,9 @@
-import DividendChart from "@/components/stocks/DividendChart";
-import LatestTransactions from "@/components/stocks/LatestTransactions";
-import PortfolioPerformance from "@/components/stocks/PortfolioPerformance";
-import StockMetricsList from "@/components/stocks/StockMetricsList";
-import TrendingStocks from "@/components/stocks/TrendingStocks";
-import WatchList from "@/components/stocks/WatchList";
+import DividendChart from "@/components/_template/stocks/DividendChart";
+import LatestTransactions from "@/components/_template/stocks/LatestTransactions";
+import PortfolioPerformance from "@/components/_template/stocks/PortfolioPerformance";
+import StockMetricsList from "@/components/_template/stocks/StockMetricsList";
+import TrendingStocks from "@/components/_template/stocks/TrendingStocks";
+import WatchList from "@/components/_template/stocks/WatchList";
 import { Metadata } from "next";
 import React from "react";
 

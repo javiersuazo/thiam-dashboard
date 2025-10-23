@@ -1,0 +1,64 @@
+{
+  "rules": {
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["@/components/domains/*/!(index)"],
+            "message": "Import from domain's public API (index.ts) instead of internal files. Use '@/components/domains/{domain}' instead."
+          },
+          {
+            "group": ["../**/components/domains/*"],
+            "message": "Don't use relative imports across domains. Use absolute imports: '@/components/domains/{domain}'"
+          }
+        ]
+      }
+    ],
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/explicit-function-return-type": [
+      "warn",
+      {
+        "allowExpressions": true,
+        "allowTypedFunctionExpressions": true
+      }
+    ],
+    "import/order": [
+      "error",
+      {
+        "groups": [
+          "builtin",
+          "external",
+          "internal",
+          "parent",
+          "sibling",
+          "index",
+          "type"
+        ],
+        "pathGroups": [
+          {
+            "pattern": "@/lib/**",
+            "group": "internal",
+            "position": "before"
+          },
+          {
+            "pattern": "@/components/domains/**",
+            "group": "internal",
+            "position": "before"
+          },
+          {
+            "pattern": "@/components/shared/**",
+            "group": "internal",
+            "position": "after"
+          }
+        ],
+        "pathGroupsExcludedImportTypes": ["builtin"],
+        "alphabetize": {
+          "order": "asc",
+          "caseInsensitive": true
+        },
+        "newlines-between": "always"
+      }
+    ]
+  }
+}

@@ -11,6 +11,7 @@
  */
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { disable2FAAction, regenerateBackupCodesAction } from '../actions'
 import TwoFactorSetupFlow from './TwoFactorSetupFlow'
 import BackupCodes from './BackupCodes'
@@ -26,6 +27,7 @@ export default function TwoFactorSettings({
   has2FAEnabled: initialEnabled,
   onStatusChange,
 }: TwoFactorSettingsProps) {
+  const t = useTranslations('auth.twoFactor.settings')
   const [is2FAEnabled, setIs2FAEnabled] = useState(initialEnabled)
   const [viewMode, setViewMode] = useState<ViewMode>('status')
   const [showDisableConfirm, setShowDisableConfirm] = useState(false)
@@ -122,11 +124,10 @@ export default function TwoFactorSettings({
       {/* Header */}
       <div>
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-          Two-Factor Authentication
+          {t('title')}
         </h2>
         <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-          Add an extra layer of security to your account by requiring a verification code when
-          signing in.
+          {t('subtitle')}
         </p>
       </div>
 
@@ -200,12 +201,12 @@ export default function TwoFactorSettings({
             </div>
             <div>
               <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-                {is2FAEnabled ? '2FA Enabled' : '2FA Disabled'}
+                {is2FAEnabled ? t('status.enabled.title') : t('status.disabled.title')}
               </h3>
               <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                 {is2FAEnabled
-                  ? 'Your account is protected with two-factor authentication.'
-                  : 'Enable 2FA to add an extra layer of security to your account.'}
+                  ? t('status.enabled.description')
+                  : t('status.disabled.description')}
               </p>
             </div>
           </div>
@@ -218,14 +219,14 @@ export default function TwoFactorSettings({
                   disabled={loading}
                   className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white shadow-theme-xs hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {loading ? 'Generating...' : 'Regenerate Backup Codes'}
+                  {loading ? t('buttons.regenerating') : t('buttons.regenerate')}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowDisableConfirm(true)}
                   className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-red-700 ring-1 ring-inset ring-red-300 hover:bg-red-50 dark:bg-gray-800 dark:text-red-400 dark:ring-red-800 dark:hover:bg-red-900/20"
                 >
-                  Disable 2FA
+                  {t('buttons.disable')}
                 </button>
               </>
             ) : (
@@ -234,7 +235,7 @@ export default function TwoFactorSettings({
                 onClick={handleEnable2FA}
                 className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white shadow-theme-xs hover:bg-brand-600"
               >
-                Enable 2FA
+                {t('buttons.enable')}
               </button>
             )}
           </div>
@@ -261,14 +262,14 @@ export default function TwoFactorSettings({
             </div>
             <div className="ml-3 flex-1">
               <h3 className="text-sm font-medium text-blue-800 dark:text-blue-400">
-                Why Enable 2FA?
+                {t('benefits.title')}
               </h3>
               <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
                 <ul className="list-inside list-disc space-y-1">
-                  <li>Protects your account even if your password is compromised</li>
-                  <li>Prevents unauthorized access to your data</li>
-                  <li>Industry-standard security practice</li>
-                  <li>Takes less than 2 minutes to set up</li>
+                  <li>{t('benefits.benefit1')}</li>
+                  <li>{t('benefits.benefit2')}</li>
+                  <li>{t('benefits.benefit3')}</li>
+                  <li>{t('benefits.benefit4')}</li>
                 </ul>
               </div>
             </div>
@@ -299,10 +300,10 @@ export default function TwoFactorSettings({
               </div>
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Disable Two-Factor Authentication?
+                  {t('disableModal.title')}
                 </h3>
                 <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                  This will make your account less secure. You can always re-enable 2FA later.
+                  {t('disableModal.message')}
                 </p>
                 <div className="mt-4 flex justify-end gap-3">
                   <button
@@ -311,7 +312,7 @@ export default function TwoFactorSettings({
                     disabled={loading}
                     className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03]"
                   >
-                    Cancel
+                    {t('disableModal.cancel')}
                   </button>
                   <button
                     type="button"
@@ -319,7 +320,7 @@ export default function TwoFactorSettings({
                     disabled={loading}
                     className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {loading ? 'Disabling...' : 'Yes, Disable 2FA'}
+                    {loading ? t('disableModal.disabling') : t('disableModal.confirm')}
                   </button>
                 </div>
               </div>

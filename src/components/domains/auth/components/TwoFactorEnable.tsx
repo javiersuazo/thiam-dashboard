@@ -8,6 +8,7 @@
  */
 
 import { useState, FormEvent } from 'react'
+import { useTranslations } from 'next-intl'
 import { enable2FAAction } from '../actions'
 import { twoFactorVerifySchema } from '../validation/authSchemas'
 
@@ -17,6 +18,7 @@ interface TwoFactorEnableProps {
 }
 
 export default function TwoFactorEnable({ onEnableComplete, onBack }: TwoFactorEnableProps) {
+  const t = useTranslations('auth.twoFactor.enable')
   const [code, setCode] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -69,10 +71,10 @@ export default function TwoFactorEnable({ onEnableComplete, onBack }: TwoFactorE
       {/* Header */}
       <div>
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-          Verify Authenticator Code
+          {t('title')}
         </h2>
         <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-          Enter the 6-digit code from your authenticator app to complete setup.
+          {t('subtitle')}
         </p>
       </div>
 
@@ -109,7 +111,7 @@ export default function TwoFactorEnable({ onEnableComplete, onBack }: TwoFactorE
         {/* Code Input */}
         <div>
           <label htmlFor="code" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Verification Code
+            {t('code')}
           </label>
           <div className="mt-2">
             <input
@@ -173,7 +175,7 @@ export default function TwoFactorEnable({ onEnableComplete, onBack }: TwoFactorE
               disabled={loading}
               className="rounded-lg bg-white px-5 py-3 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03]"
             >
-              Back
+              {t('back')}
             </button>
           )}
           <button
@@ -184,10 +186,10 @@ export default function TwoFactorEnable({ onEnableComplete, onBack }: TwoFactorE
             {loading ? (
               <>
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                Verifying...
+                {t('submitting')}
               </>
             ) : (
-              'Enable 2FA'
+              t('submit')
             )}
           </button>
         </div>

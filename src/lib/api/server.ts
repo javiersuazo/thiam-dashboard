@@ -104,6 +104,37 @@ export async function clearServerAuthToken(): Promise<void> {
 }
 
 /**
+ * Create an unauthenticated API client for public endpoints
+ *
+ * Use this for public endpoints that don't require authentication:
+ * - Login
+ * - Signup
+ * - Password reset
+ * - Email verification
+ *
+ * @returns API client without authentication
+ *
+ * @example Server Action
+ * ```ts
+ * 'use server'
+ *
+ * import { createPublicClient } from '@/lib/api/server'
+ *
+ * export async function loginAction(credentials) {
+ *   const api = createPublicClient()
+ *   const { data, error } = await api.POST('/auth/login', {
+ *     body: credentials
+ *   })
+ *   // ...
+ * }
+ * ```
+ */
+export function createPublicClient() {
+  const { createPublicServerClient } = require('./index')
+  return createPublicServerClient()
+}
+
+/**
  * Create an API client for server-side usage
  *
  * Automatically retrieves the auth token from cookies.

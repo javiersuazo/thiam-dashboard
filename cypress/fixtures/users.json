@@ -1,0 +1,52 @@
+{
+  "validCustomer": {
+    "email": "test@example.com",
+    "password": "StrongPass123!",
+    "firstName": "Test",
+    "lastName": "User",
+    "accountType": "customer",
+    "role": "customer"
+  },
+  "validCaterer": {
+    "email": "caterer@example.com",
+    "password": "CatererPass123!",
+    "firstName": "Caterer",
+    "lastName": "User",
+    "accountType": "caterer",
+    "role": "caterer"
+  },
+  "adminUser": {
+    "email": "admin@example.com",
+    "password": "AdminPass123!",
+    "firstName": "Admin",
+    "lastName": "User",
+    "accountType": "customer",
+    "role": "admin"
+  },
+  "newUser": {
+    "email": "newuser@example.com",
+    "password": "NewUserPass123!",
+    "firstName": "New",
+    "lastName": "User",
+    "accountType": "customer"
+  },
+  "invalidUser": {
+    "email": "invalid@example.com",
+    "password": "WrongPassword123!"
+  },
+  "user2FA": {
+    "email": "2fa-user@example.com",
+    "password": "TwoFactorPass123!",
+    "firstName": "2FA",
+    "lastName": "User",
+    "accountType": "customer",
+    "has2FA": true
+  },
+  "oauthUser": {
+    "email": "oauth@example.com",
+    "firstName": "OAuth",
+    "lastName": "User",
+    "accountType": "customer",
+    "provider": "google"
+  }
+}

@@ -214,6 +214,24 @@ export const smsRecoveryVerifySchema = z.object({
 export type SMSRecoveryVerifyFormData = z.infer<typeof smsRecoveryVerifySchema>
 
 /**
+ * Email Verification Schema
+ */
+export const verifyEmailSchema = z.object({
+  token: z.string().min(1, 'Token is required'),
+})
+
+export type VerifyEmailFormData = z.infer<typeof verifyEmailSchema>
+
+/**
+ * Resend Verification Email Schema
+ */
+export const resendVerificationSchema = z.object({
+  email: emailSchema,
+})
+
+export type ResendVerificationFormData = z.infer<typeof resendVerificationSchema>
+
+/**
  * Password strength requirements checker
  * Returns validation errors for password strength indicator
  */

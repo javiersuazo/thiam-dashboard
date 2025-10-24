@@ -10,6 +10,7 @@
  */
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import TwoFactorSetup from './TwoFactorSetup'
 import TwoFactorEnable from './TwoFactorEnable'
 import BackupCodes from './BackupCodes'
@@ -22,6 +23,7 @@ interface TwoFactorSetupFlowProps {
 }
 
 export default function TwoFactorSetupFlow({ onComplete, onCancel }: TwoFactorSetupFlowProps) {
+  const t = useTranslations('auth.twoFactor.setupFlow')
   const [currentStep, setCurrentStep] = useState<SetupStep>('scan')
   const [backupCodes, setBackupCodes] = useState<string[]>([])
 
@@ -81,7 +83,7 @@ export default function TwoFactorSetupFlow({ onComplete, onCancel }: TwoFactorSe
                     <span className="text-sm font-medium">1</span>
                   )}
                 </span>
-                <span className="ml-2 text-sm font-medium">Scan QR Code</span>
+                <span className="ml-2 text-sm font-medium">{t('step1Label')}</span>
               </div>
               {/* Connector Line */}
               <div className="absolute left-0 top-4 -ml-px mt-0.5 h-full w-full">
@@ -132,7 +134,7 @@ export default function TwoFactorSetupFlow({ onComplete, onCancel }: TwoFactorSe
                     <span className="text-sm font-medium">2</span>
                   )}
                 </span>
-                <span className="ml-2 text-sm font-medium">Verify Code</span>
+                <span className="ml-2 text-sm font-medium">{t('step2Label')}</span>
               </div>
               {/* Connector Line */}
               <div className="absolute left-0 top-4 -ml-px mt-0.5 h-full w-full">
@@ -164,7 +166,7 @@ export default function TwoFactorSetupFlow({ onComplete, onCancel }: TwoFactorSe
                 >
                   <span className="text-sm font-medium">3</span>
                 </span>
-                <span className="ml-2 text-sm font-medium">Save Backup Codes</span>
+                <span className="ml-2 text-sm font-medium">{t('step3Label')}</span>
               </div>
             </li>
           </ol>

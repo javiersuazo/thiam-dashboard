@@ -24,6 +24,9 @@ export type {
   ForgotPasswordSMSData,
   ResetPasswordEmailData,
   ResetPasswordSMSData,
+  VerifyEmailData,
+  VerifyEmailResponse,
+  ResendVerificationData,
   OAuthProvider,
   AuthError,
   AuthState,
@@ -42,6 +45,8 @@ export {
   forgotPasswordSMSSchema,
   resetPasswordEmailSchema,
   resetPasswordSMSSchema,
+  verifyEmailSchema,
+  resendVerificationSchema,
   phoneVerificationSchema,
   totpCodeSchema,
   smsCodeSchema,
@@ -61,6 +66,8 @@ export type {
   ForgotPasswordSMSFormData,
   ResetPasswordEmailFormData,
   ResetPasswordSMSFormData,
+  VerifyEmailFormData,
+  ResendVerificationFormData,
   PhoneVerificationFormData,
 } from './validation/authSchemas'
 
@@ -119,7 +126,17 @@ export {
   verifySMSRecoveryAction,
   forgotPasswordAction,
   resetPasswordAction,
+  verifyEmailAction,
+  resendVerificationAction,
 } from './actions'
+
+// OAuth Actions (exported separately to avoid 'use server' file restrictions)
+export {
+  initiateOAuthAction,
+  completeOAuthAction,
+  linkOAuthAccountAction,
+  unlinkOAuthAccountAction,
+} from './actions/oauthActions'
 
 // Components
 export { default as SignInForm } from './components/SignInForm'
@@ -134,6 +151,18 @@ export { default as SMSRecoveryVerify } from './components/SMSRecoveryVerify'
 export { default as SMSRecoveryFlow } from './components/SMSRecoveryFlow'
 export { default as ForgotPasswordForm } from './components/ForgotPasswordForm'
 export { default as ResetPasswordForm } from './components/ResetPasswordForm'
+export { default as EmailVerificationSent } from './components/EmailVerificationSent'
+export { default as VerifyEmail } from './components/VerifyEmail'
+export { default as TwoFactorVerifyLogin } from './components/TwoFactorVerifyLogin'
+export { default as BackupCodeVerifyLogin } from './components/BackupCodeVerifyLogin'
+export {
+  GoogleLoginButton,
+  TwitterLoginButton,
+  OAuthButtonsGroup,
+} from './components/OAuthButtons'
+export { default as PhoneVerificationRequest } from './components/PhoneVerificationRequest'
+export { default as PhoneVerificationCode } from './components/PhoneVerificationCode'
+export { default as PhoneVerificationFlow } from './components/PhoneVerificationFlow'
 
 // Hooks will be exported when created
 // export { useAuthForm } from './hooks/useAuthForm'

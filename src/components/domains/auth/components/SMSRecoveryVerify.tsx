@@ -7,6 +7,7 @@
  */
 
 import { useState, FormEvent } from 'react'
+import { useTranslations } from 'next-intl'
 import { verifySMSRecoveryAction } from '../actions'
 import { smsRecoveryVerifySchema } from '../validation/authSchemas'
 
@@ -21,6 +22,7 @@ export default function SMSRecoveryVerify({
   onRecoveryComplete,
   onBack,
 }: SMSRecoveryVerifyProps) {
+  const t = useTranslations('auth.twoFactor.smsRecovery.verify')
   const [code, setCode] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -73,11 +75,10 @@ export default function SMSRecoveryVerify({
       {/* Header */}
       <div>
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-          Enter Recovery Code
+          {t('title')}
         </h2>
         <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-          We&apos;ve sent a 6-digit code to the phone number associated with{' '}
-          <span className="font-medium">{email}</span>
+          {t('subtitle', { email })}
         </p>
       </div>
 
@@ -101,7 +102,7 @@ export default function SMSRecoveryVerify({
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-red-800 dark:text-red-400">
-                Verification Failed
+                {t('errorTitle')}
               </h3>
               <p className="mt-1 text-sm text-red-700 dark:text-red-300">{error}</p>
             </div>
@@ -114,7 +115,7 @@ export default function SMSRecoveryVerify({
         {/* Code Input */}
         <div>
           <label htmlFor="code" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Recovery Code
+            {t('code')}
           </label>
           <div className="mt-2">
             <input
@@ -162,11 +163,10 @@ export default function SMSRecoveryVerify({
             </div>
             <div className="ml-3 flex-1">
               <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-400">
-                Important Notice
+                {t('warningTitle')}
               </h3>
               <p className="mt-1 text-sm text-yellow-700 dark:text-yellow-300">
-                Verifying this code will disable two-factor authentication on your account. You
-                should re-enable 2FA after regaining access for better security.
+                {t('warningMessage')}
               </p>
             </div>
           </div>
@@ -175,7 +175,7 @@ export default function SMSRecoveryVerify({
         {/* Help Text */}
         <div className="text-center">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Didn&apos;t receive the code?{' '}
+            {t('helpText')}{' '}
             {onBack && (
               <button
                 type="button"
@@ -183,7 +183,7 @@ export default function SMSRecoveryVerify({
                 disabled={loading}
                 className="font-medium text-brand-600 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-50 dark:text-brand-400 dark:hover:text-brand-300"
               >
-                Try again
+                {t('tryAgain')}
               </button>
             )}
           </p>
@@ -198,7 +198,7 @@ export default function SMSRecoveryVerify({
               disabled={loading}
               className="rounded-lg bg-white px-5 py-3 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03]"
             >
-              Back
+              {t('back')}
             </button>
           )}
           <button
@@ -209,10 +209,10 @@ export default function SMSRecoveryVerify({
             {loading ? (
               <>
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                Verifying...
+                {t('verifying')}
               </>
             ) : (
-              'Verify & Disable 2FA'
+              t('submit')
             )}
           </button>
         </div>

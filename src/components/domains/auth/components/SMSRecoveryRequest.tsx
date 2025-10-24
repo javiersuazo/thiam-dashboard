@@ -8,6 +8,7 @@
  */
 
 import { useState, FormEvent } from 'react'
+import { useTranslations } from 'next-intl'
 import { requestSMSRecoveryAction } from '../actions'
 import { smsRecoveryRequestSchema } from '../validation/authSchemas'
 
@@ -17,6 +18,7 @@ interface SMSRecoveryRequestProps {
 }
 
 export default function SMSRecoveryRequest({ onCodeSent, onCancel }: SMSRecoveryRequestProps) {
+  const t = useTranslations('auth.twoFactor.smsRecovery.request')
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [fieldError, setFieldError] = useState<string | null>(null)
@@ -61,10 +63,10 @@ export default function SMSRecoveryRequest({ onCodeSent, onCancel }: SMSRecovery
       {/* Header */}
       <div>
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-          Recover 2FA Access
+          {t('title')}
         </h2>
         <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-          Enter your email address to receive a recovery code via SMS.
+          {t('subtitle')}
         </p>
       </div>
 
@@ -86,13 +88,13 @@ export default function SMSRecoveryRequest({ onCodeSent, onCancel }: SMSRecovery
             </svg>
           </div>
           <div className="ml-3 flex-1">
-            <h3 className="text-sm font-medium text-blue-800 dark:text-blue-400">Before You Begin</h3>
+            <h3 className="text-sm font-medium text-blue-800 dark:text-blue-400">{t('infoTitle')}</h3>
             <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
               <ul className="list-inside list-disc space-y-1">
-                <li>You must have a verified phone number on your account</li>
-                <li>The SMS code will be sent to your registered phone number</li>
-                <li>This process will disable 2FA on your account</li>
-                <li>You can re-enable 2FA after regaining access</li>
+                <li>{t('requirement1')}</li>
+                <li>{t('requirement2')}</li>
+                <li>{t('requirement3')}</li>
+                <li>{t('requirement4')}</li>
               </ul>
             </div>
           </div>
@@ -107,7 +109,7 @@ export default function SMSRecoveryRequest({ onCodeSent, onCancel }: SMSRecovery
             htmlFor="email"
             className="block text-sm font-medium text-gray-700 dark:text-gray-300"
           >
-            Email Address
+            {t('email')}
           </label>
           <div className="mt-2">
             <input
@@ -142,7 +144,7 @@ export default function SMSRecoveryRequest({ onCodeSent, onCancel }: SMSRecovery
               disabled={loading}
               className="rounded-lg bg-white px-5 py-3 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03]"
             >
-              Cancel
+              {t('cancel')}
             </button>
           )}
           <button
@@ -153,10 +155,10 @@ export default function SMSRecoveryRequest({ onCodeSent, onCancel }: SMSRecovery
             {loading ? (
               <>
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                Sending Code...
+                {t('sending')}
               </>
             ) : (
-              'Send Recovery Code'
+              t('submit')
             )}
           </button>
         </div>

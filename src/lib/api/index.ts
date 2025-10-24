@@ -174,6 +174,43 @@ export function createAuthenticatedClient(token: string) {
   return authenticatedClient
 }
 
+/**
+ * Create a public API client for unauthenticated endpoints
+ *
+ * Use for public endpoints like:
+ * - Login
+ * - Signup
+ * - Password reset
+ * - Email verification
+ *
+ * @example Server Action
+ * ```ts
+ * import { createPublicServerClient } from '@/lib/api'
+ *
+ * export async function loginAction(credentials) {
+ *   const api = createPublicServerClient()
+ *   const { data, error } = await api.POST('/auth/login', {
+ *     body: credentials
+ *   })
+ *   return data
+ * }
+ * ```
+ */
+export function createPublicServerClient() {
+  const publicClient = createClient<paths>({
+    baseUrl: `${API_BASE_URL}/v1`,
+  })
+
+  // Add middleware (no auth middleware for public endpoints)
+  publicClient.use(requestIdMiddleware)
+  publicClient.use(contentTypeMiddleware)
+  publicClient.use(loggingMiddleware)
+  publicClient.use(errorMiddleware)
+  publicClient.use(createRetryMiddleware(3))
+
+  return publicClient
+}
+
 // Re-export types for convenience
 export type { paths } from './generated/schema'
 export type { components } from './generated/schema'

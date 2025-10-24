@@ -8,9 +8,10 @@
  */
 
 import { redirect } from 'next/navigation'
-import { createServerClient } from '@/lib/api/server'
+import { createServerClient, createPublicClient } from '@/lib/api/server'
 import { createSession, saveSession, deleteSession } from '@/lib/auth/session'
 import { toSessionUser } from './utils/authHelpers'
+import type { ActionResult } from '@/types/actions'
 import type {
   LoginCredentials,
   LoginResponse,
@@ -25,6 +26,9 @@ import type {
   SMSRecoveryVerifyData,
   ForgotPasswordEmailData,
   ResetPasswordEmailData,
+  VerifyEmailData,
+  VerifyEmailResponse,
+  ResendVerificationData,
 } from './types/auth.types'
 import {
   loginSchema,
@@ -34,14 +38,9 @@ import {
   smsRecoveryVerifySchema,
   forgotPasswordEmailSchema,
   resetPasswordEmailSchema,
+  verifyEmailSchema,
+  resendVerificationSchema,
 } from './validation/authSchemas'
-
-/**
- * Server Action Result
- */
-type ActionResult<T = void> =
-  | { success: true; data: T }
-  | { success: false; error: string; fieldErrors?: Record<string, string[]> }
 
 /**
  * Login Action
@@ -63,14 +62,8 @@ export async function loginAction(
       }
     }
 
-    // Call API
-    const api = await createServerClient()
-    if (!api) {
-      return {
-        success: false,
-        error: 'Failed to initialize API client',
-      }
-    }
+    // Call API (public endpoint - no auth required)
+    const api = createPublicClient()
 
     const response = await api.POST('/auth/login', {
       body: {
@@ -150,14 +143,8 @@ export async function signupAction(data: SignUpData): Promise<ActionResult<{ use
       }
     }
 
-    // Call API
-    const api = await createServerClient()
-    if (!api) {
-      return {
-        success: false,
-        error: 'Failed to initialize API client',
-      }
-    }
+    // Call API (public endpoint - no auth required)
+    const api = createPublicClient()
 
     // Step 1: Create the user
     const createUserResponse = await api.POST('/users/', {
@@ -321,7 +308,7 @@ export async function setup2FAAction(): Promise<ActionResult<TwoFactorSetupRespo
     if (!api) {
       return {
         success: false,
-        error: 'Failed to initialize API client',
+        error: 'Not authenticated',
       }
     }
 
@@ -529,13 +516,7 @@ export async function requestSMSRecoveryAction(
       }
     }
 
-    const api = await createServerClient()
-    if (!api) {
-      return {
-        success: false,
-        error: 'Failed to initialize API client',
-      }
-    }
+    const api = createPublicClient()
 
     // Intentionally ignoring response to prevent email enumeration
     await api.POST('/auth/2fa/recovery/sms', {
@@ -579,13 +560,7 @@ export async function verifySMSRecoveryAction(
       }
     }
 
-    const api = await createServerClient()
-    if (!api) {
-      return {
-        success: false,
-        error: 'Failed to initialize API client',
-      }
-    }
+    const api = createPublicClient()
 
     const response = await api.POST('/auth/2fa/recovery/verify', {
       body: {
@@ -646,13 +621,7 @@ export async function forgotPasswordAction(
       }
     }
 
-    const api = await createServerClient()
-    if (!api) {
-      return {
-        success: false,
-        error: 'Failed to initialize API client',
-      }
-    }
+    const api = createPublicClient()
 
     // Intentionally ignoring response to prevent email enumeration
     await api.POST('/auth/password/forgot', {
@@ -696,13 +665,7 @@ export async function resetPasswordAction(
       }
     }
 
-    const api = await createServerClient()
-    if (!api) {
-      return {
-        success: false,
-        error: 'Failed to initialize API client',
-      }
-    }
+    const api = createPublicClient()
 
     const response = await api.POST('/auth/password/reset', {
       body: {
@@ -739,6 +702,133 @@ export async function resetPasswordAction(
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unexpected error occurred',
+    }
+  }
+}
+
+/**
+ * Verify Email Action
+ *
+ * Verifies user's email address using OTT (One-Time Token).
+ *
+ * @todo Backend API route /auth/email/verify needs to be implemented
+ */
+export async function verifyEmailAction(
+  data: VerifyEmailData
+): Promise<ActionResult<VerifyEmailResponse>> {
+  try {
+    // Validate input
+    const validation = verifyEmailSchema.safeParse(data)
+    if (!validation.success) {
+      return {
+        success: false,
+        error: 'Invalid verification token',
+      }
+    }
+
+    // TODO: Uncomment when backend API route is ready
+    /*
+    const api = await createServerClient()
+    if (!api) {
+      return {
+        success: false,
+        error: 'Failed to initialize API client',
+      }
+    }
+
+    const response = await api.POST('/auth/email/verify', {
+      body: {
+        token: data.token,
+      },
+    })
+
+    if (response.error) {
+      console.error('Verify email API error:', response.error)
+      return {
+        success: false,
+        error: response.error.message || 'Invalid or expired verification token',
+      }
+    }
+
+    if (!response.data) {
+      return {
+        success: false,
+        error: 'Email verification failed',
+      }
+    }
+
+    const verifyResponse = response.data as unknown as VerifyEmailResponse
+
+    return {
+      success: true,
+      data: verifyResponse,
+    }
+    */
+
+    // Temporary mock response until backend is ready
+    return {
+      success: false,
+      error: 'Email verification API not yet implemented',
+    }
+  } catch (error) {
+    console.error('Verify email action error:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unexpected error occurred',
+    }
+  }
+}
+
+/**
+ * Resend Verification Email Action
+ *
+ * Sends a new verification email to the user.
+ * Always returns success to prevent email enumeration.
+ *
+ * @todo Backend API route /auth/email/resend needs to be implemented
+ */
+export async function resendVerificationAction(
+  data: ResendVerificationData
+): Promise<ActionResult> {
+  try {
+    // Validate input
+    const validation = resendVerificationSchema.safeParse(data)
+    if (!validation.success) {
+      return {
+        success: false,
+        error: 'Invalid email address',
+      }
+    }
+
+    // TODO: Uncomment when backend API route is ready
+    /*
+    const api = await createServerClient()
+    if (!api) {
+      return {
+        success: false,
+        error: 'Failed to initialize API client',
+      }
+    }
+
+    await api.POST('/auth/email/resend', {
+      body: {
+        email: data.email,
+      },
+    })
+    */
+
+    // Always return success to prevent email enumeration
+    // Even if the email doesn't exist or verification already sent
+    return {
+      success: true,
+      data: undefined,
+    }
+  } catch (error) {
+    console.error('Resend verification action error:', error)
+    // Still return success for security (prevent email enumeration)
+    return {
+      success: true,
+      data: undefined,
     }
   }
 }

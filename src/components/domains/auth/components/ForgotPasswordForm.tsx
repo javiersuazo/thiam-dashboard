@@ -8,11 +8,13 @@
  */
 
 import { useState, FormEvent } from 'react'
-import Link from 'next/link'
+import { useTranslations } from 'next-intl'
+import { Link } from '@/i18n/routing'
 import { forgotPasswordAction } from '../actions'
 import { forgotPasswordEmailSchema } from '../validation/authSchemas'
 
 export default function ForgotPasswordForm() {
+  const t = useTranslations('auth.forgotPassword')
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -80,10 +82,9 @@ export default function ForgotPasswordForm() {
 
         {/* Success Message */}
         <div className="text-center">
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Check Your Email</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">{t('success.title')}</h2>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            If an account exists for <span className="font-medium">{email}</span>, you will receive
-            a password reset link shortly.
+            {t('success.message', { email })}
           </p>
         </div>
 
@@ -124,7 +125,7 @@ export default function ForgotPasswordForm() {
             href="/signin"
             className="text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
           >
-            Back to Sign In
+            {t('backToSignIn')}
           </Link>
         </div>
       </div>
@@ -136,10 +137,10 @@ export default function ForgotPasswordForm() {
       {/* Header */}
       <div className="text-center">
         <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-          Forgot Your Password?
+          {t('title')}
         </h2>
         <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-          Enter your email address and we&apos;ll send you a link to reset your password.
+          {t('subtitle')}
         </p>
       </div>
 
@@ -151,7 +152,7 @@ export default function ForgotPasswordForm() {
             htmlFor="email"
             className="block text-sm font-medium text-gray-700 dark:text-gray-300"
           >
-            Email Address
+            {t('email')}
           </label>
           <div className="mt-2">
             <input
@@ -167,7 +168,7 @@ export default function ForgotPasswordForm() {
                   ? 'border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400'
                   : 'border-gray-300 text-gray-900 placeholder-gray-400 focus:border-brand-500 focus:ring-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white'
               }`}
-              placeholder="you@example.com"
+              placeholder={t('emailPlaceholder')}
               disabled={loading}
               autoFocus
             />
@@ -186,10 +187,10 @@ export default function ForgotPasswordForm() {
           {loading ? (
             <>
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              Sending Reset Link...
+              {t('submitting')}
             </>
           ) : (
-            'Send Reset Link'
+            t('submit')
           )}
         </button>
       </form>
@@ -200,7 +201,7 @@ export default function ForgotPasswordForm() {
           href="/signin"
           className="text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
         >
-          Back to Sign In
+          {t('backToSignIn')}
         </Link>
       </div>
     </div>

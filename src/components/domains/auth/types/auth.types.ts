@@ -201,3 +201,21 @@ export interface PasswordStrengthResult {
   feedback: string[]
   meetsRequirements: boolean
 }
+
+// ===========================
+// Email Verification Types
+// ===========================
+
+export interface VerifyEmailData {
+  token: string
+}
+
+export interface VerifyEmailResponse {
+  userId: string
+  email: string
+  verified: boolean
+}
+
+export interface ResendVerificationData {
+  email: string
+}

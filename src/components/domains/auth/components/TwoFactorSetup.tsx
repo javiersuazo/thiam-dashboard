@@ -8,6 +8,7 @@
  */
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { setup2FAAction } from '../actions'
 import type { TwoFactorSetupResponse } from '../types/auth.types'
@@ -18,10 +19,12 @@ interface TwoFactorSetupProps {
 }
 
 export default function TwoFactorSetup({ onSetupComplete, onCancel }: TwoFactorSetupProps) {
+  const t = useTranslations('auth.twoFactor.setup')
   const [setupData, setSetupData] = useState<TwoFactorSetupResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showSecret, setShowSecret] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     async function fetchSetupData() {
@@ -54,6 +57,8 @@ export default function TwoFactorSetup({ onSetupComplete, onCancel }: TwoFactorS
   const handleCopySecret = async () => {
     if (setupData?.secret) {
       await navigator.clipboard.writeText(setupData.secret)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
     }
   }
 
@@ -61,7 +66,7 @@ export default function TwoFactorSetup({ onSetupComplete, onCancel }: TwoFactorS
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-brand-500" />
-        <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">Setting up 2FA...</p>
+        <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">{t('step1')}</p>
       </div>
     )
   }
@@ -113,10 +118,10 @@ export default function TwoFactorSetup({ onSetupComplete, onCancel }: TwoFactorS
       {/* Header */}
       <div>
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-          Set Up Two-Factor Authentication
+          {t('title')}
         </h2>
         <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-          Scan the QR code below with your authenticator app or enter the secret key manually.
+          {t('subtitle')}
         </p>
       </div>
 
@@ -153,15 +158,10 @@ export default function TwoFactorSetup({ onSetupComplete, onCancel }: TwoFactorS
           </div>
           <div className="ml-3 flex-1">
             <h3 className="text-sm font-medium text-blue-800 dark:text-blue-400">
-              Recommended Apps
+              {t('step1')}
             </h3>
             <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
-              <ul className="list-inside list-disc space-y-1">
-                <li>Google Authenticator</li>
-                <li>Microsoft Authenticator</li>
-                <li>Authy</li>
-                <li>1Password</li>
-              </ul>
+              <p>{t('step1Description')}</p>
             </div>
           </div>
         </div>
@@ -174,7 +174,7 @@ export default function TwoFactorSetup({ onSetupComplete, onCancel }: TwoFactorS
           onClick={() => setShowSecret(!showSecret)}
           className="text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
         >
-          {showSecret ? 'Hide' : "Can't scan the QR code? Enter manually"}
+          {showSecret ? t('hideSecret') : t('showSecret')}
         </button>
 
         {showSecret && (
@@ -191,7 +191,7 @@ export default function TwoFactorSetup({ onSetupComplete, onCancel }: TwoFactorS
                 onClick={handleCopySecret}
                 className="rounded-lg bg-gray-100 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
               >
-                Copy
+                {copied ? t('secretCopied') : t('copySecret')}
               </button>
             </div>
             <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
@@ -212,7 +212,7 @@ export default function TwoFactorSetup({ onSetupComplete, onCancel }: TwoFactorS
             onClick={onCancel}
             className="rounded-lg bg-white px-5 py-3 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03]"
           >
-            Cancel
+            {t('cancel')}
           </button>
         )}
         <button
@@ -220,7 +220,7 @@ export default function TwoFactorSetup({ onSetupComplete, onCancel }: TwoFactorS
           onClick={handleContinue}
           className="rounded-lg bg-brand-500 px-5 py-3 text-sm font-medium text-white shadow-theme-xs hover:bg-brand-600"
         >
-          Continue to Verification
+          {t('next')}
         </button>
       </div>
     </div>

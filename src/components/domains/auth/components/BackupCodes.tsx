@@ -8,6 +8,7 @@
  */
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 
 interface BackupCodesProps {
   codes: string[]
@@ -20,6 +21,7 @@ export default function BackupCodes({
   onComplete,
   showRegenerateWarning = false,
 }: BackupCodesProps) {
+  const t = useTranslations('auth.twoFactor.backupCodes')
   const [acknowledged, setAcknowledged] = useState(false)
   const [copied, setCopied] = useState(false)
 
@@ -105,12 +107,10 @@ export default function BackupCodes({
       {/* Header */}
       <div>
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-          {showRegenerateWarning ? 'New Backup Codes Generated' : 'Save Your Backup Codes'}
+          {t('title')}
         </h2>
         <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-          {showRegenerateWarning
-            ? 'Your old backup codes are no longer valid. Save these new codes in a safe place.'
-            : 'Store these codes in a safe place. You can use them to access your account if you lose your authenticator device.'}
+          {t('warning')}
         </p>
       </div>
 
@@ -133,15 +133,15 @@ export default function BackupCodes({
           </div>
           <div className="ml-3">
             <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-400">
-              Important: Save These Codes
+              {t('importantTitle')}
             </h3>
             <div className="mt-2 text-sm text-yellow-700 dark:text-yellow-300">
               <ul className="list-inside list-disc space-y-1">
-                <li>Each code can only be used once</li>
-                <li>These codes will not be shown again</li>
-                <li>Keep them in a secure location (password manager, safe, etc.)</li>
+                <li>{t('singleUse')}</li>
+                <li>{t('notShownAgain')}</li>
+                <li>{t('keepSecure')}</li>
                 {showRegenerateWarning && (
-                  <li className="font-semibold">Your previous backup codes are no longer valid</li>
+                  <li className="font-semibold">{t('previousInvalid')}</li>
                 )}
               </ul>
             </div>
@@ -153,7 +153,7 @@ export default function BackupCodes({
       <div className="rounded-lg border border-gray-200 bg-gray-50 p-6 dark:border-gray-700 dark:bg-gray-800">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Your Backup Codes
+            {t('codesTitle')}
           </h3>
           <div className="flex gap-2">
             <button
@@ -161,21 +161,21 @@ export default function BackupCodes({
               onClick={handleCopy}
               className="rounded-lg bg-white px-3 py-1.5 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:ring-gray-600 dark:hover:bg-gray-600"
             >
-              {copied ? 'Copied!' : 'Copy'}
+              {copied ? t('copied') : t('copy')}
             </button>
             <button
               type="button"
               onClick={handleDownload}
               className="rounded-lg bg-white px-3 py-1.5 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:ring-gray-600 dark:hover:bg-gray-600"
             >
-              Download
+              {t('download')}
             </button>
             <button
               type="button"
               onClick={handlePrint}
               className="rounded-lg bg-white px-3 py-1.5 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:ring-gray-600 dark:hover:bg-gray-600"
             >
-              Print
+              {t('print')}
             </button>
           </div>
         </div>
@@ -205,7 +205,7 @@ export default function BackupCodes({
         </div>
         <div className="ml-3">
           <label htmlFor="acknowledged" className="text-sm text-gray-700 dark:text-gray-300">
-            I have saved these backup codes in a secure location
+            {t('acknowledgment')}
           </label>
         </div>
       </div>
@@ -218,7 +218,7 @@ export default function BackupCodes({
           disabled={!acknowledged}
           className="rounded-lg bg-brand-500 px-5 py-3 text-sm font-medium text-white shadow-theme-xs hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {showRegenerateWarning ? 'Done' : 'Complete Setup'}
+          {showRegenerateWarning ? t('done') : t('completeSetup')}
         </button>
       </div>
     </div>

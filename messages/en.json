@@ -1,0 +1,479 @@
+{
+  "auth": {
+    "signin": {
+      "title": "Welcome back",
+      "subtitle": "Enter your credentials to access your account",
+      "email": "Email address",
+      "emailPlaceholder": "Enter your email",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign in",
+      "submitting": "Signing in...",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up",
+      "success": "Successfully signed in!",
+      "errors": {
+        "invalidCredentials": "Invalid email or password",
+        "accountLocked": "Account is locked. Please contact support.",
+        "emailNotVerified": "Please verify your email before signing in.",
+        "generic": "Failed to sign in. Please try again."
+      }
+    },
+    "signup": {
+      "title": "Create your account",
+      "subtitle": "Get started with Thiam",
+      "firstName": "First name",
+      "firstNamePlaceholder": "Enter your first name",
+      "lastName": "Last name",
+      "lastNamePlaceholder": "Enter your last name",
+      "email": "Email address",
+      "emailPlaceholder": "Enter your email",
+      "phone": "Phone number",
+      "phonePlaceholder": "Enter your phone number (optional)",
+      "password": "Password",
+      "passwordPlaceholder": "Create a password",
+      "confirmPassword": "Confirm password",
+      "confirmPasswordPlaceholder": "Confirm your password",
+      "agreeToTerms": "I agree to the",
+      "termsOfService": "Terms of Service",
+      "and": "and",
+      "privacyPolicy": "Privacy Policy",
+      "submit": "Create account",
+      "submitting": "Creating account...",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "success": "Account created successfully!",
+      "errors": {
+        "emailExists": "An account with this email already exists",
+        "weakPassword": "Password is too weak",
+        "generic": "Failed to create account. Please try again."
+      }
+    },
+    "forgotPassword": {
+      "title": "Forgot password?",
+      "subtitle": "Enter your email and we'll send you a reset link",
+      "email": "Email address",
+      "emailPlaceholder": "Enter your email",
+      "submit": "Send reset link",
+      "submitting": "Sending...",
+      "backToSignIn": "Back to sign in",
+      "success": {
+        "title": "Check your email",
+        "message": "If an account exists for {email}, you will receive a password reset link.",
+        "resend": "Didn't receive the email?",
+        "resendLink": "Resend"
+      }
+    },
+    "resetPassword": {
+      "title": "Reset your password",
+      "subtitle": "Enter your new password below",
+      "newPassword": "New password",
+      "newPasswordPlaceholder": "Enter new password",
+      "confirmPassword": "Confirm password",
+      "confirmPasswordPlaceholder": "Confirm new password",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "submit": "Reset password",
+      "submitting": "Resetting...",
+      "success": {
+        "title": "Password reset successful",
+        "message": "Your password has been reset. You can now sign in with your new password.",
+        "signIn": "Go to sign in"
+      },
+      "errors": {
+        "invalidToken": "Invalid or expired reset token",
+        "passwordMismatch": "Passwords do not match",
+        "generic": "Failed to reset password. Please try again."
+      },
+      "requirements": {
+        "title": "Password requirements:",
+        "minLength": "At least 8 characters",
+        "uppercase": "One uppercase letter",
+        "lowercase": "One lowercase letter",
+        "number": "One number",
+        "special": "One special character"
+      }
+    },
+    "twoFactor": {
+      "setup": {
+        "title": "Set up two-factor authentication",
+        "subtitle": "Scan the QR code with your authenticator app",
+        "step1": "Install an authenticator app",
+        "step1Description": "Download Google Authenticator, Authy, or any TOTP-compatible app",
+        "step2": "Scan the QR code",
+        "step2Description": "Open your authenticator app and scan this QR code",
+        "step3": "Or enter the secret manually",
+        "showSecret": "Show secret key",
+        "hideSecret": "Hide secret key",
+        "copySecret": "Copy secret",
+        "secretCopied": "Secret copied!",
+        "next": "Next",
+        "cancel": "Cancel"
+      },
+      "enable": {
+        "title": "Enable two-factor authentication",
+        "subtitle": "Enter the 6-digit code from your authenticator app",
+        "code": "Verification code",
+        "codePlaceholder": "Enter 6-digit code",
+        "submit": "Enable 2FA",
+        "submitting": "Enabling...",
+        "back": "Back",
+        "success": {
+          "title": "2FA enabled successfully",
+          "message": "Your account is now protected with two-factor authentication",
+          "backupCodesTitle": "Save your backup codes",
+          "backupCodesMessage": "Store these codes in a safe place. You can use them to access your account if you lose your authenticator device.",
+          "downloadCodes": "Download codes",
+          "copyCodes": "Copy codes",
+          "codesCopied": "Codes copied!",
+          "continue": "Continue"
+        },
+        "errors": {
+          "invalidCode": "Invalid verification code",
+          "generic": "Failed to enable 2FA. Please try again."
+        }
+      },
+      "disable": {
+        "title": "Disable two-factor authentication",
+        "message": "Are you sure you want to disable 2FA? Your account will be less secure.",
+        "code": "Verification code",
+        "codePlaceholder": "Enter 6-digit code",
+        "submit": "Disable 2FA",
+        "submitting": "Disabling...",
+        "cancel": "Cancel",
+        "success": "2FA disabled successfully",
+        "errors": {
+          "invalidCode": "Invalid verification code",
+          "generic": "Failed to disable 2FA. Please try again."
+        }
+      },
+      "verify": {
+        "title": "Two-factor authentication",
+        "subtitle": "Enter the 6-digit code from your authenticator app",
+        "code": "Verification code",
+        "codePlaceholder": "Enter 6-digit code",
+        "submit": "Verify",
+        "submitting": "Verifying...",
+        "useBackupCode": "Use a backup code",
+        "useSMS": "Send code via SMS",
+        "errors": {
+          "invalidCode": "Invalid verification code",
+          "generic": "Verification failed. Please try again."
+        }
+      },
+      "backupCodes": {
+        "title": "Backup codes",
+        "regenerate": "Regenerate codes",
+        "regenerating": "Regenerating...",
+        "download": "Download codes",
+        "copy": "Copy codes",
+        "copied": "Codes copied!",
+        "warning": "Each code can only be used once. Generate new codes if you run out.",
+        "codesTitle": "Your Backup Codes",
+        "importantTitle": "Important: Save These Codes",
+        "singleUse": "Each code can only be used once",
+        "notShownAgain": "These codes will not be shown again",
+        "keepSecure": "Keep them in a secure location (password manager, safe, etc.)",
+        "previousInvalid": "Your previous backup codes are no longer valid",
+        "acknowledgment": "I have saved these backup codes in a secure location",
+        "done": "Done",
+        "completeSetup": "Complete Setup",
+        "print": "Print"
+      },
+      "settings": {
+        "title": "Two-Factor Authentication",
+        "subtitle": "Add an extra layer of security to your account by requiring a verification code when signing in.",
+        "status": {
+          "enabled": {
+            "title": "2FA Enabled",
+            "description": "Your account is protected with two-factor authentication."
+          },
+          "disabled": {
+            "title": "2FA Disabled",
+            "description": "Enable 2FA to add an extra layer of security to your account."
+          }
+        },
+        "buttons": {
+          "enable": "Enable 2FA",
+          "disable": "Disable 2FA",
+          "regenerate": "Regenerate Backup Codes",
+          "regenerating": "Generating..."
+        },
+        "benefits": {
+          "title": "Why Enable 2FA?",
+          "benefit1": "Protects your account even if your password is compromised",
+          "benefit2": "Prevents unauthorized access to your data",
+          "benefit3": "Industry-standard security practice",
+          "benefit4": "Takes less than 2 minutes to set up"
+        },
+        "disableModal": {
+          "title": "Disable Two-Factor Authentication?",
+          "message": "This will make your account less secure. You can always re-enable 2FA later.",
+          "cancel": "Cancel",
+          "confirm": "Yes, Disable 2FA",
+          "disabling": "Disabling..."
+        }
+      },
+      "setupFlow": {
+        "step1Label": "Scan QR Code",
+        "step2Label": "Verify Code",
+        "step3Label": "Save Backup Codes"
+      },
+      "verifyLogin": {
+        "title": "Two-factor authentication",
+        "subtitle": "Enter the 6-digit code from your authenticator app to complete sign in for {email}",
+        "code": "Verification code",
+        "verify": "Verify and sign in",
+        "verifying": "Verifying...",
+        "errorTitle": "Verification failed",
+        "infoMessage": "The code refreshes every 30 seconds. If the code doesn't work, wait for a new code and try again.",
+        "alternativeTitle": "Having trouble?",
+        "useBackupCode": "Use a backup code",
+        "useSMSRecovery": "Use SMS recovery",
+        "errors": {
+          "invalidCodeLength": "Code must be exactly 6 digits",
+          "generic": "Verification failed. Please try again."
+        }
+      },
+      "backupCodeLogin": {
+        "title": "Use backup code",
+        "subtitle": "Enter one of your backup codes to sign in to {email}",
+        "code": "Backup code",
+        "codePlaceholder": "Enter backup code",
+        "verify": "Verify and sign in",
+        "verifying": "Verifying...",
+        "errorTitle": "Verification failed",
+        "warningTitle": "Important",
+        "warningMessage": "Each backup code can only be used once. Make sure to generate new codes after you regain access to your authenticator.",
+        "back": "Back to 2FA code",
+        "errors": {
+          "invalidCodeLength": "Backup code must be at least 8 characters",
+          "generic": "Invalid backup code. Please try again."
+        }
+      },
+      "smsRecovery": {
+        "request": {
+          "title": "Recover 2FA Access",
+          "subtitle": "Enter your email address to receive a recovery code via SMS.",
+          "infoTitle": "Before You Begin",
+          "requirement1": "You must have a verified phone number on your account",
+          "requirement2": "The SMS code will be sent to your registered phone number",
+          "requirement3": "This process will disable 2FA on your account",
+          "requirement4": "You can re-enable 2FA after regaining access",
+          "email": "Email Address",
+          "emailPlaceholder": "you@example.com",
+          "cancel": "Cancel",
+          "sending": "Sending Code...",
+          "submit": "Send Recovery Code"
+        },
+        "verify": {
+          "title": "Enter Recovery Code",
+          "subtitle": "We've sent a 6-digit code to the phone number associated with {email}",
+          "code": "Recovery Code",
+          "codePlaceholder": "000000",
+          "errorTitle": "Verification Failed",
+          "warningTitle": "Important Notice",
+          "warningMessage": "Verifying this code will disable two-factor authentication on your account. You should re-enable 2FA after regaining access for better security.",
+          "helpText": "Didn't receive the code?",
+          "tryAgain": "Try again",
+          "back": "Back",
+          "verifying": "Verifying...",
+          "submit": "Verify & Disable 2FA"
+        },
+        "flow": {
+          "step1Label": "Request Code",
+          "step2Label": "Verify Code",
+          "success": {
+            "title": "2FA Successfully Disabled",
+            "message": "Two-factor authentication has been removed from your account. You can now sign in using just your password.",
+            "recommendation": {
+              "title": "Security Recommendation",
+              "message": "We strongly recommend re-enabling two-factor authentication to keep your account secure. You can do this from your security settings."
+            },
+            "continueButton": "Continue to Sign In"
+          }
+        }
+      }
+    },
+    "oauth": {
+      "divider": "Or continue with",
+      "buttons": {
+        "google": "Continue with Google",
+        "twitter": "Continue with Twitter",
+        "loading": "Connecting..."
+      },
+      "callback": {
+        "processing": {
+          "title": "Completing sign in",
+          "message": "Please wait while we securely sign you in..."
+        },
+        "success": {
+          "title": "Sign in successful!",
+          "message": "Redirecting you to your dashboard..."
+        },
+        "error": {
+          "title": "Sign in failed",
+          "subtitle": "Please try signing in again.",
+          "backToSignIn": "Back to sign in",
+          "tryAgain": "Try again"
+        },
+        "errors": {
+          "missingCode": "Authorization code is missing",
+          "invalidProvider": "Invalid OAuth provider",
+          "generic": "Authentication failed. Please try again."
+        }
+      },
+      "errors": {
+        "generic": "Failed to connect account. Please try again."
+      }
+    },
+    "phoneVerification": {
+      "request": {
+        "title": "Verify your phone number",
+        "subtitle": "We'll send you a verification code via SMS",
+        "phone": "Phone number",
+        "phonePlaceholder": "+1 (555) 000-0000",
+        "infoMessage": "Standard SMS rates may apply. We'll never share your phone number.",
+        "cancel": "Cancel",
+        "sending": "Sending...",
+        "submit": "Send verification code",
+        "errors": {
+          "invalidPhone": "Please enter a valid phone number",
+          "generic": "Failed to send verification code. Please try again."
+        }
+      },
+      "verify": {
+        "title": "Verify phone number",
+        "subtitle": "Enter the 6-digit code sent to {phone}",
+        "code": "Verification code",
+        "errorTitle": "Verification failed",
+        "infoMessage": "The code expires in 10 minutes. If you don't receive it, you can request a new one.",
+        "back": "Change phone number",
+        "resend": "Resend code",
+        "resending": "Resending...",
+        "verifying": "Verifying...",
+        "submit": "Verify phone number",
+        "errors": {
+          "invalidCodeLength": "Code must be exactly 6 digits",
+          "generic": "Invalid verification code. Please try again.",
+          "resendFailed": "Failed to resend code. Please try again."
+        }
+      },
+      "flow": {
+        "step1Label": "Enter Phone",
+        "step2Label": "Verify Code",
+        "success": {
+          "title": "Phone verified successfully!",
+          "message": "Your phone number has been verified."
+        }
+      }
+    },
+    "emailVerification": {
+      "sent": {
+        "title": "Check your email",
+        "message": "We've sent a verification link to {email}",
+        "nextStepsTitle": "Next steps",
+        "step1": "Check your email inbox (and spam folder)",
+        "step2": "Click the verification link in the email",
+        "step3": "You'll be redirected to sign in",
+        "didntReceive": "Didn't receive the email?",
+        "resendLink": "Resend",
+        "resending": "Resending...",
+        "resentSuccess": "Verification email sent successfully!",
+        "backToSignIn": "Back to sign in"
+      },
+      "verify": {
+        "verifying": "Verifying your email...",
+        "verifyingMessage": "Please wait while we verify your email address.",
+        "success": {
+          "title": "Email verified successfully!",
+          "message": "Your email has been verified. You can now sign in to your account.",
+          "redirecting": "Redirecting to sign in in {seconds} seconds...",
+          "signInNow": "Sign in now"
+        },
+        "error": {
+          "title": "Verification failed",
+          "possibleReasonsTitle": "Possible reasons",
+          "reason1": "The verification link has expired",
+          "reason2": "The verification link is invalid or has already been used",
+          "reason3": "Your email has already been verified",
+          "trySignIn": "Try signing in",
+          "createNewAccount": "Create a new account"
+        },
+        "errors": {
+          "invalidToken": "Invalid or expired verification token",
+          "generic": "Failed to verify email. Please try again."
+        }
+      }
+    },
+    "session": {
+      "timeout": {
+        "title": "Session expiring soon",
+        "message": "Your session will expire in",
+        "autoLogout": "You'll be automatically logged out when the timer reaches zero.",
+        "logoutNow": "Logout now",
+        "stayLoggedIn": "Stay logged in",
+        "extending": "Extending..."
+      },
+      "expired": {
+        "title": "Session expired",
+        "reasons": {
+          "timeout": "Your session expired due to inactivity. Please sign in again to continue.",
+          "forced": "Your session was ended for security reasons. This may have happened because you changed your password or signed out from another device.",
+          "expired": "Your session has expired. Please sign in again to continue."
+        },
+        "securityTitle": "Why did this happen?",
+        "securityMessage": "Sessions expire automatically to keep your account secure. Sign in again to continue where you left off.",
+        "signInButton": "Sign in again",
+        "needHelp": "Need help?",
+        "contactSupport": "Contact support"
+      }
+    },
+    "validation": {
+      "required": "This field is required",
+      "email": "Please enter a valid email address",
+      "password": {
+        "minLength": "Password must be at least 8 characters",
+        "maxLength": "Password must be at most 128 characters",
+        "uppercase": "Password must contain at least one uppercase letter",
+        "lowercase": "Password must contain at least one lowercase letter",
+        "number": "Password must contain at least one number",
+        "special": "Password must contain at least one special character",
+        "mismatch": "Passwords do not match"
+      },
+      "phone": "Please enter a valid phone number",
+      "name": {
+        "minLength": "Name must be at least 2 characters",
+        "maxLength": "Name must be at most 50 characters"
+      },
+      "code": {
+        "length": "Code must be exactly 6 digits",
+        "numeric": "Code must only contain numbers"
+      },
+      "token": {
+        "length": "Token must be exactly 32 characters",
+        "format": "Invalid token format"
+      }
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK"
+  }
+}

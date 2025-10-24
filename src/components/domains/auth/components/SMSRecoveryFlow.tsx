@@ -9,6 +9,7 @@
  */
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import SMSRecoveryRequest from './SMSRecoveryRequest'
 import SMSRecoveryVerify from './SMSRecoveryVerify'
 
@@ -20,6 +21,7 @@ interface SMSRecoveryFlowProps {
 }
 
 export default function SMSRecoveryFlow({ onComplete, onCancel }: SMSRecoveryFlowProps) {
+  const t = useTranslations('auth.twoFactor.smsRecovery.flow')
   const [currentStep, setCurrentStep] = useState<RecoveryStep>('request')
   const [email, setEmail] = useState('')
 
@@ -80,7 +82,7 @@ export default function SMSRecoveryFlow({ onComplete, onCancel }: SMSRecoveryFlo
                       <span className="text-sm font-medium">1</span>
                     )}
                   </span>
-                  <span className="ml-2 text-sm font-medium">Request Code</span>
+                  <span className="ml-2 text-sm font-medium">{t('step1Label')}</span>
                 </div>
                 {/* Connector Line */}
                 <div className="absolute left-0 top-4 -ml-px mt-0.5 h-full w-full">
@@ -112,7 +114,7 @@ export default function SMSRecoveryFlow({ onComplete, onCancel }: SMSRecoveryFlo
                   >
                     <span className="text-sm font-medium">2</span>
                   </span>
-                  <span className="ml-2 text-sm font-medium">Verify Code</span>
+                  <span className="ml-2 text-sm font-medium">{t('step2Label')}</span>
                 </div>
               </li>
             </ol>
@@ -159,11 +161,10 @@ export default function SMSRecoveryFlow({ onComplete, onCancel }: SMSRecoveryFlo
             {/* Success Message */}
             <div>
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                2FA Successfully Disabled
+                {t('success.title')}
               </h2>
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                Two-factor authentication has been removed from your account. You can now sign in
-                using just your password.
+                {t('success.message')}
               </p>
             </div>
 
@@ -186,11 +187,10 @@ export default function SMSRecoveryFlow({ onComplete, onCancel }: SMSRecoveryFlo
                 </div>
                 <div className="ml-3">
                   <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-400">
-                    Security Recommendation
+                    {t('success.recommendation.title')}
                   </h3>
                   <p className="mt-1 text-sm text-yellow-700 dark:text-yellow-300">
-                    We strongly recommend re-enabling two-factor authentication to keep your
-                    account secure. You can do this from your security settings.
+                    {t('success.recommendation.message')}
                   </p>
                 </div>
               </div>
@@ -203,7 +203,7 @@ export default function SMSRecoveryFlow({ onComplete, onCancel }: SMSRecoveryFlo
                 onClick={handleSuccessComplete}
                 className="rounded-lg bg-brand-500 px-6 py-3 text-sm font-medium text-white shadow-theme-xs hover:bg-brand-600"
               >
-                Continue to Sign In
+                {t('success.continueButton')}
               </button>
             </div>
           </div>

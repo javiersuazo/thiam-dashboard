@@ -8,8 +8,8 @@
  */
 
 import { useState, FormEvent } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { useTranslations } from 'next-intl'
+import { Link, useRouter } from '@/i18n/routing'
 import { resetPasswordAction } from '../actions'
 import { resetPasswordEmailSchema, passwordRequirements } from '../validation/authSchemas'
 
@@ -18,6 +18,7 @@ interface ResetPasswordFormProps {
 }
 
 export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
+  const t = useTranslations('auth.resetPassword')
   const router = useRouter()
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -98,10 +99,10 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       {/* Header */}
       <div className="text-center">
         <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-          Reset Your Password
+          {t('title')}
         </h2>
         <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-          Enter a new password for your account.
+          {t('subtitle')}
         </p>
       </div>
 
@@ -139,7 +140,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
             htmlFor="newPassword"
             className="block text-sm font-medium text-gray-700 dark:text-gray-300"
           >
-            New Password
+            {t('newPassword')}
           </label>
           <div className="relative mt-2">
             <input
@@ -202,7 +203,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         {newPassword && (
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
             <h4 className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-              Password Requirements
+              {t('requirements.title')}
             </h4>
             <ul className="space-y-1 text-sm">
               <li className="flex items-center gap-2">
@@ -212,7 +213,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                   {passwordStrength.minLength ? '✓' : '○'}
                 </span>
                 <span className={passwordStrength.minLength ? 'text-green-600' : 'text-gray-600'}>
-                  At least 8 characters
+                  {t('requirements.minLength')}
                 </span>
               </li>
               <li className="flex items-center gap-2">
@@ -224,7 +225,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                 <span
                   className={passwordStrength.hasUppercase ? 'text-green-600' : 'text-gray-600'}
                 >
-                  One uppercase letter
+                  {t('requirements.uppercase')}
                 </span>
               </li>
               <li className="flex items-center gap-2">
@@ -236,7 +237,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                 <span
                   className={passwordStrength.hasLowercase ? 'text-green-600' : 'text-gray-600'}
                 >
-                  One lowercase letter
+                  {t('requirements.lowercase')}
                 </span>
               </li>
               <li className="flex items-center gap-2">
@@ -244,7 +245,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                   {passwordStrength.hasNumber ? '✓' : '○'}
                 </span>
                 <span className={passwordStrength.hasNumber ? 'text-green-600' : 'text-gray-600'}>
-                  One number
+                  {t('requirements.number')}
                 </span>
               </li>
               <li className="flex items-center gap-2">
@@ -256,7 +257,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                 <span
                   className={passwordStrength.hasSpecialChar ? 'text-green-600' : 'text-gray-600'}
                 >
-                  One special character
+                  {t('requirements.special')}
                 </span>
               </li>
             </ul>
@@ -269,7 +270,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
             htmlFor="confirmPassword"
             className="block text-sm font-medium text-gray-700 dark:text-gray-300"
           >
-            Confirm New Password
+            {t('confirmPassword')}
           </label>
           <div className="mt-2">
             <input
@@ -305,10 +306,10 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           {loading ? (
             <>
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              Resetting Password...
+              {t('submitting')}
             </>
           ) : (
-            'Reset Password'
+            t('submit')
           )}
         </button>
       </form>

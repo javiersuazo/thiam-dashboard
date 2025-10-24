@@ -13,7 +13,8 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import { useRouter } from '@/i18n/routing'
 import { refreshSessionAction, logoutAction } from '@/components/domains/auth'
 
 interface SessionTimeoutWarningProps {
@@ -54,6 +55,7 @@ export function SessionTimeoutWarning({
   onExtend,
   onLogout,
 }: SessionTimeoutWarningProps) {
+  const t = useTranslations('auth.session.timeout')
   const router = useRouter()
   const [showWarning, setShowWarning] = useState(false)
   const [timeRemaining, setTimeRemaining] = useState(0)
@@ -163,16 +165,16 @@ export function SessionTimeoutWarning({
         {/* Warning Message */}
         <div className="mt-4 text-center">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Session Expiring Soon
+            {t('title')}
           </h3>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Your session will expire in
+            {t('message')}
           </p>
           <p className="mt-2 text-3xl font-bold text-yellow-600 dark:text-yellow-400">
             {formatTime(timeRemaining)}
           </p>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            You&apos;ll be automatically logged out when the timer reaches zero.
+            {t('autoLogout')}
           </p>
         </div>
 
@@ -184,7 +186,7 @@ export function SessionTimeoutWarning({
             disabled={isExtending}
             className="flex-1 rounded-lg bg-white px-4 py-3 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03]"
           >
-            Logout Now
+            {t('logoutNow')}
           </button>
           <button
             type="button"
@@ -195,10 +197,10 @@ export function SessionTimeoutWarning({
             {isExtending ? (
               <>
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                Extending...
+                {t('extending')}
               </>
             ) : (
-              'Stay Logged In'
+              t('stayLoggedIn')
             )}
           </button>
         </div>

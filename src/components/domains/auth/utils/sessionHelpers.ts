@@ -6,15 +6,28 @@
 
 import type { Session, SessionUser } from '@/components/features/session/types'
 import { SESSION_STORAGE_KEY } from '@/components/features/session/types'
-import { isSessionExpired, calculateSessionExpiry } from './authHelpers'
+import { isSessionExpired } from './authHelpers'
 
 /**
- * Create a session object
+ * Create a session object (client-side)
+ *
+ * @param user - Session user data
+ * @param token - Access token
+ * @param refreshToken - Refresh token
+ * @param expiresAt - Unix timestamp when token expires
+ * @returns Session object
  */
-export function createSession(user: SessionUser, expiresInDays: number = 7): Session {
+export function createSession(
+  user: SessionUser,
+  token: string,
+  refreshToken: string,
+  expiresAt: number
+): Session {
   return {
     user,
-    expiresAt: calculateSessionExpiry(expiresInDays),
+    token,
+    refreshToken,
+    expiresAt,
     issuedAt: Date.now(),
   }
 }

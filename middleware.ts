@@ -98,32 +98,36 @@ const intlMiddleware = createMiddleware(routing)
  */
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
-  const hasSession = hasValidSession(request)
 
-  // Step 1: Handle i18n routing first
-  // This ensures locale prefixes are properly handled
+  // Step 1: Handle i18n routing FIRST - let next-intl handle locale detection & redirects
   const intlResponse = intlMiddleware(request)
 
-  // Step 2: Run authentication checks
-  // Allow public routes without authentication
-  if (isPublicRoute(pathname)) {
+  // Get the final pathname after intl processing
+  const finalPathname = intlResponse.headers.get('x-middleware-request-x-nextUrl-pathname') || pathname
+
+  // Step 2: Run authentication checks on the final pathname
+  const hasSession = hasValidSession(request)
+
+  // Extract locale from final pathname
+  const localeMatch = finalPathname.match(/^\/([a-z]{2})(?:\/|$)/)
+  const locale = localeMatch?.[1] || routing.defaultLocale
+
+  // Step 3: Check if this is a public route
+  if (isPublicRoute(finalPathname)) {
     // If user is authenticated and trying to access auth pages, redirect to dashboard
-    if (hasSession && isAuthRoute(pathname)) {
-      // Preserve locale in redirect
-      const locale = pathname.match(/^\/([a-z]{2})(?:\/|$)/)?.[1] || ''
-      const redirectPath = locale ? `/${locale}${DEFAULT_SIGNIN_REDIRECT}` : DEFAULT_SIGNIN_REDIRECT
+    if (hasSession && isAuthRoute(finalPathname)) {
+      const redirectPath = `/${locale}${DEFAULT_SIGNIN_REDIRECT}`
       return NextResponse.redirect(new URL(redirectPath, request.url))
     }
     return intlResponse
   }
 
-  // Protect all other routes - require authentication
+  // Step 4: Protect all other routes - require authentication
   if (!hasSession) {
     // Store the attempted URL for redirect after login
-    const locale = pathname.match(/^\/([a-z]{2})(?:\/|$)/)?.[1] || ''
-    const redirectPath = locale ? `/${locale}${DEFAULT_SIGNOUT_REDIRECT}` : DEFAULT_SIGNOUT_REDIRECT
+    const redirectPath = `/${locale}${DEFAULT_SIGNOUT_REDIRECT}`
     const signInUrl = new URL(redirectPath, request.url)
-    signInUrl.searchParams.set('callbackUrl', pathname)
+    signInUrl.searchParams.set('callbackUrl', finalPathname)
     return NextResponse.redirect(signInUrl)
   }
 

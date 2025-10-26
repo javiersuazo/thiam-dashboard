@@ -1,6 +1,5 @@
 import { ResetPasswordForm } from '@/components/domains/auth'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
   title: 'Reset Password | Thiam',
@@ -13,12 +12,8 @@ interface ResetPasswordPageProps {
 
 export default async function ResetPasswordPage({ searchParams }: ResetPasswordPageProps) {
   const params = await searchParams
-  const token = params.token
+  const tokenFromUrl = params.token
 
-  // Redirect to forgot password if no token provided
-  if (!token) {
-    redirect('/forgot-password')
-  }
-
-  return <ResetPasswordForm token={token} />
+  // Token can come from URL (email link) or be entered manually (SMS code)
+  return <ResetPasswordForm initialToken={tokenFromUrl} />
 }

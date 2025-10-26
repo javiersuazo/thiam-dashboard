@@ -63,8 +63,13 @@ export const errorMiddleware: Middleware = {
         sessionStorage.removeItem('auth_token')
 
         // Redirect to login if not already there
-        if (!window.location.pathname.startsWith('/signin')) {
-          window.location.href = `/signin?redirect=${encodeURIComponent(window.location.pathname)}`
+        if (!window.location.pathname.includes('/signin')) {
+          // Extract locale from current pathname
+          const currentPath = window.location.pathname
+          const localeMatch = currentPath.match(/^\/([a-z]{2})(\/|$)/)
+          const locale = localeMatch ? localeMatch[1] : 'en'
+
+          window.location.href = `/${locale}/signin?redirect=${encodeURIComponent(window.location.pathname)}`
         }
       }
 

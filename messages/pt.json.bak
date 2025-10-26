@@ -13,18 +13,9 @@
     }
   },
   "auth": {
-    "errors": {
-      "rateLimitExceeded": "Muitas solicitações. Por favor tente novamente em alguns minutos.",
-      "tooManyLoginAttempts": "Muitas tentativas de login. Por favor tente novamente em 15 minutos.",
-      "accountLocked": "Sua conta foi temporariamente bloqueada devido a múltiplas tentativas de login falhadas. Por favor tente mais tarde ou entre em contato com o suporte."
-    },
     "signin": {
       "title": "Bem-vindo de volta",
-      "subtitle": "Escolha seu método preferido de login",
-      "quickSignIn": "Login rápido",
-      "magicLink": "Link mágico",
-      "passkey": "Chave de acesso",
-      "orContinueWith": "Ou continue com e-mail e senha",
+      "subtitle": "Digite suas credenciais para acessar sua conta",
       "email": "Endereço de e-mail",
       "emailPlaceholder": "Digite seu e-mail",
       "password": "Senha",
@@ -36,13 +27,11 @@
       "noAccount": "Não tem uma conta?",
       "signUp": "Cadastre-se",
       "success": "Login realizado com sucesso!",
-      "passkeySuccess": "Login realizado com sucesso usando chave de acesso!",
       "errors": {
         "invalidCredentials": "E-mail ou senha inválidos",
         "accountLocked": "Conta bloqueada. Por favor entre em contato com o suporte.",
         "emailNotVerified": "Por favor verifique seu e-mail antes de fazer login.",
-        "generic": "Erro ao fazer login. Por favor tente novamente.",
-        "passkeyFailed": "Erro ao fazer login com chave de acesso. Por favor tente novamente."
+        "generic": "Erro ao fazer login. Por favor tente novamente."
       }
     },
     "signup": {
@@ -97,13 +86,13 @@
         "emailSteps": {
           "step1": "Verifique sua caixa de entrada (e pasta de spam)",
           "step2": "Clique no link de redefinição no e-mail",
-          "step3": "Digite o código de 6 dígitos e crie uma nova senha",
+          "step3": "Crie uma nova senha",
           "step4": "Você será automaticamente conectado"
         },
         "phoneSteps": {
-          "step1": "Verifique seu telefone para um SMS com um código de 6 dígitos",
-          "step2": "Vá para a página de redefinição de senha",
-          "step3": "Digite o código de 6 dígitos e crie uma nova senha",
+          "step1": "Verifique seu telefone para um SMS",
+          "step2": "Use o código para redefinir sua senha",
+          "step3": "Crie uma nova senha",
           "step4": "Você será automaticamente conectado"
         }
       }
@@ -111,8 +100,6 @@
     "resetPassword": {
       "title": "Redefina sua senha",
       "subtitle": "Digite sua nova senha abaixo",
-      "resetCode": "Código de redefinição",
-      "resetCodeHint": "Digite o código que você recebeu por e-mail ou SMS",
       "newPassword": "Nova senha",
       "newPasswordPlaceholder": "Digite nova senha",
       "confirmPassword": "Confirmar senha",
@@ -491,132 +478,6 @@
         "signInButton": "Entrar novamente",
         "needHelp": "Precisa de ajuda?",
         "contactSupport": "Contatar suporte"
-      }
-    },
-    "passwordless": {
-      "title": "Entrar sem senha",
-      "subtitle": "Escolha como você gostaria de entrar. Enviaremos um link seguro ou código.",
-      "methodToggle": {
-        "email": "E-mail",
-        "phone": "Telefone"
-      },
-      "email": {
-        "label": "Endereço de e-mail",
-        "placeholder": "voce@exemplo.com",
-        "description": "Enviaremos um link mágico para você entrar instantaneamente",
-        "submit": "Enviar link mágico",
-        "submitting": "Enviando..."
-      },
-      "phone": {
-        "label": "Número de telefone",
-        "placeholder": "+5511999999999",
-        "description": "Use o formato E.164 (por exemplo, +5511999999999). Enviaremos um código de 6 dígitos.",
-        "submit": "Enviar código",
-        "submitting": "Enviando..."
-      },
-      "success": {
-        "email": {
-          "title": "Verifique sua caixa de entrada",
-          "message": "Enviamos um link mágico para você entrar. Clique no link em seu e-mail para continuar.",
-          "toast": "Link mágico enviado! Verifique seu e-mail."
-        },
-        "phone": {
-          "title": "Verifique suas mensagens",
-          "message": "Enviamos um código de 6 dígitos. Digite-o na próxima tela para continuar.",
-          "toast": "Código enviado! Verifique suas mensagens."
-        },
-        "returnToSignIn": "Voltar para entrar",
-        "tryDifferentMethod": "Tentar um método diferente"
-      },
-      "resend": {
-        "button": "Reenviar",
-        "cooldown": "Reenviar em {seconds}s",
-        "sending": "Enviando...",
-        "success": "Enviado com sucesso!"
-      },
-      "verify": {
-        "title": "Entrar",
-        "subtitle": "Verificando seu link...",
-        "success": "Verificado! Redirecionando...",
-        "invalid": "Link inválido ou expirado",
-        "expired": "Este link expirou. Por favor, solicite um novo."
-      },
-      "alternativeSignIn": {
-        "message": "Prefere usar uma senha?",
-        "link": "Entrar com senha"
-      },
-      "errors": {
-        "invalidEmail": "Endereço de e-mail inválido",
-        "invalidPhone": "Formato de telefone inválido. Use o formato E.164 (por exemplo, +5511999999999)",
-        "failedToSendEmail": "Falha ao enviar o link mágico",
-        "failedToSendSMS": "Falha ao enviar o código",
-        "invalidToken": "Token inválido ou expirado",
-        "unexpected": "Ocorreu um erro inesperado"
-      }
-    },
-    "passkey": {
-      "errors": {
-        "notSupported": "Chaves de acesso não são suportadas no seu navegador. Por favor use um navegador moderno como Chrome, Safari ou Edge.",
-        "fetchFailed": "Erro ao obter chaves de acesso",
-        "registerBeginFailed": "Erro ao iniciar registro de chave de acesso",
-        "registerCancelled": "Registro cancelado pelo usuário",
-        "registerFailed": "Erro ao criar chave de acesso",
-        "registerSaveFailed": "Erro ao salvar chave de acesso",
-        "authNotSupported": "Chaves de acesso não são suportadas no seu navegador. Por favor use um navegador moderno.",
-        "authBeginFailed": "Erro ao iniciar autenticação com chave de acesso",
-        "authCancelled": "Autenticação cancelada pelo usuário",
-        "authFailed": "Erro ao autenticar",
-        "authCompleteFailed": "Autenticação falhou",
-        "deleteFailed": "Erro ao excluir chave de acesso"
-      },
-      "settings": {
-        "title": "Chaves de acesso",
-        "subtitle": "Gerencie suas chaves de acesso para autenticação sem senha usando biometria ou chaves de segurança",
-        "notSupported": {
-          "title": "Chaves de acesso não suportadas",
-          "message": "Seu navegador não suporta chaves de acesso. Por favor use um navegador moderno como Chrome, Safari, Edge ou Firefox."
-        },
-        "platformAuth": {
-          "title": "Autenticação biométrica disponível",
-          "message": "Este dispositivo suporta autenticação biométrica (Touch ID, Face ID ou Windows Hello). Você pode usá-lo para fazer login com segurança sem senha."
-        },
-        "list": {
-          "title": "Suas chaves de acesso",
-          "subtitle": "Dispositivos e chaves de segurança que você usa para fazer login",
-          "addButton": "Adicionar chave",
-          "loading": "Carregando chaves de acesso...",
-          "empty": {
-            "title": "Nenhuma chave registrada",
-            "message": "Adicione sua primeira chave de acesso para habilitar login sem senha"
-          },
-          "unnamed": "Chave sem nome",
-          "created": "Criada",
-          "lastUsed": "Último uso",
-          "delete": "Excluir"
-        },
-        "add": {
-          "title": "Adicionar nova chave de acesso",
-          "subtitle": "Dê um nome à sua chave para identificá-la depois",
-          "nameLabel": "Nome da chave",
-          "namePlaceholder": "ex. Meu iPhone, YubiKey 5, Windows Hello",
-          "registerButton": "Registrar chave",
-          "registering": "Registrando...",
-          "cancel": "Cancelar"
-        },
-        "delete": {
-          "confirm": "Tem certeza de que deseja excluir esta chave de acesso? Você não poderá mais usá-la para fazer login.",
-          "confirmButton": "Excluir chave",
-          "cancel": "Cancelar"
-        },
-        "success": {
-          "added": "Chave de acesso registrada com sucesso!",
-          "deleted": "Chave de acesso excluída com sucesso"
-        },
-        "errors": {
-          "nameRequired": "Por favor digite um nome para sua chave",
-          "addFailed": "Erro ao registrar chave de acesso. Por favor tente novamente.",
-          "deleteFailed": "Erro ao excluir chave de acesso. Por favor tente novamente."
-        }
       }
     },
     "validation": {

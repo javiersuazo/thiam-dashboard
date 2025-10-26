@@ -1,13 +1,11 @@
-import OtpForm from "@/components/_examples/auth/OtpForm";
-import { Metadata } from "next";
+import TwoFactorVerification from '@/components/domains/auth/components/TwoFactorVerification'
+import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title:
-    "Next.js Two Step Verification Page | TailAdmin - Next.js Dashboard Template",
-  description: "This is Next.js SignUp Page TailAdmin Dashboard Template",
-  // other metadata
-};
+  title: 'Two-Factor Verification | Thiam',
+  description: 'Enter your two-factor authentication code',
+}
 
-export default function OtpVerification() {
-  return <OtpForm />;
+export default function TwoStepVerification() {
+  return <TwoFactorVerification />
 }

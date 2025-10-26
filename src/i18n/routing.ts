@@ -15,8 +15,9 @@ export const routing = defineRouting({
   // Used when no locale matches
   defaultLocale,
 
-  // Don't prefix the default locale in URLs
-  localePrefix: 'as-needed',
+  // Always prefix locale in URLs for consistency
+  // This ensures all URLs have locale: /en/signin, /es/signin, /pt/signin
+  localePrefix: 'always',
 })
 
 // Lightweight wrappers around Next.js' navigation APIs

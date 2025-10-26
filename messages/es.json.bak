@@ -13,18 +13,9 @@
     }
   },
   "auth": {
-    "errors": {
-      "rateLimitExceeded": "Demasiadas solicitudes. Por favor intenta de nuevo en unos minutos.",
-      "tooManyLoginAttempts": "Demasiados intentos de inicio de sesión. Por favor intenta de nuevo en 15 minutos.",
-      "accountLocked": "Tu cuenta ha sido temporalmente bloqueada debido a múltiples intentos fallidos de inicio de sesión. Por favor intenta más tarde o contacta a soporte."
-    },
     "signin": {
       "title": "Bienvenido de nuevo",
-      "subtitle": "Elige tu método preferido de inicio de sesión",
-      "quickSignIn": "Inicio rápido",
-      "magicLink": "Enlace mágico",
-      "passkey": "Llave de acceso",
-      "orContinueWith": "O continúa con correo y contraseña",
+      "subtitle": "Ingresa tus credenciales para acceder a tu cuenta",
       "email": "Correo electrónico",
       "emailPlaceholder": "Ingresa tu correo",
       "password": "Contraseña",
@@ -36,13 +27,11 @@
       "noAccount": "¿No tienes una cuenta?",
       "signUp": "Regístrate",
       "success": "¡Sesión iniciada correctamente!",
-      "passkeySuccess": "¡Sesión iniciada correctamente con llave de acceso!",
       "errors": {
         "invalidCredentials": "Correo o contraseña inválidos",
         "accountLocked": "Cuenta bloqueada. Por favor contacta a soporte.",
         "emailNotVerified": "Por favor verifica tu correo antes de iniciar sesión.",
-        "generic": "Error al iniciar sesión. Por favor intenta de nuevo.",
-        "passkeyFailed": "Error al iniciar sesión con llave de acceso. Por favor intenta de nuevo."
+        "generic": "Error al iniciar sesión. Por favor intenta de nuevo."
       }
     },
     "signup": {
@@ -97,13 +86,13 @@
         "emailSteps": {
           "step1": "Revisa tu bandeja de entrada (y carpeta de spam)",
           "step2": "Haz clic en el enlace de restablecimiento del correo",
-          "step3": "Ingresa el código de 6 dígitos y crea una nueva contraseña",
+          "step3": "Crea una nueva contraseña",
           "step4": "Serás automáticamente conectado"
         },
         "phoneSteps": {
-          "step1": "Revisa tu teléfono para un SMS con un código de 6 dígitos",
-          "step2": "Ve a la página de restablecimiento de contraseña",
-          "step3": "Ingresa el código de 6 dígitos y crea una nueva contraseña",
+          "step1": "Revisa tu teléfono para un SMS",
+          "step2": "Usa el código para restablecer tu contraseña",
+          "step3": "Crea una nueva contraseña",
           "step4": "Serás automáticamente conectado"
         }
       }
@@ -111,8 +100,6 @@
     "resetPassword": {
       "title": "Restablece tu contraseña",
       "subtitle": "Ingresa tu nueva contraseña",
-      "resetCode": "Código de restablecimiento",
-      "resetCodeHint": "Ingresa el código que recibiste por correo electrónico o SMS",
       "newPassword": "Nueva contraseña",
       "newPasswordPlaceholder": "Ingresa nueva contraseña",
       "confirmPassword": "Confirmar contraseña",
@@ -491,135 +478,6 @@
         "signInButton": "Iniciar sesión de nuevo",
         "needHelp": "¿Necesitas ayuda?",
         "contactSupport": "Contactar soporte"
-      }
-    },
-    "passwordless": {
-      "title": "Iniciar sesión sin contraseña",
-      "subtitle": "Elige cómo te gustaría iniciar sesión. Te enviaremos un enlace seguro o código.",
-      "methodToggle": {
-        "email": "Correo",
-        "phone": "Teléfono"
-      },
-      "email": {
-        "label": "Correo electrónico",
-        "placeholder": "tu@ejemplo.com",
-        "description": "Te enviaremos un enlace mágico para iniciar sesión al instante",
-        "submit": "Enviar enlace mágico",
-        "submitting": "Enviando..."
-      },
-      "phone": {
-        "label": "Número de teléfono",
-        "placeholder": "+14155552671",
-        "description": "Usa el formato E.164 (ej. +14155552671). Te enviaremos un código de 6 dígitos.",
-        "submit": "Enviar código",
-        "submitting": "Enviando..."
-      },
-      "success": {
-        "email": {
-          "title": "Revisa tu bandeja de entrada",
-          "message": "Te hemos enviado un enlace mágico para iniciar sesión. Haz clic en el enlace de tu correo para continuar.",
-          "toast": "¡Enlace mágico enviado! Revisa tu correo."
-        },
-        "phone": {
-          "title": "Revisa tus mensajes",
-          "message": "Te hemos enviado un código de 6 dígitos. Ingrésalo en la siguiente pantalla para continuar.",
-          "toast": "¡Código enviado! Revisa tus mensajes."
-        },
-        "tryDifferentMethod": "Probar un método diferente",
-        "returnToSignIn": "Volver a iniciar sesión"
-      },
-      "resend": {
-        "button": "Reenviar",
-        "cooldown": "Reenviar en {seconds}s",
-        "sending": "Enviando...",
-        "success": "¡Enviado exitosamente!"
-      },
-      "verify": {
-        "title": "Ingresa tu código",
-        "subtitle": "Enviamos un código de 6 dígitos a tu teléfono",
-        "code": "Código de verificación",
-        "codePlaceholder": "Ingresa código de 6 dígitos",
-        "submit": "Verificar e iniciar sesión",
-        "submitting": "Verificando...",
-        "resend": "¿No recibiste el código?",
-        "resendButton": "Reenviar código"
-      },
-      "alternativeSignIn": {
-        "message": "¿Prefieres usar una contraseña?",
-        "link": "Iniciar sesión con contraseña"
-      },
-      "backToSignIn": "Volver a iniciar sesión",
-      "errors": {
-        "invalidEmail": "Correo electrónico inválido",
-        "invalidPhone": "Formato de teléfono inválido. Usa el formato E.164 (ej. +14155552671)",
-        "invalidToken": "Token inválido o expirado",
-        "generic": "Error al procesar la solicitud. Por favor intenta de nuevo.",
-        "sendFailed": "Error al enviar. Por favor intenta de nuevo."
-      }
-    },
-    "passkey": {
-      "errors": {
-        "notSupported": "Las llaves de acceso no son compatibles con tu navegador. Por favor usa un navegador moderno como Chrome, Safari o Edge.",
-        "fetchFailed": "Error al obtener llaves de acceso",
-        "registerBeginFailed": "Error al iniciar registro de llave de acceso",
-        "registerCancelled": "Registro cancelado por el usuario",
-        "registerFailed": "Error al crear llave de acceso",
-        "registerSaveFailed": "Error al guardar llave de acceso",
-        "authNotSupported": "Las llaves de acceso no son compatibles con tu navegador. Por favor usa un navegador moderno.",
-        "authBeginFailed": "Error al iniciar autenticación con llave de acceso",
-        "authCancelled": "Autenticación cancelada por el usuario",
-        "authFailed": "Error al autenticar",
-        "authCompleteFailed": "Autenticación fallida",
-        "deleteFailed": "Error al eliminar llave de acceso"
-      },
-      "settings": {
-        "title": "Llaves de acceso",
-        "subtitle": "Administra tus llaves de acceso para autenticación sin contraseña usando biometría o llaves de seguridad",
-        "notSupported": {
-          "title": "Llaves de acceso no compatibles",
-          "message": "Tu navegador no soporta llaves de acceso. Por favor usa un navegador moderno como Chrome, Safari, Edge o Firefox."
-        },
-        "platformAuth": {
-          "title": "Autenticación biométrica disponible",
-          "message": "Este dispositivo soporta autenticación biométrica (Touch ID, Face ID o Windows Hello). Puedes usarlo para iniciar sesión de forma segura sin contraseña."
-        },
-        "list": {
-          "title": "Tus llaves de acceso",
-          "subtitle": "Dispositivos y llaves de seguridad que usas para iniciar sesión",
-          "addButton": "Agregar llave",
-          "loading": "Cargando llaves de acceso...",
-          "empty": {
-            "title": "Sin llaves registradas",
-            "message": "Agrega tu primera llave de acceso para habilitar el inicio de sesión sin contraseña"
-          },
-          "unnamed": "Llave sin nombre",
-          "created": "Creada",
-          "lastUsed": "Último uso",
-          "delete": "Eliminar"
-        },
-        "add": {
-          "title": "Agregar nueva llave de acceso",
-          "subtitle": "Dale un nombre a tu llave para identificarla después",
-          "nameLabel": "Nombre de la llave",
-          "namePlaceholder": "ej. Mi iPhone, YubiKey 5, Windows Hello",
-          "registerButton": "Registrar llave",
-          "registering": "Registrando...",
-          "cancel": "Cancelar"
-        },
-        "delete": {
-          "confirm": "¿Estás seguro de eliminar esta llave de acceso? No podrás usarla para iniciar sesión.",
-          "confirmButton": "Eliminar llave",
-          "cancel": "Cancelar"
-        },
-        "success": {
-          "added": "¡Llave de acceso registrada exitosamente!",
-          "deleted": "Llave de acceso eliminada exitosamente"
-        },
-        "errors": {
-          "nameRequired": "Por favor ingresa un nombre para tu llave",
-          "addFailed": "Error al registrar llave de acceso. Por favor intenta de nuevo.",
-          "deleteFailed": "Error al eliminar llave de acceso. Por favor intenta de nuevo."
-        }
       }
     },
     "validation": {

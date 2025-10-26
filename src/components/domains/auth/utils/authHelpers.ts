@@ -99,9 +99,12 @@ export function toSessionUser(authUser: AuthUser): SessionUser {
     firstName: authUser.firstName,
     lastName: authUser.lastName,
     fullName: getFullName(authUser),
+    phone: authUser.phone,
     role: authUser.role,
     accountId: authUser.accountId,
     has2FAEnabled: authUser.has2FAEnabled,
+    emailVerified: authUser.emailVerified,
+    phoneVerified: authUser.phoneVerified,
   }
 }
 

@@ -12,14 +12,16 @@ import { useTranslations } from 'next-intl'
 import { Link, useRouter } from '@/i18n/routing'
 import { resetPasswordAction } from '../actions'
 import { resetPasswordEmailSchema, passwordRequirements } from '../validation/authSchemas'
+import { ChevronLeftIcon } from '@/icons'
 
 interface ResetPasswordFormProps {
-  token: string
+  initialToken?: string // Optional: can come from URL (email) or be entered manually (SMS)
 }
 
-export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
+export default function ResetPasswordForm({ initialToken }: ResetPasswordFormProps) {
   const t = useTranslations('auth.resetPassword')
   const router = useRouter()
+  const [token, setToken] = useState(initialToken || '')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -73,13 +75,20 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         return
       }
 
-      // Success! Redirect to signin
-      router.push('/signin?reset=success')
+      // Success! Auto-logged in, redirect to dashboard
+      router.push('/')
+      router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to reset password')
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleTokenChange = (value: string) => {
+    setToken(value)
+    setFieldErrors((prev) => ({ ...prev, token: '' }))
+    setError(null)
   }
 
   const handlePasswordChange = (value: string) => {
@@ -95,16 +104,29 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="text-center">
-        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-          {t('title')}
-        </h2>
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-          {t('subtitle')}
-        </p>
+    <div className="flex flex-col flex-1 lg:w-1/2 w-full">
+      <div className="w-full max-w-md sm:pt-10 mx-auto mb-5">
+        <Link
+          href="/signin"
+          className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+        >
+          <ChevronLeftIcon />
+          {t('backToSignIn')}
+        </Link>
       </div>
+
+      <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
+        <div>
+          <div className="mb-5 sm:mb-8">
+            <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
+              {t('title')}
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {t('subtitle')}
+            </p>
+          </div>
+
+          <div className="space-y-6">
 
       {/* Error Alert */}
       {error && (
@@ -125,7 +147,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
               </svg>
             </div>
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800 dark:text-red-400">Reset Failed</h3>
+              <h3 className="text-sm font-medium text-red-800 dark:text-red-400">{t('errors.generic')}</h3>
               <p className="mt-1 text-sm text-red-700 dark:text-red-300">{error}</p>
             </div>
           </div>
@@ -134,6 +156,52 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Reset Code/Token Input (only show if not from URL) */}
+        {!initialToken && (
+          <div>
+            <label
+              htmlFor="token"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              {t('resetCode')}
+            </label>
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              {t('resetCodeHint')}
+            </p>
+            <div className="mt-2">
+              <input
+                id="token"
+                name="token"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                autoComplete="one-time-code"
+                required
+                maxLength={6}
+                value={token}
+                onChange={(e) => {
+                  // Only allow digits for SMS codes
+                  const value = e.target.value.replace(/\D/g, '')
+                  handleTokenChange(value)
+                }}
+                className={`block w-full rounded-lg border px-4 py-3 text-center text-2xl tracking-widest shadow-sm focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50 font-mono ${
+                  fieldErrors.token
+                    ? 'border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400'
+                    : 'border-gray-300 text-gray-900 placeholder-gray-400 focus:border-brand-500 focus:ring-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white'
+                }`}
+                placeholder="123456"
+                disabled={loading}
+                autoFocus
+              />
+              {fieldErrors.token && (
+                <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                  {fieldErrors.token}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* New Password Input */}
         <div>
           <label
@@ -158,7 +226,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
               }`}
               placeholder="••••••••"
               disabled={loading}
-              autoFocus
+              autoFocus={!!initialToken} // Only autofocus if token already provided
             />
             <button
               type="button"
@@ -300,7 +368,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         {/* Submit Button */}
         <button
           type="submit"
-          disabled={loading || !allRequirementsMet || !confirmPassword}
+          disabled={loading || !token || !allRequirementsMet || !confirmPassword}
           className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-5 py-3 text-sm font-medium text-white shadow-theme-xs hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? (
@@ -314,14 +382,19 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         </button>
       </form>
 
-      {/* Back to Sign In */}
-      <div className="text-center">
-        <Link
-          href="/signin"
-          className="text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
-        >
-          Back to Sign In
-        </Link>
+            {/* Back to Sign In */}
+            <div className="mt-5">
+              <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
+                <Link
+                  href="/signin"
+                  className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
+                >
+                  {t('backToSignIn')}
+                </Link>
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

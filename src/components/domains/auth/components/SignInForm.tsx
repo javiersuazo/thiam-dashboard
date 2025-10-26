@@ -20,16 +20,19 @@ import { Link, useRouter } from '@/i18n/routing'
 
 import { loginAction } from '../actions'
 import { loginSchema, type LoginFormData } from '../validation/authSchemas'
-import { OAuthButtonsGroup } from './OAuthButtons'
+import { GoogleLoginButton } from './OAuthButtons'
+import PasskeySignInButton from './PasskeySignInButton'
+import { getErrorCode, mapApiErrorResponse } from '../utils/errorMapping'
 
 import Checkbox from '@/components/shared/form/input/Checkbox'
 import Input from '@/components/shared/form/input/InputField'
 import Label from '@/components/shared/form/Label'
 import Button from '@/components/shared/ui/button/Button'
-import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from '@/icons'
+import { ChevronLeftIcon, EyeCloseIcon, EyeIcon, EnvelopeIcon } from '@/icons'
 
 export default function SignInForm() {
   const t = useTranslations('auth.signin')
+  const tCommon = useTranslations('common')
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [showPassword, setShowPassword] = useState(false)
@@ -61,14 +64,29 @@ export default function SignInForm() {
         })
 
         if (!result.success) {
-          toast.error(result.error)
+          // Use structured error data if available, otherwise fall back to message parsing
+          const errorCode = result.errorData
+            ? mapApiErrorResponse(result.errorData, 'signin')
+            : getErrorCode(result.error, 'signin')
+
+          // Extract the translation based on the error code pattern
+          const translatedError = errorCode.startsWith('common.')
+            ? tCommon(errorCode.replace('common.', '') as 'errors.network')
+            : t(errorCode.replace('auth.signin.', '') as 'errors.generic')
+          toast.error(translatedError)
           return
         }
 
         // Check if 2FA is required
         if (result.data.requiresTwoFactor) {
-          toast.info(t('errors.generic'))
-          // TODO: Navigate to 2FA verification page
+          // Store challengeToken and email in sessionStorage (client-side only)
+          if (result.data.challengeToken) {
+            sessionStorage.setItem('challengeToken', result.data.challengeToken)
+          }
+          if (result.data.email) {
+            sessionStorage.setItem('loginEmail', result.data.email)
+          }
+          toast.info('Please enter your verification code')
           router.push('/two-step-verification')
           return
         }
@@ -79,8 +97,15 @@ export default function SignInForm() {
         router.refresh()
       } catch (error) {
         console.error('Sign in error:', error)
-        const message = error instanceof Error ? error.message : t('errors.generic')
-        toast.error(message)
+        // Handle unexpected errors (network errors, etc.)
+        const errorCode = getErrorCode(
+          error instanceof Error ? error.message : 'Unknown error',
+          'signin'
+        )
+        const translatedError = errorCode.startsWith('common.')
+          ? tCommon(errorCode.replace('common.', '') as 'errors.network')
+          : t(errorCode.replace('auth.signin.', '') as 'errors.generic')
+        toast.error(translatedError)
       }
     })
   })
@@ -109,8 +134,40 @@ export default function SignInForm() {
           </div>
 
           <div>
-            {/* OAuth Login Buttons */}
-            <OAuthButtonsGroup providers={['google']} disabled={isPending} />
+            {/* Quick Sign In Options - Better Layout */}
+            <div className="mb-6 space-y-3">
+              <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                {t('quickSignIn')}
+              </p>
+
+              {/* Google OAuth Button - Full Width */}
+              <GoogleLoginButton disabled={isPending} />
+
+              {/* Passkey & Magic Link - Responsive Grid */}
+              {/* If passkey not supported (returns null), magic link takes full width */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <PasskeySignInButton disabled={isPending} />
+
+                <Link href="/passwordless" className="block">
+                  <Button variant="outline" className="w-full h-full" size="sm" disabled={isPending}>
+                    <EnvelopeIcon className="w-4 h-4 mr-2 fill-current" />
+                    {t('magicLink')}
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="relative mb-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 text-gray-500 bg-white dark:bg-gray-900 dark:text-gray-400">
+                  {t('orContinueWith')}
+                </span>
+              </div>
+            </div>
 
             <form onSubmit={onSubmit}>
               <div className="space-y-6">

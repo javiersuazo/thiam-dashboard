@@ -14,18 +14,24 @@ export interface SessionUser {
   firstName: string | null
   lastName: string | null
   fullName: string
+  phone: string | null
   role: 'customer' | 'caterer' | 'admin' | 'ops' | 'finance' | 'sales'
   accountId: string
   has2FAEnabled: boolean
+  emailVerified: boolean
+  phoneVerified: boolean
 }
 
 /**
  * Session Data
+ * Includes token data for automatic refresh capability
  */
 export interface Session {
   user: SessionUser
-  expiresAt: number
-  issuedAt: number
+  token: string // Access token (JWT)
+  refreshToken: string // Refresh token for obtaining new access tokens
+  expiresAt: number // Unix timestamp when access token expires
+  issuedAt: number // Timestamp when session was created
 }
 
 /**

@@ -37,13 +37,13 @@ export default async function LocaleLayout({
 
   // Providing all messages to the client
   // side is the easiest way to get started
-  const messages = await getMessages()
+  const messages = await getMessages({ locale })
 
   return (
     <html lang={locale}>
       <body className={`${outfit.className} dark:bg-gray-900`}>
         <Providers>
-          <NextIntlClientProvider messages={messages}>
+          <NextIntlClientProvider messages={messages} locale={locale}>
             <ThemeProvider>
               <SidebarProvider>{children}</SidebarProvider>
             </ThemeProvider>

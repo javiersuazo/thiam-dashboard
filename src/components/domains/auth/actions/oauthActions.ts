@@ -122,6 +122,8 @@ export async function completeOAuthAction(
     const oauthResponse = response.data as unknown as {
       user: AuthUser
       token: string
+      refreshToken: string
+      expiresAt: number | string
     }
 
     if (!oauthResponse?.user || !oauthResponse?.token) {
@@ -131,9 +133,31 @@ export async function completeOAuthAction(
       }
     }
 
+    if (!oauthResponse?.refreshToken) {
+      return {
+        success: false,
+        error: 'No refresh token received',
+      }
+    }
+
+    if (!oauthResponse?.expiresAt) {
+      return {
+        success: false,
+        error: 'No expiration time received',
+      }
+    }
+
     // Create session from API response
     const sessionUser = toSessionUser(oauthResponse.user)
-    const session = createSession(sessionUser, 7) // 7 days expiry
+    const expiresAtTimestamp = typeof oauthResponse.expiresAt === 'string'
+      ? parseInt(oauthResponse.expiresAt)
+      : oauthResponse.expiresAt
+    const session = createSession(
+      sessionUser,
+      oauthResponse.token,
+      oauthResponse.refreshToken,
+      expiresAtTimestamp
+    )
 
     // Save session to httpOnly cookie
     await saveSession(session)

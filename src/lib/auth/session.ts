@@ -28,13 +28,22 @@ const SESSION_COOKIE_OPTIONS = {
  * Create a new session
  *
  * @param user - Session user data
- * @param expiresInDays - Number of days until session expires (default: 7)
+ * @param token - Access token
+ * @param refreshToken - Refresh token
+ * @param expiresAt - Unix timestamp when token expires
  * @returns Session object
  */
-export function createSession(user: SessionUser, expiresInDays: number = 7): Session {
+export function createSession(
+  user: SessionUser,
+  token: string,
+  refreshToken: string,
+  expiresAt: number
+): Session {
   return {
     user,
-    expiresAt: calculateSessionExpiry(expiresInDays),
+    token,
+    refreshToken,
+    expiresAt,
     issuedAt: Date.now(),
   }
 }
@@ -169,8 +178,36 @@ export async function isAuthenticated(): Promise<boolean> {
 }
 
 /**
+ * Update session tokens
+ *
+ * Updates token, refreshToken, and expiresAt without changing user data.
+ */
+export async function updateSessionTokens(
+  token: string,
+  refreshToken: string,
+  expiresAt: number
+): Promise<void> {
+  const session = await getSession()
+
+  if (!session) {
+    throw new Error('No session to update')
+  }
+
+  // Update session with new token data
+  const updatedSession: Session = {
+    ...session,
+    token,
+    refreshToken,
+    expiresAt,
+  }
+
+  await saveSession(updatedSession)
+}
+
+/**
  * Refresh session expiry
  *
+ * @deprecated Use refreshTokenAction instead for automatic token refresh
  * Updates the expiry time without changing other session data.
  */
 export async function refreshSession(): Promise<void> {

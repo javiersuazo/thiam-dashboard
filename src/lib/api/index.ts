@@ -40,7 +40,15 @@ import {
   contentTypeMiddleware,
 } from './middleware'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
+const API_BASE_URL = 'http://localhost:8080'
+
+// Log API configuration in development
+if (process.env.NODE_ENV === 'development') {
+  console.log('🔧 API Client Configuration:', {
+    baseUrl: `${API_BASE_URL}/v1`,
+    env: process.env.NEXT_PUBLIC_API_URL,
+  })
+}
 
 /**
  * Main API client for client-side usage
@@ -131,7 +139,12 @@ export function logout(): void {
   setAuthToken(null)
 
   if (typeof window !== 'undefined') {
-    window.location.href = '/signin'
+    // Extract locale from current pathname (e.g., /en/dashboard -> en)
+    const currentPath = window.location.pathname
+    const localeMatch = currentPath.match(/^\/([a-z]{2})(\/|$)/)
+    const locale = localeMatch ? localeMatch[1] : 'en' // Default to 'en' if no locale found
+
+    window.location.href = `/${locale}/signin`
   }
 }
 

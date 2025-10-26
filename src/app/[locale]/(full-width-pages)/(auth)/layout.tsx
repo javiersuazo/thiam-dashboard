@@ -1,5 +1,6 @@
 import GridShape from "@/components/shared/common/GridShape";
 import ThemeTogglerTwo from "@/components/shared/common/ThemeTogglerTwo";
+import { LanguageSwitcher } from "@/components/shared/LanguageSwitcher";
 import { ThemeProvider } from "@/context/ThemeContext";
 import Image from "next/image";
 import Link from "next/link";
@@ -34,8 +35,15 @@ export default function AuthLayout({
               </div>
             </div>
           </div>
+
+          {/* Theme Toggler - Bottom Right */}
           <div className="fixed bottom-6 right-6 z-50 hidden sm:block">
             <ThemeTogglerTwo />
+          </div>
+
+          {/* Language Switcher - Top Right */}
+          <div className="fixed top-6 right-6 z-50">
+            <LanguageSwitcher />
           </div>
         </div>
       </ThemeProvider>

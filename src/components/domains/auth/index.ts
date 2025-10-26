@@ -114,6 +114,7 @@ export {
 // Server Actions
 export {
   loginAction,
+  verify2FALoginAction,
   signupAction,
   logoutAction,
   refreshSessionAction,
@@ -125,6 +126,7 @@ export {
   requestSMSRecoveryAction,
   verifySMSRecoveryAction,
   forgotPasswordAction,
+  forgotPasswordPhoneAction,
   resetPasswordAction,
   verifyEmailAction,
   resendVerificationAction,

@@ -1,106 +1,120 @@
 /**
  * Server-Side API Utilities
  *
- * Utilities for calling the API from Next.js Server Components and Server Actions.
- * Handles authentication via cookies (httpOnly for security).
+ * JWT-based authentication with httpOnly cookies.
+ * Follows industry best practices for security.
  */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { cookies } from 'next/headers'
-import { createAuthenticatedClient } from './index'
-import type { paths } from './generated/schema'
+import { createAuthenticatedClient, createPublicServerClient } from './index'
 
 /**
- * Cookie name for storing the auth token
+ * Cookie names for JWT tokens
  */
-const AUTH_COOKIE_NAME = 'auth_token'
+const ACCESS_TOKEN_COOKIE = 'access_token'
+const REFRESH_TOKEN_COOKIE = 'refresh_token'
 
 /**
- * Cookie options for auth token
- * - httpOnly: Cannot be accessed by JavaScript (XSS protection)
- * - secure: Only sent over HTTPS in production
- * - sameSite: CSRF protection
- * - path: Available throughout the app
+ * Cookie options for JWT tokens
  */
-export const AUTH_COOKIE_OPTIONS = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax' as const,
+const TOKEN_COOKIE_OPTIONS = {
+  httpOnly: true, // Cannot be accessed by JavaScript (XSS protection)
+  secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+  sameSite: 'lax' as const, // CSRF protection
   path: '/',
-  maxAge: 60 * 60 * 24 * 7, // 7 days
 }
 
 /**
- * Get authentication token from cookies (server-side only)
+ * Get access token from httpOnly cookie (server-side only)
  *
- * @returns The auth token or null if not found
- *
- * @example Server Component
- * ```ts
- * import { getServerAuthToken } from '@/lib/api/server'
- *
- * export default async function Page() {
- *   const token = await getServerAuthToken()
- *   if (!token) {
- *     redirect('/signin')
- *   }
- *   // ...
- * }
- * ```
+ * @returns The JWT access token or null if not found
  */
 export async function getServerAuthToken(): Promise<string | null> {
-  const cookieStore = await cookies()
-  return cookieStore.get(AUTH_COOKIE_NAME)?.value || null
+  try {
+    const cookieStore = await cookies()
+    const tokenCookie = cookieStore.get(ACCESS_TOKEN_COOKIE)
+
+    console.log('🔐 getServerAuthToken - Cookie check:', {
+      cookieName: ACCESS_TOKEN_COOKIE,
+      hasCookie: !!tokenCookie,
+      tokenPresent: !!tokenCookie?.value
+    })
+
+    if (!tokenCookie?.value) {
+      console.log('❌ getServerAuthToken - No access token cookie found')
+      return null
+    }
+
+    console.log('✅ getServerAuthToken - Token retrieved successfully')
+    return tokenCookie.value
+  } catch (error) {
+    console.error('❌ getServerAuthToken - Error:', error)
+    return null
+  }
 }
 
 /**
- * Set authentication token in cookies (server-side only)
+ * Get refresh token from httpOnly cookie (server-side only)
  *
- * Use this after successful login in a Server Action.
- *
- * @param token - JWT token to store
- *
- * @example Server Action
- * ```ts
- * 'use server'
- *
- * import { setServerAuthToken } from '@/lib/api/server'
- *
- * export async function login(email: string, password: string) {
- *   // ... login logic ...
- *   const token = loginResponse.token
- *   await setServerAuthToken(token)
- *   redirect('/dashboard')
- * }
- * ```
+ * @returns The JWT refresh token or null if not found
  */
-export async function setServerAuthToken(token: string): Promise<void> {
-  const cookieStore = await cookies()
-  cookieStore.set(AUTH_COOKIE_NAME, token, AUTH_COOKIE_OPTIONS)
+export async function getServerRefreshToken(): Promise<string | null> {
+  try {
+    const cookieStore = await cookies()
+    const tokenCookie = cookieStore.get(REFRESH_TOKEN_COOKIE)
+    return tokenCookie?.value || null
+  } catch (error) {
+    console.error('Failed to get refresh token:', error)
+    return null
+  }
 }
 
 /**
- * Clear authentication token from cookies (server-side only)
+ * Set JWT tokens in httpOnly cookies (server-side only)
  *
- * Use this for logout in a Server Action.
- *
- * @example Server Action
- * ```ts
- * 'use server'
- *
- * import { clearServerAuthToken } from '@/lib/api/server'
- *
- * export async function logout() {
- *   await clearServerAuthToken()
- *   redirect('/signin')
- * }
- * ```
+ * @param accessToken - JWT access token
+ * @param refreshToken - JWT refresh token
+ * @param expiresIn - Access token expiration in seconds (default: 900 = 15 min)
  */
-export async function clearServerAuthToken(): Promise<void> {
-  const cookieStore = await cookies()
-  cookieStore.delete(AUTH_COOKIE_NAME)
+export async function setServerAuthTokens(
+  accessToken: string,
+  refreshToken: string,
+  expiresIn: number = 900 // 15 minutes default
+): Promise<void> {
+  try {
+    const cookieStore = await cookies()
+
+    // Set access token (short-lived)
+    cookieStore.set(ACCESS_TOKEN_COOKIE, accessToken, {
+      ...TOKEN_COOKIE_OPTIONS,
+      maxAge: expiresIn,
+    })
+
+    // Set refresh token (long-lived - 7 days)
+    cookieStore.set(REFRESH_TOKEN_COOKIE, refreshToken, {
+      ...TOKEN_COOKIE_OPTIONS,
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    })
+
+    console.log('✅ setServerAuthTokens - Tokens saved to cookies')
+  } catch (error) {
+    console.error('Failed to set auth tokens:', error)
+    throw new Error('Could not save authentication tokens')
+  }
+}
+
+/**
+ * Clear authentication tokens from cookies (server-side only)
+ */
+export async function clearServerAuthTokens(): Promise<void> {
+  try {
+    const cookieStore = await cookies()
+    cookieStore.delete(ACCESS_TOKEN_COOKIE)
+    cookieStore.delete(REFRESH_TOKEN_COOKIE)
+    console.log('✅ clearServerAuthTokens - Tokens cleared')
+  } catch (error) {
+    console.error('Failed to clear auth tokens:', error)
+  }
 }
 
 /**
@@ -130,7 +144,6 @@ export async function clearServerAuthToken(): Promise<void> {
  * ```
  */
 export function createPublicClient() {
-  const { createPublicServerClient } = require('./index')
   return createPublicServerClient()
 }
 
@@ -258,16 +271,14 @@ export async function getCurrentUser() {
     return null
   }
 
-  // TODO: Update this to use your actual current user endpoint
-  // This is a placeholder - adjust based on your API schema
-  const { data, error } = await api.GET('/users/me' as any, {})
+  const { data, error } = await api.GET('/users/me', {})
 
   if (error) {
     console.error('Failed to fetch current user:', error)
     return null
   }
 
-  return data as any
+  return data
 }
 
 /**

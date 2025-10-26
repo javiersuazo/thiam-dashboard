@@ -26,6 +26,7 @@ import {
   getPasswordStrengthLabel,
 } from '../utils/passwordStrength'
 import { OAuthButtonsGroup } from './OAuthButtons'
+import { getErrorCode, mapApiErrorResponse } from '../utils/errorMapping'
 
 import Checkbox from '@/components/shared/form/input/Checkbox'
 import Input from '@/components/shared/form/input/InputField'
@@ -35,6 +36,7 @@ import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from '@/icons'
 
 export default function SignUpForm() {
   const t = useTranslations('auth.signup')
+  const tCommon = useTranslations('common')
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [showPassword, setShowPassword] = useState(false)
@@ -84,20 +86,44 @@ export default function SignUpForm() {
         })
 
         if (!result.success) {
-          setFormError(result.error)
-          toast.error(result.error)
+          // Use structured error data if available, otherwise fall back to message parsing
+          const errorCode = result.errorData
+            ? mapApiErrorResponse(result.errorData, 'signup')
+            : getErrorCode(result.error, 'signup')
+
+          const translatedError = errorCode.startsWith('common.')
+            ? tCommon(errorCode.replace('common.', '') as 'errors.network')
+            : t(errorCode.replace('auth.signup.', '') as 'errors.generic')
+          setFormError(translatedError)
+          toast.error(translatedError)
           return
         }
 
-        // Success - session is saved on server
-        toast.success(t('success'))
-        router.push('/')
+        // Success - check if email needs verification
+        const emailVerified = result.data?.emailVerified ?? false
+
+        if (!emailVerified) {
+          // Redirect to email verification page
+          toast.success(t('success'))
+          router.push(`/verify-email?email=${encodeURIComponent(data.email)}`)
+        } else {
+          // Email already verified - go to dashboard
+          toast.success(t('success'))
+          router.push('/')
+        }
         router.refresh()
       } catch (error) {
         console.error('Sign up error:', error)
-        const message = error instanceof Error ? error.message : t('errors.generic')
-        setFormError(message)
-        toast.error(message)
+        // Handle unexpected errors (network errors, etc.)
+        const errorCode = getErrorCode(
+          error instanceof Error ? error.message : 'Unknown error',
+          'signup'
+        )
+        const translatedError = errorCode.startsWith('common.')
+          ? tCommon(errorCode.replace('common.', '') as 'errors.network')
+          : t(errorCode.replace('auth.signup.', '') as 'errors.generic')
+        setFormError(translatedError)
+        toast.error(translatedError)
       }
     })
   })

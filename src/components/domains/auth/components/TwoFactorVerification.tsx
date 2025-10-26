@@ -18,13 +18,14 @@ import { ChevronLeftIcon } from '@/icons'
 export default function TwoFactorVerification() {
   const router = useRouter()
   const [email, setEmail] = useState<string>('')
+  const [challengeToken, setChallengeToken] = useState<string>('')
 
   useEffect(() => {
     // Get email from session storage (set during login)
     const loginEmail = sessionStorage.getItem('loginEmail')
-    const challengeToken = sessionStorage.getItem('challengeToken')
+    const token = sessionStorage.getItem('challengeToken')
 
-    if (!challengeToken) {
+    if (!token) {
       // No challenge token - redirect to login
       toast.error('Session expired. Please login again.')
       router.push('/signin')
@@ -32,11 +33,12 @@ export default function TwoFactorVerification() {
     }
 
     setEmail(loginEmail || '')
+    setChallengeToken(token)
   }, [router])
 
   const handleVerify = async (code: string) => {
     try {
-      const result = await verify2FALoginAction(code)
+      const result = await verify2FALoginAction(challengeToken, code)
 
       if (!result.success) {
         return {

@@ -14,6 +14,7 @@ import {
   setServerAuthTokens,
   clearServerAuthTokens
 } from '@/lib/api/server'
+import { createSession, saveSession } from '@/lib/auth/session'
 import { toSessionUser } from './utils/authHelpers'
 import { debugToken } from '@/lib/auth/jwt'
 import type { ActionResult } from '@/types/actions'
@@ -228,13 +229,10 @@ export async function loginAction(
  * Completes login flow by returning access token.
  */
 export async function verify2FALoginAction(
+  challengeToken: string,
   code: string
 ): Promise<ActionResult<{ requiresTwoFactor: boolean }>> {
   try {
-    // Get challengeToken from session storage
-    const challengeToken =
-      typeof window !== 'undefined' ? sessionStorage.getItem('challengeToken') : null
-
     if (!challengeToken) {
       return {
         success: false,
@@ -339,11 +337,8 @@ export async function verify2FALoginAction(
     // Save session to httpOnly cookie
     await saveSession(session)
 
-    // Clear challenge token from session storage
-    if (typeof window !== 'undefined') {
-      sessionStorage.removeItem('challengeToken')
-      sessionStorage.removeItem('loginEmail')
-    }
+    // Note: Client component handles clearing sessionStorage (challengeToken, loginEmail)
+    // Server actions cannot access browser APIs like sessionStorage
 
     return {
       success: true,

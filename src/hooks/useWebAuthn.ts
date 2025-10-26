@@ -127,26 +127,30 @@ export function useWebAuthn() {
 
       // Step 1: Begin registration - get challenge from server
       // @ts-expect-error - WebAuthn route not in generated OpenAPI schema
-      const { data: options, error: beginError } = await api.POST(
+      const { data: response, error: beginError } = await api.POST(
         '/auth/webauthn/register/begin'
       )
 
-      if (beginError || !options) {
+      if (beginError || !response) {
         throw new Error(t('registerBeginFailed'))
       }
+
+      // Extract publicKey from response - API returns { publicKey: {...} }
+      // but simplewebauthn expects just the inner object
+      const options = (response as { publicKey: PublicKeyCredentialCreationOptionsJSON }).publicKey
 
       // Step 2: Prompt user for biometric/security key
       let attResp
       try {
         attResp = await startRegistration({
-          optionsJSON: options as PublicKeyCredentialCreationOptionsJSON,
+          optionsJSON: options,
         })
       } catch (err) {
         const error = err as Error & { name?: string }
         if (error.name === 'NotAllowedError') {
           throw new Error(t('registerCancelled'))
         }
-        throw new Error(`${t('registerFailed')}: ${error.message}`)
+        throw new Error(`${t('registerFailed')}${error.message ? ': ' + error.message : ''}`)
       }
 
       // Step 3: Send credential to server for verification
@@ -185,34 +189,39 @@ export function useWebAuthn() {
       }
 
       // Step 1: Begin authentication - get challenge from server (no userId required!)
-      const { data: options, error: beginError } =
+      const { data: response, error: beginError } =
         // @ts-expect-error - WebAuthn route not in generated OpenAPI schema
-        await api.POST('/auth/passkey/login/begin')
+        await api.POST('/passkey/login/begin')
 
-      if (beginError || !options) {
+      if (beginError || !response) {
         throw new Error(t('authBeginFailed'))
       }
+
+      // Extract publicKey from response - API returns { publicKey: {...} }
+      // but simplewebauthn expects just the inner object
+      const options = (response as { publicKey: PublicKeyCredentialRequestOptionsJSON }).publicKey
 
       // Step 2: Prompt user for biometric/security key
       // The authenticator will show all available credentials
       let asseResp
       try {
         asseResp = await startAuthentication({
-          optionsJSON: options as PublicKeyCredentialRequestOptionsJSON,
+          optionsJSON: options,
         })
       } catch (err) {
+        console.error('🔐 Authentication Error:', err)
         const error = err as Error & { name?: string }
         if (error.name === 'NotAllowedError') {
           throw new Error(t('authCancelled'))
         }
-        throw new Error(`${t('authFailed')}: ${error.message}`)
+        throw new Error(`${t('authFailed')}${error.message ? ': ' + error.message : ''}`)
       }
 
       // Step 3: Send authentication response to server
       // Server identifies the user by the credential ID in the response
       const { data: authResult, error: finishError } =
         // @ts-expect-error - WebAuthn route not in generated OpenAPI schema
-        await api.POST('/auth/passkey/login/finish', {
+        await api.POST('/passkey/login/finish', {
           body: {
             response: asseResp,
           },

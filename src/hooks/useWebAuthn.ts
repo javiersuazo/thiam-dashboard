@@ -88,10 +88,14 @@ export function useWebAuthn() {
   const t = useTranslations('auth.passkey.errors')
   const [error, setError] = useState<string | null>(null)
   const [isSupported, setIsSupported] = useState(false)
+  const [hasPlatformAuthenticator, setHasPlatformAuthenticator] = useState(false)
 
   // Check browser support on mount (client-side only to avoid hydration errors)
   useEffect(() => {
     setIsSupported(isWebAuthnSupported())
+
+    // Check for platform authenticator (Touch ID, Face ID, Windows Hello)
+    isPlatformAuthenticatorAvailable().then(setHasPlatformAuthenticator)
   }, [])
 
   // Fetch user's registered passkeys
@@ -117,6 +121,8 @@ export function useWebAuthn() {
 
   // Register a new passkey
   const registerMutation = useMutation({
+    // IMPORTANT: Disable retry for WebAuthn - browser prompts should never retry automatically
+    retry: false,
     mutationFn: async (credentialName: string) => {
       setError(null)
 
@@ -180,7 +186,10 @@ export function useWebAuthn() {
 
   // Authenticate with passkey (discoverable credentials - no userId needed!)
   const authenticateMutation = useMutation({
+    // IMPORTANT: Disable retry for WebAuthn - browser prompts should never retry automatically
+    retry: false,
     mutationFn: async () => {
+      console.log('🔐 useWebAuthn - authenticateMutation started')
       setError(null)
 
       // Check browser support
@@ -188,10 +197,12 @@ export function useWebAuthn() {
         throw new Error(t('authNotSupported'))
       }
 
+      console.log('🔐 useWebAuthn - calling /passkey/login/begin')
       // Step 1: Begin authentication - get challenge from server (no userId required!)
-      const { data: response, error: beginError } =
+      const { data: response, error: beginError} =
         // @ts-expect-error - WebAuthn route not in generated OpenAPI schema
         await api.POST('/passkey/login/begin')
+      console.log('🔐 useWebAuthn - /passkey/login/begin response received')
 
       if (beginError || !response) {
         throw new Error(t('authBeginFailed'))
@@ -205,15 +216,19 @@ export function useWebAuthn() {
       // The authenticator will show all available credentials
       let asseResp
       try {
+        console.log('🔐 useWebAuthn - calling startAuthentication (browser prompt)')
         asseResp = await startAuthentication({
           optionsJSON: options,
         })
+        console.log('🔐 useWebAuthn - startAuthentication completed')
       } catch (err) {
-        console.error('🔐 Authentication Error:', err)
+        console.error('🔐 useWebAuthn - Authentication Error:', err)
         const error = err as Error & { name?: string }
+
         if (error.name === 'NotAllowedError') {
           throw new Error(t('authCancelled'))
         }
+
         throw new Error(`${t('authFailed')}${error.message ? ': ' + error.message : ''}`)
       }
 
@@ -286,5 +301,6 @@ export function useWebAuthn() {
 
     // Browser support checks (from state to avoid hydration errors)
     isSupported,
+    hasPlatformAuthenticator,
   }
 }

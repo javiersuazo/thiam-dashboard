@@ -32,14 +32,18 @@ export default function PasskeySignInButton({ disabled }: PasskeySignInButtonPro
   }
 
   const handlePasskeyClick = async () => {
+    console.log('🔐 PasskeySignInButton - handlePasskeyClick called')
     try {
       // Trigger discoverable credential authentication (no email/username required!)
       // The authenticator will show all available credentials
+      console.log('🔐 PasskeySignInButton - calling authenticateWithPasskey')
       await authenticateWithPasskey()
+      console.log('🔐 PasskeySignInButton - authentication successful')
       toast.success(t('passkeySuccess'))
       router.push('/')
       router.refresh()
     } catch (error) {
+      console.log('🔐 PasskeySignInButton - authentication failed:', error)
       const errorMessage = error instanceof Error ? error.message : t('errors.passkeyFailed')
       toast.error(errorMessage)
     }

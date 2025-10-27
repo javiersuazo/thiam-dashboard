@@ -48,6 +48,8 @@
     "signup": {
       "title": "Create your account",
       "subtitle": "Get started with Thiam",
+      "quickSignUp": "Quick sign up",
+      "orContinueWith": "Or continue with email and password",
       "firstName": "First name",
       "firstNamePlaceholder": "Enter your first name",
       "lastName": "Last name",
@@ -141,6 +143,23 @@
         "special": "One special character"
       }
     },
+    "checkEmail": {
+      "title": "Check your email",
+      "description": "We sent a verification email to:",
+      "nextSteps": "Next steps",
+      "step1": "Open your email inbox",
+      "step2": "Click the verification link we sent you",
+      "step3": "You'll be automatically signed in once verified",
+      "spamNotice": "Can't find the email? Check your spam or junk folder",
+      "didntReceive": "Didn't receive the email?",
+      "resendButton": "Resend verification email",
+      "resendCooldown": "Resend available in {seconds}s",
+      "resendSuccess": "Verification email sent! Please check your inbox.",
+      "resendError": "Failed to send email. Please try again.",
+      "needHelp": "Need help?",
+      "contactSupport": "Contact support",
+      "backToSignIn": "Back to sign in"
+    },
     "verifyEmail": {
       "title": "Verify your email address",
       "description": "We've sent a verification email to:",
@@ -157,6 +176,24 @@
       "continuePrompt": "You can also continue to your dashboard and verify later.",
       "continueToDashboard": "Continue to dashboard",
       "backToSignIn": "Back to sign in"
+    },
+    "emailVerified": {
+      "title": "Email verified!",
+      "subtitle": "Your account is now fully activated",
+      "passkeyTitle": "Sign in faster next time",
+      "passkeyDescription": "Set up a passkey to sign in securely without a password",
+      "passkeyDescriptionBiometric": "Use Face ID, Touch ID, or Windows Hello to sign in instantly",
+      "benefit1": "Sign in faster - no password needed",
+      "benefit2": "More secure than passwords",
+      "benefit3": "Works across all your devices",
+      "setupPasskey": "Set up passkey",
+      "settingUp": "Setting up...",
+      "skipForNow": "Skip for now",
+      "passkeySuccess": "Passkey created successfully!",
+      "passkeyError": "Failed to create passkey. You can set it up later in settings.",
+      "redirecting": "Redirecting to dashboard in {seconds} seconds...",
+      "continueToDashboard": "Continue to dashboard",
+      "noWebAuthnSupport": "Passkeys are not supported in your browser. You can still continue to your dashboard."
     },
     "twoFactor": {
       "setup": {

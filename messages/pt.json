@@ -141,6 +141,23 @@
         "special": "Um caractere especial"
       }
     },
+    "checkEmail": {
+      "title": "Verifique seu e-mail",
+      "description": "Enviamos um e-mail de verificação para:",
+      "nextSteps": "Próximos passos",
+      "step1": "Abra sua caixa de entrada",
+      "step2": "Clique no link de verificação que enviamos",
+      "step3": "Você será conectado automaticamente após a verificação",
+      "spamNotice": "Não encontrou o e-mail? Verifique sua pasta de spam ou lixo eletrônico",
+      "didntReceive": "Não recebeu o e-mail?",
+      "resendButton": "Reenviar e-mail de verificação",
+      "resendCooldown": "Reenviar disponível em {seconds}s",
+      "resendSuccess": "E-mail de verificação enviado! Por favor, verifique sua caixa de entrada.",
+      "resendError": "Falha ao enviar e-mail. Por favor, tente novamente.",
+      "needHelp": "Precisa de ajuda?",
+      "contactSupport": "Contatar suporte",
+      "backToSignIn": "Voltar para login"
+    },
     "verifyEmail": {
       "title": "Verifique seu endereço de e-mail",
       "description": "Enviamos um e-mail de verificação para:",
@@ -157,6 +174,24 @@
       "continuePrompt": "Você também pode continuar para seu painel e verificar mais tarde.",
       "continueToDashboard": "Continuar para o painel",
       "backToSignIn": "Voltar para login"
+    },
+    "emailVerified": {
+      "title": "E-mail verificado!",
+      "subtitle": "Sua conta agora está totalmente ativada",
+      "passkeyTitle": "Faça login mais rápido da próxima vez",
+      "passkeyDescription": "Configure uma passkey para fazer login com segurança sem senha",
+      "passkeyDescriptionBiometric": "Use Face ID, Touch ID ou Windows Hello para fazer login instantaneamente",
+      "benefit1": "Login mais rápido - sem senha necessária",
+      "benefit2": "Mais seguro que senhas",
+      "benefit3": "Funciona em todos os seus dispositivos",
+      "setupPasskey": "Configurar passkey",
+      "settingUp": "Configurando...",
+      "skipForNow": "Pular por enquanto",
+      "passkeySuccess": "Passkey criada com sucesso!",
+      "passkeyError": "Falha ao criar passkey. Você pode configurá-la mais tarde nas configurações.",
+      "redirecting": "Redirecionando para o painel em {seconds} segundos...",
+      "continueToDashboard": "Continuar para o painel",
+      "noWebAuthnSupport": "Passkeys não são suportadas no seu navegador. Você ainda pode continuar para seu painel."
     },
     "twoFactor": {
       "setup": {

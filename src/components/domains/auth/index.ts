@@ -165,6 +165,7 @@ export {
 export { default as PhoneVerificationRequest } from './components/PhoneVerificationRequest'
 export { default as PhoneVerificationCode } from './components/PhoneVerificationCode'
 export { default as PhoneVerificationFlow } from './components/PhoneVerificationFlow'
+export { default as PasskeyEnrollmentPrompt } from './components/PasskeyEnrollmentPrompt'
 
 // Hooks will be exported when created
 // export { useAuthForm } from './hooks/useAuthForm'

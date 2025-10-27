@@ -413,106 +413,23 @@ export async function signupAction(
       }
     }
 
-    // Step 2: Automatically log in the user
-    const loginResponse = await api.POST('/auth/login', {
-      body: {
-        email: data.email,
-        password: data.password,
-      },
-    })
-
-    if (loginResponse.error) {
-      console.error('Auto-login after signup failed:', loginResponse.error)
-      return {
-        success: false,
-        error: 'Account created but login failed. Please try signing in manually.',
-      }
+    // Get user data from registration response
+    const userData = createUserResponse.data as {
+      id?: string
+      email?: string
+      emailVerified?: boolean
     }
 
-    if (!loginResponse.data) {
-      return {
-        success: false,
-        error: 'Account created but login failed. Please try signing in manually.',
-      }
-    }
+    console.log('✅ Signup successful - verification email sent')
 
-    // Step 3: Get token and user profile from login response
-    const loginData = loginResponse.data as {
-      token?: string
-      refreshToken?: string
-      expiresAt?: number | string
-      user?: {
-        id?: string
-        email?: string
-        firstName?: string
-        lastName?: string
-        phone?: string
-        status?: string
-        totpEnabled?: boolean
-        createdAt?: string
-        updatedAt?: string
-      }
-    }
-
-    const { token, refreshToken, expiresAt, user: apiUser } = loginData
-
-    if (!token) {
-      return {
-        success: false,
-        error: 'Account created but login failed. No token received.',
-      }
-    }
-
-    if (!refreshToken) {
-      return {
-        success: false,
-        error: 'Account created but login failed. No refresh token received.',
-      }
-    }
-
-    if (!expiresAt) {
-      return {
-        success: false,
-        error: 'Account created but login failed. No expiration time received.',
-      }
-    }
-
-    if (!apiUser) {
-      return {
-        success: false,
-        error: 'Account created but login failed. No user data received.',
-      }
-    }
-
-    console.log('✅ Signup successful - using user data from API response (no /me call needed)')
-
-    // Map API user to AuthUser
-    const authUser: AuthUser = {
-      id: apiUser.id || 'unknown',
-      email: apiUser.email || data.email,
-      firstName: apiUser.firstName || null,
-      lastName: apiUser.lastName || null,
-      phone: apiUser.phone || null,
-      role: 'customer', // TODO: Get from API when available
-      accountId: apiUser.id || 'unknown', // TODO: Get from API when available
-      has2FAEnabled: apiUser.totpEnabled || false,
-      emailVerified: false, // TODO: Get from API when available
-      phoneVerified: false, // TODO: Get from API when available
-      createdAt: apiUser.createdAt || new Date().toISOString(),
-    }
-
-    const sessionUser = toSessionUser(authUser)
-
-    // Create session with token, refreshToken, and expiresAt
-    const expiresAtTimestamp = typeof expiresAt === 'string' ? parseInt(expiresAt) : expiresAt
-    const session = createSession(sessionUser, token, refreshToken, expiresAtTimestamp)
-
-    // Save session to httpOnly cookie
-    await saveSession(session)
-
+    // Return success with user data - NO AUTO-LOGIN
+    // User will be redirected to check their email
     return {
       success: true,
-      data: { userId: sessionUser.id, emailVerified: authUser.emailVerified },
+      data: {
+        userId: userData.id || 'unknown',
+        emailVerified: userData.emailVerified || false
+      },
     }
   } catch (error) {
     console.error('Signup action error:', error)
@@ -1344,6 +1261,123 @@ export async function resendVerificationAction(
     return {
       success: true,
       data: undefined,
+    }
+  }
+}
+
+/**
+ * Verify Email With Token Action
+ *
+ * Verifies email address using the token from the verification link.
+ * Auto-logs in the user by saving the session tokens returned by the backend.
+ */
+export async function verifyEmailWithTokenAction(
+  token: string
+): Promise<ActionResult<{ userId: string; token: string }>> {
+  try {
+    if (!token) {
+      return {
+        success: false,
+        error: 'Verification token is required',
+      }
+    }
+
+    // Call public API endpoint
+    const api = createPublicClient()
+
+    const response = await api.GET('/auth/email/verify', {
+      params: {
+        query: { token },
+      },
+    })
+
+    if (response.error) {
+      console.error('Email verification error:', response.error)
+
+      const apiError = response.error as Record<string, unknown>
+      const errorMessage = (apiError.message as string) || 'Failed to verify email'
+
+      return {
+        success: false,
+        error: errorMessage,
+      }
+    }
+
+    if (!response.data) {
+      return {
+        success: false,
+        error: 'No data returned from verification',
+      }
+    }
+
+    // Extract session data from response
+    const verificationData = response.data as {
+      token?: string
+      refreshToken?: string
+      expiresAt?: number | string
+      user?: {
+        id?: string
+        email?: string
+        firstName?: string
+        lastName?: string
+        emailVerified?: boolean
+        totpEnabled?: boolean
+      }
+    }
+
+    const { token: accessToken, refreshToken, expiresAt, user: apiUser } = verificationData
+
+    if (!accessToken || !refreshToken || !expiresAt || !apiUser) {
+      return {
+        success: false,
+        error: 'Invalid verification response',
+      }
+    }
+
+    console.log('✅ Email verified successfully - auto-logging in user')
+
+    // Map API user to AuthUser
+    const authUser: AuthUser = {
+      id: apiUser.id || 'unknown',
+      email: apiUser.email || '',
+      firstName: apiUser.firstName || null,
+      lastName: null,
+      phone: null,
+      role: 'customer',
+      accountId: apiUser.id || 'unknown',
+      has2FAEnabled: apiUser.totpEnabled || false,
+      emailVerified: apiUser.emailVerified || true,
+      phoneVerified: false,
+      createdAt: new Date().toISOString(),
+    }
+
+    const sessionUser = toSessionUser(authUser)
+
+    // Create session with token, refreshToken, and expiresAt
+    const expiresAtTimestamp = typeof expiresAt === 'string' ? parseInt(expiresAt) : expiresAt
+    const session = createSession(sessionUser, accessToken, refreshToken, expiresAtTimestamp)
+
+    // Save session to httpOnly cookie
+    await saveSession(session)
+
+    // IMPORTANT: Also set token in sessionStorage for client-side API calls
+    // This is needed because useWebAuthn and other client-side hooks use the api client
+    // which reads the token from sessionStorage (see middleware.ts)
+    // Server Actions run on server, so we can't use setAuthToken directly here
+    // Instead, we'll return the token to the client and let it store it
+
+    return {
+      success: true,
+      data: {
+        userId: sessionUser.id,
+        token: accessToken, // Return token so client can store it
+      },
+    }
+  } catch (error) {
+    console.error('Verify email with token action error:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to verify email',
     }
   }
 }

@@ -141,6 +141,23 @@
         "special": "Un carácter especial"
       }
     },
+    "checkEmail": {
+      "title": "Revisa tu correo electrónico",
+      "description": "Enviamos un correo de verificación a:",
+      "nextSteps": "Próximos pasos",
+      "step1": "Abre tu bandeja de entrada",
+      "step2": "Haz clic en el enlace de verificación que te enviamos",
+      "step3": "Serás automáticamente conectado una vez verificado",
+      "spamNotice": "¿No encuentras el correo? Revisa tu carpeta de spam o correo no deseado",
+      "didntReceive": "¿No recibiste el correo?",
+      "resendButton": "Reenviar correo de verificación",
+      "resendCooldown": "Reenviar disponible en {seconds}s",
+      "resendSuccess": "¡Correo de verificación enviado! Por favor revisa tu bandeja de entrada.",
+      "resendError": "Error al enviar el correo. Por favor intenta de nuevo.",
+      "needHelp": "¿Necesitas ayuda?",
+      "contactSupport": "Contactar soporte",
+      "backToSignIn": "Volver a iniciar sesión"
+    },
     "verifyEmail": {
       "title": "Verifica tu dirección de correo electrónico",
       "description": "Hemos enviado un correo de verificación a:",
@@ -157,6 +174,24 @@
       "continuePrompt": "También puedes continuar a tu panel y verificar más tarde.",
       "continueToDashboard": "Continuar al panel",
       "backToSignIn": "Volver a iniciar sesión"
+    },
+    "emailVerified": {
+      "title": "¡Correo verificado!",
+      "subtitle": "Tu cuenta ahora está completamente activada",
+      "passkeyTitle": "Inicia sesión más rápido la próxima vez",
+      "passkeyDescription": "Configura una passkey para iniciar sesión de forma segura sin contraseña",
+      "passkeyDescriptionBiometric": "Usa Face ID, Touch ID o Windows Hello para iniciar sesión al instante",
+      "benefit1": "Inicia sesión más rápido - sin contraseña",
+      "benefit2": "Más seguro que las contraseñas",
+      "benefit3": "Funciona en todos tus dispositivos",
+      "setupPasskey": "Configurar passkey",
+      "settingUp": "Configurando...",
+      "skipForNow": "Omitir por ahora",
+      "passkeySuccess": "¡Passkey creada exitosamente!",
+      "passkeyError": "Error al crear passkey. Puedes configurarla más tarde en ajustes.",
+      "redirecting": "Redirigiendo al panel en {seconds} segundos...",
+      "continueToDashboard": "Continuar al panel",
+      "noWebAuthnSupport": "Las passkeys no son compatibles con tu navegador. Puedes continuar a tu panel."
     },
     "twoFactor": {
       "setup": {

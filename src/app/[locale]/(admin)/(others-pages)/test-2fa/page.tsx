@@ -6,20 +6,12 @@ import Button from '@/components/shared/ui/button/Button'
 import { toast } from 'sonner'
 import Image from 'next/image'
 
-interface TOTPSetupResponse {
-  secret: string
-  qrCode: string
-  issuer: string
-  accountId: string
-}
-
-interface TOTPEnableResponse {
-  message: string
-  backupCodes: string[]
-}
-
 export default function Test2FAPage() {
-  const [setupData, setSetupData] = useState<TOTPSetupResponse | null>(null)
+  const [setupData, setSetupData] = useState<{
+    secret: string
+    qrCode: string
+    issuer: string
+  } | null>(null)
   const [code, setCode] = useState('')
   const [backupCodes, setBackupCodes] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -30,7 +22,7 @@ export default function Test2FAPage() {
       const result = await setup2FAAction()
 
       if (!result.success || !result.data) {
-        toast.error(result.error || 'Failed to setup 2FA')
+        toast.error('error' in result ? result.error : 'Failed to setup 2FA')
         return
       }
 
@@ -55,7 +47,7 @@ export default function Test2FAPage() {
       const result = await enable2FAAction({ code })
 
       if (!result.success || !result.data) {
-        toast.error(result.error || 'Invalid code or 2FA enable failed')
+        toast.error('error' in result ? result.error : 'Invalid code or 2FA enable failed')
         return
       }
 
@@ -83,10 +75,10 @@ export default function Test2FAPage() {
           </h4>
           <ol className="list-inside list-decimal space-y-1 text-sm text-blue-800 dark:text-blue-200">
             <li>Sign in with <code className="rounded bg-blue-100 px-1 dark:bg-blue-800">admin@test.thiam.com</code></li>
-            <li>Click "Setup 2FA" to generate a QR code</li>
+            <li>Click &quot;Setup 2FA&quot; to generate a QR code</li>
             <li>Scan the QR code with Google Authenticator or Authy</li>
             <li>Enter the 6-digit code from your authenticator app</li>
-            <li>Click "Enable 2FA" and save your backup codes</li>
+            <li>Click &quot;Enable 2FA&quot; and save your backup codes</li>
           </ol>
         </div>
 

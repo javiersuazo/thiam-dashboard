@@ -3,26 +3,85 @@
 /**
  * Email Verification Page Component
  *
- * Shows after successful signup to inform users to verify their email.
- * Includes resend verification email functionality.
+ * Two modes:
+ * 1. If token present: Verifies email and auto-logs in user
+ * 2. If no token: Shows waiting message with resend functionality
  */
 
-import React, { useState, useTransition } from 'react'
+import React, { useState, useTransition, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
-import { Link } from '@/i18n/routing'
+import { Link, useRouter } from '@/i18n/routing'
 
-import { resendVerificationAction } from '../actions'
+import { resendVerificationAction, verifyEmailWithTokenAction } from '../actions'
+import { setAuthToken } from '@/lib/api'
 import Button from '@/components/shared/ui/button/Button'
 import { ChevronLeftIcon } from '@/icons'
 
 export default function VerifyEmailPage() {
   const t = useTranslations('auth.verifyEmail')
   const searchParams = useSearchParams()
+  const router = useRouter()
   const email = searchParams?.get('email') || ''
+  const token = searchParams?.get('token') || ''
   const [isPending, startTransition] = useTransition()
   const [resendSuccess, setResendSuccess] = useState(false)
+  const [isVerifying, setIsVerifying] = useState(false)
+
+  // If token is present, verify email immediately
+  useEffect(() => {
+    if (token && !isVerifying) {
+      setIsVerifying(true)
+
+      startTransition(async () => {
+        const result = await verifyEmailWithTokenAction(token)
+
+        if (result.success && result.data?.token) {
+          // Store token in sessionStorage for client-side API calls
+          // This is needed for useWebAuthn and other client-side hooks
+          setAuthToken(result.data.token)
+
+          toast.success('Email verified successfully!')
+          // Redirect to email-verified page with passkey prompt
+          router.push('/email-verified')
+        } else {
+          const errorMessage = 'error' in result ? result.error : 'Failed to verify email'
+          toast.error(errorMessage || 'Failed to verify email')
+          setIsVerifying(false)
+        }
+      })
+    }
+  }, [token, router, isVerifying])
+
+  // Show loading state while verifying
+  if (token && isVerifying) {
+    return (
+      <div className="flex flex-col items-center justify-center flex-1 w-full">
+        <div className="flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-brand-100 dark:bg-brand-900/20 animate-pulse">
+          <svg
+            className="w-8 h-8 text-brand-600 dark:text-brand-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        </div>
+        <h1 className="mb-3 text-xl font-semibold text-gray-800 dark:text-white/90">
+          Verifying your email...
+        </h1>
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Please wait while we verify your email address
+        </p>
+      </div>
+    )
+  }
 
   const handleResendEmail = () => {
     if (!email) {

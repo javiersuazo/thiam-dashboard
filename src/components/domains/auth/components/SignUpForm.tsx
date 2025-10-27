@@ -25,7 +25,7 @@ import {
   getPasswordStrengthColor,
   getPasswordStrengthLabel,
 } from '../utils/passwordStrength'
-import { OAuthButtonsGroup } from './OAuthButtons'
+import { GoogleLoginButton } from './OAuthButtons'
 import { getErrorCode, mapApiErrorResponse } from '../utils/errorMapping'
 
 import Checkbox from '@/components/shared/form/input/Checkbox'
@@ -99,18 +99,10 @@ export default function SignUpForm() {
           return
         }
 
-        // Success - check if email needs verification
-        const emailVerified = result.data?.emailVerified ?? false
-
-        if (!emailVerified) {
-          // Redirect to email verification page
-          toast.success(t('success'))
-          router.push(`/verify-email?email=${encodeURIComponent(data.email)}`)
-        } else {
-          // Email already verified - go to dashboard
-          toast.success(t('success'))
-          router.push('/')
-        }
+        // Success - redirect to check email page
+        // New users always need to verify their email
+        toast.success(t('success'))
+        router.push(`/check-email?email=${encodeURIComponent(data.email)}`)
         router.refresh()
       } catch (error) {
         console.error('Sign up error:', error)
@@ -152,8 +144,27 @@ export default function SignUpForm() {
           </div>
 
           <div>
-            {/* OAuth Sign Up Buttons */}
-            <OAuthButtonsGroup providers={['google']} disabled={isPending} />
+            {/* Quick Sign Up Options */}
+            <div className="mb-6 space-y-3">
+              <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                {t('quickSignUp')}
+              </p>
+
+              {/* Google OAuth Button - Full Width */}
+              <GoogleLoginButton disabled={isPending} />
+            </div>
+
+            {/* Divider */}
+            <div className="relative mb-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 text-gray-500 bg-white dark:bg-gray-900 dark:text-gray-400">
+                  {t('orContinueWith')}
+                </span>
+              </div>
+            </div>
 
             {/* Form Error Display */}
             {formError && (

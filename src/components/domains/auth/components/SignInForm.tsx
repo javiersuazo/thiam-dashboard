@@ -52,6 +52,15 @@ export default function SignInForm() {
     },
   })
 
+  // NOTE: Conditional UI (passkey autofill) has been DISABLED to prevent double popup issues
+  // When conditional UI is active and user clicks the passkey button, both prompts appear
+  // The WebAuthn browser ceremony cannot be aborted once started
+  // For better UX, we only trigger passkey auth when user explicitly clicks the button
+  //
+  // If you want to re-enable conditional UI in the future:
+  // 1. The passkey button must be hidden when conditional UI is active
+  // 2. OR use a different flow where conditional UI is the ONLY way to authenticate with passkeys
+
   // Watch rememberMe checkbox
   const rememberMe = watch('rememberMe') ?? false
 
@@ -93,6 +102,10 @@ export default function SignInForm() {
 
         // Success - session is saved on server
         toast.success(t('success'))
+
+        // Mark that user just logged in (for passkey enrollment prompt)
+        sessionStorage.setItem('just_logged_in', 'true')
+
         router.push('/')
         router.refresh()
       } catch (error) {
@@ -171,7 +184,7 @@ export default function SignInForm() {
 
             <form onSubmit={onSubmit}>
               <div className="space-y-6">
-                {/* Email Field */}
+                {/* Email Field with Passkey Autofill */}
                 <div>
                   <Label>
                     {t('email')} <span className="text-error-500">*</span>
@@ -182,6 +195,7 @@ export default function SignInForm() {
                     placeholder={t('emailPlaceholder')}
                     disabled={isPending}
                     className={errors.email ? 'border-error-500' : ''}
+                    autoComplete="username webauthn"
                   />
                   {errors.email && (
                     <p className="mt-1 text-xs text-error-500">{errors.email.message}</p>

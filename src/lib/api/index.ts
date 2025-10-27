@@ -54,7 +54,7 @@ if (process.env.NODE_ENV === 'development') {
  * Main API client for client-side usage
  *
  * Automatically includes:
- * - Authentication (from sessionStorage)
+ * - Authentication (from httpOnly cookies - sent automatically by browser)
  * - Error handling (401 redirect, etc.)
  * - Request logging (dev mode)
  * - Request IDs
@@ -63,6 +63,7 @@ if (process.env.NODE_ENV === 'development') {
  */
 const client = createClient<paths>({
   baseUrl: `${API_BASE_URL}/v1`,
+  credentials: 'include', // CRITICAL: Send cookies with cross-origin requests
 })
 
 // Add middleware in order
@@ -81,62 +82,24 @@ client.use(createRetryMiddleware(3)) // Retry up to 3 times
  * - React Query hooks
  * - Event handlers
  * - Client-side utilities
+ *
+ * SECURITY NOTE:
+ * Authentication is handled via httpOnly cookies which are:
+ * - Automatically sent with every request by the browser
+ * - NOT accessible to JavaScript (XSS protection)
+ * - Protected with SameSite=lax (CSRF protection)
  */
 export const api = client
 
 /**
- * Set authentication token
+ * @deprecated Use server-side logout action instead
+ * @see logoutAction in @/components/domains/auth/actions
  *
- * Stores the token for future API requests.
- * Token is stored in sessionStorage (client-side only).
- *
- * @example
- * ```ts
- * import { setAuthToken } from '@/lib/api'
- *
- * // After successful login
- * setAuthToken(loginResponse.token)
- * ```
- */
-export function setAuthToken(token: string | null): void {
-  if (typeof window === 'undefined') {
-    console.warn('setAuthToken called on server-side - this is a no-op')
-    return
-  }
-
-  if (token) {
-    sessionStorage.setItem('auth_token', token)
-  } else {
-    sessionStorage.removeItem('auth_token')
-  }
-}
-
-/**
- * Get current authentication token
- *
- * @returns The current auth token or null
- */
-export function getAuthToken(): string | null {
-  if (typeof window === 'undefined') return null
-  return sessionStorage.getItem('auth_token')
-}
-
-/**
- * Clear authentication token and logout
- *
- * Removes the token and redirects to login page.
- *
- * @example
- * ```ts
- * import { logout } from '@/lib/api'
- *
- * function handleLogout() {
- *   logout()
- * }
- * ```
+ * This function is deprecated because auth tokens are now stored in httpOnly cookies
+ * which can only be cleared server-side. Use the logoutAction server action instead.
  */
 export function logout(): void {
-  setAuthToken(null)
+  console.warn('logout() is deprecated. Use logoutAction() server action instead.')
 
   if (typeof window !== 'undefined') {
     // Extract locale from current pathname (e.g., /en/dashboard -> en)

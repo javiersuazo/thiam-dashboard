@@ -10,21 +10,40 @@
  * - Handles success/error states
  */
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { useRouter } from '@/i18n/routing'
-import { useWebAuthn } from '@/hooks/useWebAuthn'
+import { startAuthentication } from '@simplewebauthn/browser'
+import type { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/browser'
+import { passkeyLoginBeginAction, passkeyLoginFinishAction } from '@/components/domains/auth/actions'
 import Button from '@/components/shared/ui/button/Button'
 
 interface PasskeySignInButtonProps {
   disabled?: boolean
 }
 
+// Check if WebAuthn is supported in the current browser
+function isWebAuthnSupported(): boolean {
+  if (typeof window === 'undefined') {
+    return false
+  }
+  return (
+    window.PublicKeyCredential !== undefined &&
+    typeof window.PublicKeyCredential === 'function'
+  )
+}
+
 export default function PasskeySignInButton({ disabled }: PasskeySignInButtonProps) {
   const t = useTranslations('auth.signin')
   const router = useRouter()
-  const { authenticateWithPasskey, isAuthenticating, isSupported } = useWebAuthn()
+  const [isAuthenticating, setIsAuthenticating] = useState(false)
+  const [isSupported, setIsSupported] = useState(false)
+
+  // Check browser support on mount (client-side only to avoid hydration errors)
+  useEffect(() => {
+    setIsSupported(isWebAuthnSupported())
+  }, [])
 
   // Don't render button if browser doesn't support WebAuthn
   if (!isSupported) {
@@ -33,11 +52,32 @@ export default function PasskeySignInButton({ disabled }: PasskeySignInButtonPro
 
   const handlePasskeyClick = async () => {
     console.log('🔐 PasskeySignInButton - handlePasskeyClick called')
+    setIsAuthenticating(true)
+
     try {
-      // Trigger discoverable credential authentication (no email/username required!)
-      // The authenticator will show all available credentials
-      console.log('🔐 PasskeySignInButton - calling authenticateWithPasskey')
-      await authenticateWithPasskey()
+      // Step 1: Get challenge from server (via Server Action)
+      console.log('🔐 PasskeySignInButton - calling passkeyLoginBeginAction')
+      const beginResult = await passkeyLoginBeginAction()
+
+      if (!beginResult.success || !beginResult.data) {
+        throw new Error((beginResult as { error?: string }).error || 'Failed to initiate authentication')
+      }
+
+      const options = beginResult.data.publicKey as PublicKeyCredentialRequestOptionsJSON
+
+      // Step 2: Prompt user for biometric/security key
+      console.log('🔐 PasskeySignInButton - calling startAuthentication (browser prompt)')
+      const authResponse = await startAuthentication({ optionsJSON: options })
+      console.log('🔐 PasskeySignInButton - startAuthentication completed')
+
+      // Step 3: Send authentication response to server (via Server Action)
+      console.log('🔐 PasskeySignInButton - calling passkeyLoginFinishAction')
+      const finishResult = await passkeyLoginFinishAction(authResponse)
+
+      if (!finishResult.success) {
+        throw new Error((finishResult as { error?: string }).error || 'Authentication failed')
+      }
+
       console.log('🔐 PasskeySignInButton - authentication successful')
       toast.success(t('passkeySuccess'))
       router.push('/')
@@ -46,6 +86,8 @@ export default function PasskeySignInButton({ disabled }: PasskeySignInButtonPro
       console.log('🔐 PasskeySignInButton - authentication failed:', error)
       const errorMessage = error instanceof Error ? error.message : t('errors.passkeyFailed')
       toast.error(errorMessage)
+    } finally {
+      setIsAuthenticating(false)
     }
   }
 

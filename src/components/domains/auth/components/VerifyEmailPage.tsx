@@ -15,7 +15,6 @@ import { useTranslations } from 'next-intl'
 import { Link, useRouter } from '@/i18n/routing'
 
 import { resendVerificationAction, verifyEmailWithTokenAction } from '../actions'
-import { setAuthToken } from '@/lib/api'
 import Button from '@/components/shared/ui/button/Button'
 import { ChevronLeftIcon } from '@/icons'
 
@@ -37,10 +36,10 @@ export default function VerifyEmailPage() {
       startTransition(async () => {
         const result = await verifyEmailWithTokenAction(token)
 
-        if (result.success && result.data?.token) {
-          // Store token in sessionStorage for client-side API calls
-          // This is needed for useWebAuthn and other client-side hooks
-          setAuthToken(result.data.token)
+        if (result.success) {
+          // ✅ SECURITY: Tokens are stored in httpOnly cookies by the server action
+          // No client-side token storage needed (XSS protection)
+          // The server automatically sets the cookies in the response
 
           toast.success('Email verified successfully!')
           // Redirect to email-verified page with passkey prompt

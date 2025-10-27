@@ -11,17 +11,13 @@ import { redirect } from 'next/navigation'
 import {
   createServerClient,
   createPublicClient,
-  setServerAuthTokens,
   clearServerAuthTokens
 } from '@/lib/api/server'
-import { createSession, saveSession } from '@/lib/auth/session'
-import { toSessionUser } from './utils/authHelpers'
 import { debugToken } from '@/lib/auth/jwt'
 import type { ActionResult } from '@/types/actions'
 import type {
   LoginCredentials,
   SignUpData,
-  AuthUser,
   TwoFactorSetupResponse,
   TwoFactorEnableResponse,
   TwoFactorDisableResponse,
@@ -186,27 +182,20 @@ export async function loginAction(
       }
     }
 
-    console.log('✅ Login successful - storing JWT tokens in httpOnly cookies')
+    console.log('✅ Login successful - storing tokens in Next.js httpOnly cookies')
 
     // Debug: Log token in development
     if (process.env.NODE_ENV === 'development') {
       debugToken(accessToken)
     }
 
-    // Calculate token expiration in seconds
-    // expiresAt is a Unix timestamp (API returns seconds, not milliseconds)
-    const expiresAtTimestamp = typeof expiresAt === 'string' ? parseInt(expiresAt) : expiresAt
-    const nowInSeconds = Math.floor(Date.now() / 1000)
-    const expiresInSeconds = expiresAtTimestamp - nowInSeconds
-
-    console.log('🔐 Token expiration:', {
-      expiresAtTimestamp,
-      nowInSeconds,
-      expiresInSeconds,
-      expiresInAbout: `${Math.floor(expiresInSeconds / 60)} minutes`,
-    })
-
-    // Store JWT tokens in httpOnly cookies
+    // ✅ SECURITY: Store tokens in Next.js httpOnly cookies
+    // This works for both:
+    // 1. Next.js SSR/Server Actions (access via cookies() in server components)
+    // 2. Next.js client-side API calls (cookies sent automatically to Next.js API routes)
+    // 3. Server Actions can add Authorization header when calling Go API
+    const expiresInSeconds = Math.floor((typeof expiresAt === 'string' ? parseInt(expiresAt) : expiresAt) / 1000) - Math.floor(Date.now() / 1000)
+    const { setServerAuthTokens } = await import('@/lib/api/server')
     await setServerAuthTokens(accessToken, refreshToken, expiresInSeconds)
 
     return {
@@ -311,31 +300,12 @@ export async function verify2FALoginAction(
       }
     }
 
-    console.log('✅ 2FA verified successfully - using user data from API response')
+    console.log('✅ 2FA verified successfully - storing tokens in Next.js httpOnly cookies')
 
-    // Map API user to AuthUser (user object is already in the response!)
-    const authUser: AuthUser = {
-      id: (apiUser.id as string) || 'unknown',
-      email: (apiUser.email as string) || '',
-      firstName: (apiUser.firstName as string) || null,
-      lastName: (apiUser.lastName as string) || null,
-      phone: (apiUser.phone as string) || null,
-      role: 'customer', // TODO: Get from API when available
-      accountId: (apiUser.id as string) || 'unknown', // TODO: Get from API when available
-      has2FAEnabled: (apiUser.totpEnabled as boolean) || false,
-      emailVerified: false, // TODO: Get from API when available
-      phoneVerified: false, // TODO: Get from API when available
-      createdAt: (apiUser.createdAt as string) || new Date().toISOString(),
-    }
-
-    const sessionUser = toSessionUser(authUser)
-
-    // Create session with token, refreshToken, and expiresAt
-    const expiresAtTimestamp = typeof expiresAt === 'string' ? parseInt(expiresAt) : expiresAt
-    const session = createSession(sessionUser, accessToken, refreshToken, expiresAtTimestamp)
-
-    // Save session to httpOnly cookie
-    await saveSession(session)
+    // Store tokens in Next.js httpOnly cookies (same as regular login)
+    const expiresInSeconds = Math.floor((typeof expiresAt === 'string' ? parseInt(expiresAt) : expiresAt) / 1000) - Math.floor(Date.now() / 1000)
+    const { setServerAuthTokens } = await import('@/lib/api/server')
+    await setServerAuthTokens(accessToken, refreshToken, expiresInSeconds)
 
     // Note: Client component handles clearing sessionStorage (challengeToken, loginEmail)
     // Server actions cannot access browser APIs like sessionStorage
@@ -1099,35 +1069,16 @@ export async function resetPasswordAction(
       }
     }
 
-    console.log('✅ Password reset successful - using user data from API response (no /me call needed)')
+    console.log('✅ Password reset successful - storing tokens in Next.js httpOnly cookies')
 
-    // Map API user to AuthUser (user object is already in the response!)
-    const authUser: AuthUser = {
-      id: (apiUser.id as string) || 'unknown',
-      email: (apiUser.email as string) || '',
-      firstName: (apiUser.firstName as string) || null,
-      lastName: (apiUser.lastName as string) || null,
-      phone: (apiUser.phone as string) || null,
-      role: 'customer',
-      accountId: (apiUser.id as string) || 'unknown',
-      has2FAEnabled: (apiUser.totpEnabled as boolean) || false,
-      emailVerified: false,
-      phoneVerified: false,
-      createdAt: (apiUser.createdAt as string) || new Date().toISOString(),
-    }
-
-    const sessionUser = toSessionUser(authUser)
-
-    // Create session with token, refreshToken, and expiresAt
-    const expiresAtTimestamp = typeof expiresAt === 'string' ? parseInt(expiresAt) : expiresAt
-    const session = createSession(sessionUser, accessToken, refreshToken, expiresAtTimestamp)
-
-    // Save session to httpOnly cookie
-    await saveSession(session)
+    // Store tokens in Next.js httpOnly cookies (same as regular login)
+    const expiresInSeconds = Math.floor((typeof expiresAt === 'string' ? parseInt(expiresAt) : expiresAt) / 1000) - Math.floor(Date.now() / 1000)
+    const { setServerAuthTokens } = await import('@/lib/api/server')
+    await setServerAuthTokens(accessToken, refreshToken, expiresInSeconds)
 
     return {
       success: true,
-      data: { userId: sessionUser.id },
+      data: { userId: (apiUser.id as string) || 'unknown' },
     }
   } catch (error) {
     console.error('Reset password action error:', error)
@@ -1334,43 +1285,41 @@ export async function verifyEmailWithTokenAction(
       }
     }
 
-    console.log('✅ Email verified successfully - auto-logging in user')
+    console.log('✅ Email verified successfully - storing tokens in Next.js httpOnly cookies')
 
-    // Map API user to AuthUser
-    const authUser: AuthUser = {
-      id: apiUser.id || 'unknown',
-      email: apiUser.email || '',
-      firstName: apiUser.firstName || null,
-      lastName: null,
-      phone: null,
-      role: 'customer',
-      accountId: apiUser.id || 'unknown',
-      has2FAEnabled: apiUser.totpEnabled || false,
-      emailVerified: apiUser.emailVerified || true,
-      phoneVerified: false,
-      createdAt: new Date().toISOString(),
+    // Store tokens in Next.js httpOnly cookies (same as regular login)
+    const expiresAtTimestamp = typeof expiresAt === 'string' ? parseInt(expiresAt) : expiresAt
+
+    // Debug: Check if expiresAt is in seconds or milliseconds
+    console.log('🔐 Token expiration debug:', {
+      expiresAt,
+      expiresAtTimestamp,
+      now: Date.now(),
+      nowInSeconds: Math.floor(Date.now() / 1000),
+      isInMilliseconds: expiresAtTimestamp > Date.now(),
+    })
+
+    // If expiresAt is in seconds (Unix timestamp), convert to TTL in seconds
+    // If expiresAt is in milliseconds, convert to seconds then calculate TTL
+    let expiresInSeconds: number
+    if (expiresAtTimestamp > Date.now()) {
+      // expiresAt is in milliseconds (future timestamp > current ms)
+      expiresInSeconds = Math.floor((expiresAtTimestamp - Date.now()) / 1000)
+    } else {
+      // expiresAt is in seconds (Unix timestamp)
+      expiresInSeconds = expiresAtTimestamp - Math.floor(Date.now() / 1000)
     }
 
-    const sessionUser = toSessionUser(authUser)
+    console.log('🔐 Token TTL:', expiresInSeconds, 'seconds')
 
-    // Create session with token, refreshToken, and expiresAt
-    const expiresAtTimestamp = typeof expiresAt === 'string' ? parseInt(expiresAt) : expiresAt
-    const session = createSession(sessionUser, accessToken, refreshToken, expiresAtTimestamp)
-
-    // Save session to httpOnly cookie
-    await saveSession(session)
-
-    // IMPORTANT: Also set token in sessionStorage for client-side API calls
-    // This is needed because useWebAuthn and other client-side hooks use the api client
-    // which reads the token from sessionStorage (see middleware.ts)
-    // Server Actions run on server, so we can't use setAuthToken directly here
-    // Instead, we'll return the token to the client and let it store it
+    const { setServerAuthTokens } = await import('@/lib/api/server')
+    await setServerAuthTokens(accessToken, refreshToken, expiresInSeconds)
 
     return {
       success: true,
       data: {
-        userId: sessionUser.id,
-        token: accessToken, // Return token so client can store it
+        userId: apiUser.id || 'unknown',
+        token: accessToken, // Return token for logging (optional)
       },
     }
   } catch (error) {
@@ -1470,6 +1419,242 @@ export async function requestPasswordlessPhoneAction(data: {
 }
 
 /**
+ * Passkey Login Begin Action
+ *
+ * Initiates passkey authentication flow.
+ * Returns challenge options for the client to present to the authenticator.
+ */
+export async function passkeyLoginBeginAction(): Promise<ActionResult<{ publicKey: unknown }>> {
+  try {
+    const api = createPublicClient()
+
+    console.log('🔐 Passkey Login Begin - Calling /passkey/login/begin')
+
+    // Passkey route not in generated OpenAPI schema - use any for now
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const response = (await (api as any).POST('/passkey/login/begin')) as {
+      error?: Record<string, unknown>
+      data?: { publicKey: unknown }
+    }
+
+    if (response.error) {
+      console.error('Passkey login begin error:', response.error)
+      return {
+        success: false,
+        error: 'Failed to initiate passkey authentication',
+      }
+    }
+
+    if (!response.data) {
+      return {
+        success: false,
+        error: 'No challenge data received',
+      }
+    }
+
+    const challengeData = response.data
+
+    return {
+      success: true,
+      data: challengeData,
+    }
+  } catch (error) {
+    console.error('Passkey login begin action error:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unexpected error occurred',
+    }
+  }
+}
+
+/**
+ * Passkey Login Finish Action
+ *
+ * Completes passkey authentication with the authenticator response.
+ * Creates session and returns tokens.
+ */
+export async function passkeyLoginFinishAction(
+  authResponse: unknown
+): Promise<ActionResult<{ requiresTwoFactor: boolean }>> {
+  try {
+    const api = createPublicClient()
+
+    console.log('🔐 Passkey Login Finish - Calling /passkey/login/finish')
+
+    // Passkey route not in generated OpenAPI schema - use any for now
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const response = (await (api as any).POST('/passkey/login/finish', {
+      body: {
+        response: authResponse,
+      },
+    })) as {
+      error?: Record<string, unknown>
+      data?: {
+        token?: string
+        refreshToken?: string
+        expiresAt?: string | number
+        user?: Record<string, unknown>
+      }
+    }
+
+    if (response.error) {
+      console.error('Passkey login finish error:', response.error)
+      return {
+        success: false,
+        error: 'Authentication failed',
+      }
+    }
+
+    if (!response.data) {
+      return {
+        success: false,
+        error: 'No authentication data received',
+      }
+    }
+
+    const authResult = response.data
+
+    const { token: accessToken, refreshToken, expiresAt, user: apiUser } = authResult
+
+    if (!accessToken || !refreshToken || !expiresAt || !apiUser) {
+      return {
+        success: false,
+        error: 'Invalid authentication response',
+      }
+    }
+
+    console.log('✅ Passkey authentication successful - storing tokens in Next.js httpOnly cookies')
+
+    // Store tokens in Next.js httpOnly cookies (same as regular login)
+    const expiresInSeconds = Math.floor((typeof expiresAt === 'string' ? parseInt(expiresAt) : expiresAt) / 1000) - Math.floor(Date.now() / 1000)
+    const { setServerAuthTokens } = await import('@/lib/api/server')
+    await setServerAuthTokens(accessToken, refreshToken, expiresInSeconds)
+
+    return {
+      success: true,
+      data: { requiresTwoFactor: false },
+    }
+  } catch (error) {
+    console.error('Passkey login finish action error:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unexpected error occurred',
+    }
+  }
+}
+
+/**
+ * WebAuthn Registration Begin Action
+ *
+ * Initiates passkey registration flow.
+ * Returns challenge options for the client to present to the authenticator.
+ */
+export async function webAuthnRegisterBeginAction(): Promise<ActionResult<{ publicKey: unknown }>> {
+  try {
+    const api = await createServerClient()
+    if (!api) {
+      return {
+        success: false,
+        error: 'Not authenticated',
+      }
+    }
+
+    console.log('🔐 WebAuthn Register Begin - Calling /auth/webauthn/register/begin')
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const response = (await (api as any).POST('/auth/webauthn/register/begin')) as {
+      error?: Record<string, unknown>
+      data?: { publicKey: unknown }
+    }
+
+    if (response.error) {
+      console.error('WebAuthn register begin error:', response.error)
+      return {
+        success: false,
+        error: 'Failed to initiate passkey registration',
+      }
+    }
+
+    if (!response.data) {
+      return {
+        success: false,
+        error: 'No challenge data received',
+      }
+    }
+
+    return {
+      success: true,
+      data: response.data,
+    }
+  } catch (error) {
+    console.error('WebAuthn register begin action error:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unexpected error occurred',
+    }
+  }
+}
+
+/**
+ * WebAuthn Registration Finish Action
+ *
+ * Completes passkey registration with the authenticator response.
+ */
+export async function webAuthnRegisterFinishAction(
+  credentialName: string,
+  registrationResponse: unknown
+): Promise<ActionResult<{ credential: unknown }>> {
+  try {
+    const api = await createServerClient()
+    if (!api) {
+      return {
+        success: false,
+        error: 'Not authenticated',
+      }
+    }
+
+    console.log('🔐 WebAuthn Register Finish - Calling /auth/webauthn/register/finish')
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const response = (await (api as any).POST('/auth/webauthn/register/finish', {
+      body: {
+        name: credentialName,
+        response: registrationResponse,
+      },
+    })) as {
+      error?: Record<string, unknown>
+      data?: unknown
+    }
+
+    if (response.error) {
+      console.error('WebAuthn register finish error:', response.error)
+      return {
+        success: false,
+        error: 'Failed to complete passkey registration',
+      }
+    }
+
+    if (!response.data) {
+      return {
+        success: false,
+        error: 'No credential data received',
+      }
+    }
+
+    return {
+      success: true,
+      data: { credential: response.data },
+    }
+  } catch (error) {
+    console.error('WebAuthn register finish action error:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unexpected error occurred',
+    }
+  }
+}
+
+/**
  * Verify Passwordless Login Action
  *
  * Verifies the passwordless login token (from email or SMS) and logs the user in.
@@ -1553,16 +1738,12 @@ export async function verifyPasswordlessLoginAction(data: {
       }
     }
 
-    const sessionUser = toSessionUser(responseData.user as AuthUser)
+    console.log('✅ Passwordless login successful - storing tokens in Next.js httpOnly cookies')
 
-    const session = createSession(
-      sessionUser,
-      responseData.token,
-      responseData.refreshToken,
-      responseData.expiresAt || 0
-    )
-
-    await saveSession(session)
+    // Store tokens in Next.js httpOnly cookies (same as regular login)
+    const expiresInSeconds = Math.floor((responseData.expiresAt || Date.now() / 1000 + 900) / 1000) - Math.floor(Date.now() / 1000)
+    const { setServerAuthTokens } = await import('@/lib/api/server')
+    await setServerAuthTokens(responseData.token, responseData.refreshToken, expiresInSeconds)
 
     return {
       success: true,

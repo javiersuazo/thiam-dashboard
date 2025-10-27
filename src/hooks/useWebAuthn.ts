@@ -45,7 +45,7 @@ import type {
   PublicKeyCredentialCreationOptionsJSON,
   PublicKeyCredentialRequestOptionsJSON,
 } from '@simplewebauthn/browser'
-import { api, setAuthToken } from '@/lib/api'
+import { api } from '@/lib/api'
 
 // Types for WebAuthn credential
 export interface WebAuthnCredential {
@@ -110,13 +110,21 @@ export function useWebAuthn() {
       const { data, error } = await api.GET('/auth/webauthn/credentials')
 
       if (error) {
+        // Don't throw on 401 - user might not be logged in (e.g., on signin page)
+        // Just return empty array
+        if (error.status === 401) {
+          return []
+        }
         throw new Error(t('fetchFailed'))
       }
 
       return (data as WebAuthnCredential[]) || []
     },
-    // Only fetch if user is authenticated
-    enabled: typeof window !== 'undefined' && !!sessionStorage.getItem('token'),
+    // DISABLED: Client-side API calls can't access httpOnly cookies
+    // This needs to be converted to Server Actions or Next.js API routes
+    // For now, disable automatic fetching to prevent 401 errors
+    enabled: false,
+    retry: false, // Don't retry on 401
   })
 
   // Register a new passkey
@@ -246,11 +254,10 @@ export function useWebAuthn() {
         throw new Error(t('authCompleteFailed'))
       }
 
-      // Store access token
-      const result = authResult as { token?: string }
-      if (result.token) {
-        setAuthToken(result.token)
-      }
+      // ✅ SECURITY: Tokens are stored in httpOnly cookies by the server
+      // No client-side token storage needed (XSS protection)
+      // The server automatically sets the cookies in the response
+      const result = authResult as { user?: unknown }
 
       return result
     },

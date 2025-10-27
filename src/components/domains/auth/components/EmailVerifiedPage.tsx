@@ -11,15 +11,31 @@ import React, { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/routing'
-import { useWebAuthn } from '@/hooks/useWebAuthn'
+import { startRegistration } from '@simplewebauthn/browser'
+import type { PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/browser'
+import { webAuthnRegisterBeginAction, webAuthnRegisterFinishAction } from '../actions'
+import { isWebAuthnSupported } from '@/hooks/useWebAuthn'
 import Button from '@/components/shared/ui/button/Button'
 
 export default function EmailVerifiedPage() {
   const t = useTranslations('auth.emailVerified')
   const router = useRouter()
-  const { registerPasskey, isRegistering, isSupported, hasPlatformAuthenticator } = useWebAuthn()
+  const [isRegistering, setIsRegistering] = useState(false)
+  const [isSupported, setIsSupported] = useState(false)
+  const [hasPlatformAuthenticator, setHasPlatformAuthenticator] = useState(false)
   const [showPasskeyPrompt, setShowPasskeyPrompt] = useState(true)
   const [autoRedirectCountdown, setAutoRedirectCountdown] = useState(10)
+
+  // Check WebAuthn support on mount
+  useEffect(() => {
+    setIsSupported(isWebAuthnSupported())
+    // Check for platform authenticator
+    if (typeof window !== 'undefined' && window.PublicKeyCredential) {
+      window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+        .then(setHasPlatformAuthenticator)
+        .catch(() => setHasPlatformAuthenticator(false))
+    }
+  }, [])
 
   // Auto-redirect countdown
   useEffect(() => {
@@ -34,14 +50,41 @@ export default function EmailVerifiedPage() {
   }, [autoRedirectCountdown, showPasskeyPrompt, router])
 
   const handleSetupPasskey = async () => {
+    setIsRegistering(true)
     try {
-      await registerPasskey('My Device')
+      // Step 1: Get challenge from server (via Server Action)
+      console.log('🔐 EmailVerifiedPage - calling webAuthnRegisterBeginAction')
+      const beginResult = await webAuthnRegisterBeginAction()
+
+      if (!beginResult.success || !beginResult.data) {
+        throw new Error((beginResult as { error?: string }).error || 'Failed to initiate passkey registration')
+      }
+
+      const options = beginResult.data.publicKey as PublicKeyCredentialCreationOptionsJSON
+
+      // Step 2: Prompt user for biometric/security key
+      console.log('🔐 EmailVerifiedPage - calling startRegistration (browser prompt)')
+      const registrationResponse = await startRegistration({ optionsJSON: options })
+      console.log('🔐 EmailVerifiedPage - startRegistration completed')
+
+      // Step 3: Send registration response to server (via Server Action)
+      console.log('🔐 EmailVerifiedPage - calling webAuthnRegisterFinishAction')
+      const finishResult = await webAuthnRegisterFinishAction('My Device', registrationResponse)
+
+      if (!finishResult.success) {
+        throw new Error((finishResult as { error?: string }).error || 'Failed to complete passkey registration')
+      }
+
+      console.log('🔐 EmailVerifiedPage - passkey registration successful')
       toast.success(t('passkeySuccess'))
       setShowPasskeyPrompt(false)
       // Start auto-redirect countdown
     } catch (error) {
       console.log('Passkey setup cancelled or failed', error)
-      toast.error(t('passkeyError'))
+      const errorMessage = error instanceof Error ? error.message : t('passkeyError')
+      toast.error(errorMessage)
+    } finally {
+      setIsRegistering(false)
     }
   }
 

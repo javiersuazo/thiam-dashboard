@@ -11,24 +11,29 @@ import type { Middleware } from 'openapi-fetch'
  * Authentication Middleware
  *
  * Automatically adds the Authorization header to all requests.
- * - Client-side: Reads from sessionStorage (will be upgraded to cookies)
- * - Server-side: Token must be passed explicitly via headers
+ * - Client-side: Cannot access httpOnly cookies, uses Next.js API proxy pattern
+ * - Server-side: Reads token from cookies and adds Authorization header
+ *
+ * SECURITY: Tokens are stored in httpOnly cookies, which are:
+ * - NOT accessible to JavaScript (XSS protection)
+ * - Protected with SameSite=lax (CSRF protection)
+ * - Only accessible from Next.js server-side code
  */
 export const authMiddleware: Middleware = {
   async onRequest({ request }) {
-    // Check if token is already in headers (server-side case)
+    // Check if token is already in headers (already authenticated)
     const existingAuth = request.headers.get('Authorization')
     if (existingAuth) {
       return request
     }
 
-    // Client-side: Get token from sessionStorage
-    if (typeof window !== 'undefined') {
-      const token = sessionStorage.getItem('auth_token')
-      if (token) {
-        request.headers.set('Authorization', `Bearer ${token}`)
-      }
-    }
+    // Client-side: httpOnly cookies are NOT accessible to JavaScript
+    // This middleware runs on the client, so we cannot read the cookies here
+    // Solution: Server Actions (which run server-side) will read cookies and add header
+    // For client-side API calls, you should use Server Actions or Next.js API routes as proxy
+
+    // NOTE: If this middleware runs on the server (via createAuthenticatedClient),
+    // the Authorization header is already set in the client initialization
 
     return request
   },
@@ -59,8 +64,8 @@ export const errorMiddleware: Middleware = {
       // Handle specific error codes
       if (status === 401 && typeof window !== 'undefined') {
         // Unauthorized - redirect to login (client-side only)
-        // Clear auth token
-        sessionStorage.removeItem('auth_token')
+        // Note: Tokens are in httpOnly cookies, cleared by server on logout
+        // No client-side token cleanup needed
 
         // Redirect to login if not already there
         if (!window.location.pathname.includes('/signin')) {

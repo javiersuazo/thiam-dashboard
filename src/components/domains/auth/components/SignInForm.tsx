@@ -17,6 +17,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
 import { Link, useRouter } from '@/i18n/routing'
+import { useSearchParams } from 'next/navigation'
 
 import { loginAction } from '../actions'
 import { loginSchema, type LoginFormData } from '../validation/authSchemas'
@@ -34,6 +35,7 @@ export default function SignInForm() {
   const t = useTranslations('auth.signin')
   const tCommon = useTranslations('common')
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
   const [showPassword, setShowPassword] = useState(false)
 
@@ -100,14 +102,28 @@ export default function SignInForm() {
           return
         }
 
-        // Success - session is saved on server
+        // Success - cookies are now set in the response
         toast.success(t('success'))
 
         // Mark that user just logged in (for passkey enrollment prompt)
         sessionStorage.setItem('just_logged_in', 'true')
 
-        router.push('/')
-        router.refresh()
+        // Check for callback URL (where user tried to go before login)
+        const callbackUrl = searchParams.get('callbackUrl')
+
+        // Client-side redirect ensures cookies are available before navigation
+        // Use callback URL if available, otherwise go to home with locale
+        if (callbackUrl) {
+          router.push(callbackUrl)
+        } else {
+          // Use router.refresh() to ensure middleware re-evaluates the session
+          // Then navigate to home, middleware will handle locale redirect
+          router.refresh()
+          // Add a small delay to ensure cookies are set
+          setTimeout(() => {
+            window.location.href = '/'
+          }, 100)
+        }
       } catch (error) {
         console.error('Sign in error:', error)
         // Handle unexpected errors (network errors, etc.)

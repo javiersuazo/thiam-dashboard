@@ -8,9 +8,7 @@
 
 import { createServerClient } from '@/lib/api/server'
 import type { ActionResult } from '@/types/actions'
-import type { OAuthProvider, AuthUser } from '../types/auth.types'
-import { createSession, saveSession } from '@/lib/auth/session'
-import { toSessionUser } from '../utils/authHelpers'
+import type { OAuthProvider } from '../types/auth.types'
 
 /**
  * Initiate OAuth Flow
@@ -120,54 +118,54 @@ export async function completeOAuthAction(
 
     // Cast response to expected structure (OAuth returns similar to login)
     const oauthResponse = response.data as unknown as {
-      user: AuthUser
-      token: string
-      refreshToken: string
-      expiresAt: number | string
+      user?: Record<string, unknown>
+      token?: string
+      refreshToken?: string
+      expiresAt?: number | string
     }
 
-    if (!oauthResponse?.user || !oauthResponse?.token) {
+    const { token: accessToken, refreshToken, expiresAt, user: apiUser } = oauthResponse
+
+    if (!accessToken || !refreshToken || !expiresAt || !apiUser) {
       return {
         success: false,
-        error: 'Invalid OAuth response',
+        error: 'Invalid OAuth response - missing required fields',
       }
     }
 
-    if (!oauthResponse?.refreshToken) {
-      return {
-        success: false,
-        error: 'No refresh token received',
-      }
+    console.log('✅ OAuth authentication successful - storing tokens in Next.js httpOnly cookies')
+
+    // Store tokens in Next.js httpOnly cookies (same as regular login)
+    const expiresAtTimestamp = typeof expiresAt === 'string' ? parseInt(expiresAt) : expiresAt
+
+    // Debug: Check if expiresAt is in seconds or milliseconds
+    console.log('🔐 OAuth Token expiration debug:', {
+      expiresAt,
+      expiresAtTimestamp,
+      now: Date.now(),
+      isInMilliseconds: expiresAtTimestamp > Date.now(),
+    })
+
+    // If expiresAt is in seconds (Unix timestamp), convert to TTL in seconds
+    // If expiresAt is in milliseconds, convert to seconds then calculate TTL
+    let expiresInSeconds: number
+    if (expiresAtTimestamp > Date.now()) {
+      // expiresAt is in milliseconds (future timestamp > current ms)
+      expiresInSeconds = Math.floor((expiresAtTimestamp - Date.now()) / 1000)
+    } else {
+      // expiresAt is in seconds (Unix timestamp)
+      expiresInSeconds = expiresAtTimestamp - Math.floor(Date.now() / 1000)
     }
 
-    if (!oauthResponse?.expiresAt) {
-      return {
-        success: false,
-        error: 'No expiration time received',
-      }
-    }
+    console.log('🔐 OAuth Token TTL:', expiresInSeconds, 'seconds')
 
-    // Create session from API response
-    const sessionUser = toSessionUser(oauthResponse.user)
-    const expiresAtTimestamp = typeof oauthResponse.expiresAt === 'string'
-      ? parseInt(oauthResponse.expiresAt)
-      : oauthResponse.expiresAt
-    const session = createSession(
-      sessionUser,
-      oauthResponse.token,
-      oauthResponse.refreshToken,
-      expiresAtTimestamp
-    )
+    const { setServerAuthTokens } = await import('@/lib/api/server')
+    await setServerAuthTokens(accessToken, refreshToken, expiresInSeconds)
 
-    // Save session to httpOnly cookie
-    await saveSession(session)
-
-    // Return success with redirect URL
+    // Return success - client will handle redirect
     return {
       success: true,
-      data: {
-        redirectUrl: '/', // Redirect to dashboard
-      },
+      data: { redirectUrl: '/' },
     }
   } catch (error) {
     console.error('OAuth callback error:', error)

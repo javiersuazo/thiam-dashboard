@@ -14,7 +14,7 @@
 import createMiddleware from 'next-intl/middleware'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { routing } from './src/i18n/routing'
+import { routing } from './i18n/routing'
 
 /**
  * Public routes that don't require authentication
@@ -47,17 +47,26 @@ const DEFAULT_SIGNIN_REDIRECT = '/' // Dashboard
 const DEFAULT_SIGNOUT_REDIRECT = '/signin'
 
 /**
- * Session cookie name
- * Must match the cookie name in @/lib/auth/session.ts
+ * Token cookie names
+ * Must match the cookie names in @/lib/api/server.ts
  */
-const SESSION_COOKIE_NAME = 'thiam_session'
+const ACCESS_TOKEN_COOKIE = 'access_token'
 
 /**
  * Check if user has a valid session
+ * Checks for access_token cookie (JWT-based authentication)
  */
 function hasValidSession(request: NextRequest): boolean {
-  const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)
-  return !!sessionCookie?.value
+  const accessToken = request.cookies.get(ACCESS_TOKEN_COOKIE)
+
+  // Check if token exists and is not empty
+  if (!accessToken?.value) {
+    return false
+  }
+
+  // Token exists - rely on API to validate on each request
+  // Middleware just does a quick check for performance
+  return true
 }
 
 /**
@@ -65,7 +74,7 @@ function hasValidSession(request: NextRequest): boolean {
  */
 function stripLocale(pathname: string): string {
   const localeMatch = pathname.match(/^\/([a-z]{2})(?:\/|$)/)
-  if (localeMatch && routing.locales.includes(localeMatch[1] as any)) {
+  if (localeMatch && routing.locales.includes(localeMatch[1] as (typeof routing.locales)[number])) {
     return pathname.slice(localeMatch[1].length + 1) || '/'
   }
   return pathname
@@ -96,23 +105,42 @@ const intlMiddleware = createMiddleware(routing)
  * Combined middleware function
  * Handles both i18n routing and authentication
  */
-export function middleware(request: NextRequest) {
+export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Step 1: Handle i18n routing FIRST - let next-intl handle locale detection & redirects
+  // Step 1: Handle root path "/" - redirect based on auth status BEFORE i18n
+  if (pathname === '/') {
+    const hasSession = hasValidSession(request)
+    const locale = routing.defaultLocale
+
+    if (hasSession) {
+      // Authenticated: redirect to dashboard home
+      return NextResponse.redirect(new URL(`/${locale}`, request.url))
+    } else {
+      // Not authenticated: redirect to signin
+      return NextResponse.redirect(new URL(`/${locale}/signin`, request.url))
+    }
+  }
+
+  // Step 2: Handle i18n routing - let next-intl handle locale detection & redirects
   const intlResponse = intlMiddleware(request)
 
-  // Get the final pathname after intl processing
-  const finalPathname = intlResponse.headers.get('x-middleware-request-x-nextUrl-pathname') || pathname
+  // If intl middleware returned a redirect, let it through
+  if (intlResponse.status === 307 || intlResponse.status === 308) {
+    return intlResponse
+  }
 
-  // Step 2: Run authentication checks on the final pathname
+  // Get the pathname after intl processing
+  const finalPathname = pathname
+
+  // Step 3: Run authentication checks on the final pathname
   const hasSession = hasValidSession(request)
 
   // Extract locale from final pathname
   const localeMatch = finalPathname.match(/^\/([a-z]{2})(?:\/|$)/)
   const locale = localeMatch?.[1] || routing.defaultLocale
 
-  // Step 3: Check if this is a public route
+  // Step 4: Check if this is a public route
   if (isPublicRoute(finalPathname)) {
     // If user is authenticated and trying to access auth pages, redirect to dashboard
     if (hasSession && isAuthRoute(finalPathname)) {
@@ -122,7 +150,7 @@ export function middleware(request: NextRequest) {
     return intlResponse
   }
 
-  // Step 4: Protect all other routes - require authentication
+  // Step 5: Protect all other routes - require authentication
   if (!hasSession) {
     // Store the attempted URL for redirect after login
     const redirectPath = `/${locale}${DEFAULT_SIGNOUT_REDIRECT}`

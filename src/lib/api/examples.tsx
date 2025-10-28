@@ -10,7 +10,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { api, setAuthToken } from './index'
+import { api } from './index'
 import {
   useAccounts,
   useAccount,
@@ -50,7 +50,8 @@ export async function loginExample(email: string, password: string) {
 
   // Store the token
   if (data?.token) {
-    setAuthToken(data.token)
+    // Authentication is now handled via httpOnly cookies
+    // setAuthToken(data.token)
   }
 
   return data
@@ -60,7 +61,8 @@ export async function loginExample(email: string, password: string) {
  * Logout and clear token
  */
 export function logoutExample() {
-  setAuthToken(null)
+  // Authentication is now handled via httpOnly cookies
+  // setAuthToken(null)
   // Optionally redirect to login
   window.location.href = '/login'
 }

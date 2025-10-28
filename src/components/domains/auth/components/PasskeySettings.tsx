@@ -10,62 +10,134 @@
  * - Platform authenticator detection (Touch ID, Face ID, Windows Hello)
  */
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
-import { useWebAuthn, isPlatformAuthenticatorAvailable } from '@/hooks/useWebAuthn'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { startRegistration } from '@simplewebauthn/browser'
+import type { PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/browser'
+import { isWebAuthnSupported, isPlatformAuthenticatorAvailable } from '@/hooks/useWebAuthn'
+import {
+  getWebAuthnCredentialsAction,
+  webAuthnRegisterBeginAction,
+  webAuthnRegisterFinishAction,
+  deleteWebAuthnCredentialAction,
+} from '../actions'
 import { toast } from 'sonner'
+
+interface WebAuthnCredential {
+  id: string
+  name: string
+  createdAt: string
+  lastUsedAt?: string
+}
 
 export default function PasskeySettings() {
   const t = useTranslations('auth.passkey.settings')
-  const {
-    credentials,
-    isLoadingCredentials,
-    registerPasskey,
-    isRegistering,
-    deletePasskey,
-    isDeletingPasskey,
-    isSupported,
-  } = useWebAuthn()
+  const queryClient = useQueryClient()
 
+  const [isSupported, setIsSupported] = useState(false)
   const [showAddPasskey, setShowAddPasskey] = useState(false)
   const [passkeyName, setPasskeyName] = useState('')
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [hasPlatformAuth, setHasPlatformAuth] = useState<boolean | null>(null)
 
-  // Check for platform authenticator on mount
-  React.useEffect(() => {
-    if (isSupported) {
+  // Check WebAuthn support on mount
+  useEffect(() => {
+    setIsSupported(isWebAuthnSupported())
+    if (isWebAuthnSupported()) {
       isPlatformAuthenticatorAvailable()
         .then(setHasPlatformAuth)
         .catch(() => setHasPlatformAuth(false))
     }
-  }, [isSupported])
+  }, [])
+
+  // Fetch credentials using Server Action
+  const {
+    data: credentialsData,
+    isLoading: isLoadingCredentials,
+  } = useQuery({
+    queryKey: ['webauthn-credentials'],
+    queryFn: async () => {
+      const result = await getWebAuthnCredentialsAction()
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to fetch credentials')
+      }
+      return result.data?.credentials as WebAuthnCredential[]
+    },
+    enabled: isSupported,
+  })
+
+  const credentials = credentialsData || []
+
+  // Register passkey mutation
+  const registerMutation = useMutation({
+    mutationFn: async (name: string) => {
+      // Step 1: Get challenge from server
+      const beginResult = await webAuthnRegisterBeginAction()
+      if (!beginResult.success) {
+        throw new Error(beginResult.error || 'Failed to initiate registration')
+      }
+      if (!beginResult.data) {
+        throw new Error('No registration data received')
+      }
+
+      const options = beginResult.data.publicKey as PublicKeyCredentialCreationOptionsJSON
+
+      // Step 2: Prompt user for biometric/security key
+      const registrationResponse = await startRegistration({ optionsJSON: options })
+
+      // Step 3: Complete registration
+      const finishResult = await webAuthnRegisterFinishAction(name, registrationResponse)
+      if (!finishResult.success) {
+        throw new Error('error' in finishResult ? finishResult.error : 'Failed to complete registration')
+      }
+
+      return finishResult.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['webauthn-credentials'] })
+      toast.success(t('success.added'))
+      setPasskeyName('')
+      setShowAddPasskey(false)
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || t('errors.addFailed'))
+    },
+  })
+
+  // Delete passkey mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (credentialId: string) => {
+      const result = await deleteWebAuthnCredentialAction(credentialId)
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to delete passkey')
+      }
+      return result.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['webauthn-credentials'] })
+      toast.success(t('success.deleted'))
+      setDeleteConfirm(null)
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || t('errors.deleteFailed'))
+    },
+  })
 
   const handleAddPasskey = async () => {
     if (!passkeyName.trim()) {
       toast.error(t('errors.nameRequired'))
       return
     }
-
-    try {
-      await registerPasskey(passkeyName.trim())
-      toast.success(t('success.added'))
-      setPasskeyName('')
-      setShowAddPasskey(false)
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t('errors.addFailed'))
-    }
+    registerMutation.mutate(passkeyName.trim())
   }
 
   const handleDeletePasskey = async (credentialId: string) => {
-    try {
-      await deletePasskey(credentialId)
-      toast.success(t('success.deleted'))
-      setDeleteConfirm(null)
-    } catch {
-      toast.error(t('errors.deleteFailed'))
-    }
+    deleteMutation.mutate(credentialId)
   }
+
+  const isRegistering = registerMutation.isPending
+  const isDeletingPasskey = deleteMutation.isPending
 
   // Browser not supported
   if (!isSupported) {

@@ -15,6 +15,30 @@ import {
 } from '@/lib/api/server'
 import { debugToken } from '@/lib/auth/jwt'
 import type { ActionResult } from '@/types/actions'
+
+/**
+ * Calculate token TTL in seconds from expiresAt timestamp
+ * Handles both milliseconds and seconds timestamps
+ */
+function calculateTokenTTL(expiresAt: string | number): number {
+  const expiresAtTimestamp = typeof expiresAt === 'string' ? parseInt(expiresAt, 10) : expiresAt
+  const nowMs = Date.now()
+  const nowSec = Math.floor(nowMs / 1000)
+
+  // Calculate TTL in seconds
+  // API might return expiresAt in milliseconds or seconds
+  if (expiresAtTimestamp > nowMs) {
+    // expiresAt is in milliseconds (future timestamp > current ms)
+    return Math.floor((expiresAtTimestamp - nowMs) / 1000)
+  } else if (expiresAtTimestamp > nowSec) {
+    // expiresAt is in seconds (Unix timestamp)
+    return expiresAtTimestamp - nowSec
+  } else {
+    // Token already expired or invalid format - default to 15 minutes
+    console.warn('⚠️ Invalid expiresAt, using default 15 min:', { expiresAtTimestamp, nowSec, nowMs })
+    return 900
+  }
+}
 import type {
   LoginCredentials,
   SignUpData,
@@ -194,13 +218,21 @@ export async function loginAction(
     // 1. Next.js SSR/Server Actions (access via cookies() in server components)
     // 2. Next.js client-side API calls (cookies sent automatically to Next.js API routes)
     // 3. Server Actions can add Authorization header when calling Go API
-    const expiresInSeconds = Math.floor((typeof expiresAt === 'string' ? parseInt(expiresAt) : expiresAt) / 1000) - Math.floor(Date.now() / 1000)
+
+    // Calculate token TTL properly
+    const expiresInSeconds = calculateTokenTTL(expiresAt)
+    console.log('📅 Token TTL calculated:', expiresInSeconds, 'seconds')
+
     const { setServerAuthTokens } = await import('@/lib/api/server')
     await setServerAuthTokens(accessToken, refreshToken, expiresInSeconds)
 
+    // ✅ Return success - client will handle redirect
+    // This ensures cookies are set in response, browser stores them, THEN client navigates
     return {
       success: true,
-      data: { requiresTwoFactor: false },
+      data: {
+        requiresTwoFactor: false,
+      },
     }
   } catch (error) {
     console.error('Login action error:', error)
@@ -303,16 +335,16 @@ export async function verify2FALoginAction(
     console.log('✅ 2FA verified successfully - storing tokens in Next.js httpOnly cookies')
 
     // Store tokens in Next.js httpOnly cookies (same as regular login)
-    const expiresInSeconds = Math.floor((typeof expiresAt === 'string' ? parseInt(expiresAt) : expiresAt) / 1000) - Math.floor(Date.now() / 1000)
+    const expiresInSeconds = calculateTokenTTL(expiresAt)
     const { setServerAuthTokens } = await import('@/lib/api/server')
     await setServerAuthTokens(accessToken, refreshToken, expiresInSeconds)
 
-    // Note: Client component handles clearing sessionStorage (challengeToken, loginEmail)
-    // Server actions cannot access browser APIs like sessionStorage
-
+    // Return success - client will handle redirect
     return {
       success: true,
-      data: { requiresTwoFactor: false },
+      data: {
+        requiresTwoFactor: false,
+      },
     }
   } catch (error) {
     console.error('2FA verify action error:', error)
@@ -1072,13 +1104,16 @@ export async function resetPasswordAction(
     console.log('✅ Password reset successful - storing tokens in Next.js httpOnly cookies')
 
     // Store tokens in Next.js httpOnly cookies (same as regular login)
-    const expiresInSeconds = Math.floor((typeof expiresAt === 'string' ? parseInt(expiresAt) : expiresAt) / 1000) - Math.floor(Date.now() / 1000)
+    const expiresInSeconds = calculateTokenTTL(expiresAt)
     const { setServerAuthTokens } = await import('@/lib/api/server')
     await setServerAuthTokens(accessToken, refreshToken, expiresInSeconds)
 
+    // Return success - client will handle redirect
     return {
       success: true,
-      data: { userId: (apiUser.id as string) || 'unknown' },
+      data: {
+        userId: (apiUser.id as string) || (apiUser.ID as string) || '',
+      },
     }
   } catch (error) {
     console.error('Reset password action error:', error)
@@ -1315,11 +1350,12 @@ export async function verifyEmailWithTokenAction(
     const { setServerAuthTokens } = await import('@/lib/api/server')
     await setServerAuthTokens(accessToken, refreshToken, expiresInSeconds)
 
+    // Return success - client will handle redirect
     return {
       success: true,
       data: {
-        userId: apiUser.id || 'unknown',
-        token: accessToken, // Return token for logging (optional)
+        userId: apiUser.id || '',
+        token: accessToken,
       },
     }
   } catch (error) {
@@ -1526,13 +1562,16 @@ export async function passkeyLoginFinishAction(
     console.log('✅ Passkey authentication successful - storing tokens in Next.js httpOnly cookies')
 
     // Store tokens in Next.js httpOnly cookies (same as regular login)
-    const expiresInSeconds = Math.floor((typeof expiresAt === 'string' ? parseInt(expiresAt) : expiresAt) / 1000) - Math.floor(Date.now() / 1000)
+    const expiresInSeconds = calculateTokenTTL(expiresAt)
     const { setServerAuthTokens } = await import('@/lib/api/server')
     await setServerAuthTokens(accessToken, refreshToken, expiresInSeconds)
 
+    // Return success - client will handle redirect
     return {
       success: true,
-      data: { requiresTwoFactor: false },
+      data: {
+        requiresTwoFactor: false,
+      },
     }
   } catch (error) {
     console.error('Passkey login finish action error:', error)
@@ -1647,6 +1686,104 @@ export async function webAuthnRegisterFinishAction(
     }
   } catch (error) {
     console.error('WebAuthn register finish action error:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unexpected error occurred',
+    }
+  }
+}
+
+/**
+ * Get WebAuthn Credentials Action
+ *
+ * Retrieves the list of registered passkeys for the authenticated user.
+ */
+export async function getWebAuthnCredentialsAction(): Promise<ActionResult<{ credentials: unknown[] }>> {
+  try {
+    const api = await createServerClient()
+    if (!api) {
+      return {
+        success: false,
+        error: 'Not authenticated',
+      }
+    }
+
+    console.log('🔐 Getting WebAuthn credentials')
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const response = (await (api as any).GET('/auth/webauthn/credentials')) as {
+      error?: Record<string, unknown>
+      data?: unknown[]
+    }
+
+    if (response.error) {
+      console.error('Get WebAuthn credentials error:', response.error)
+      return {
+        success: false,
+        error: 'Failed to fetch passkeys',
+      }
+    }
+
+    return {
+      success: true,
+      data: {
+        credentials: response.data || [],
+      },
+    }
+  } catch (error) {
+    console.error('Get WebAuthn credentials action error:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unexpected error occurred',
+    }
+  }
+}
+
+/**
+ * Delete WebAuthn Credential Action
+ *
+ * Deletes a registered passkey for the authenticated user.
+ */
+export async function deleteWebAuthnCredentialAction(
+  credentialId: string
+): Promise<ActionResult<{ message: string }>> {
+  try {
+    const api = await createServerClient()
+    if (!api) {
+      return {
+        success: false,
+        error: 'Not authenticated',
+      }
+    }
+
+    console.log('🔐 Deleting WebAuthn credential:', credentialId)
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const response = (await (api as any).DELETE('/auth/webauthn/credentials/{id}', {
+      params: {
+        path: { id: credentialId },
+      },
+    })) as {
+      error?: Record<string, unknown>
+      data?: unknown
+    }
+
+    if (response.error) {
+      console.error('Delete WebAuthn credential error:', response.error)
+      return {
+        success: false,
+        error: 'Failed to delete passkey',
+      }
+    }
+
+    return {
+      success: true,
+      data: {
+        message: 'Passkey deleted successfully',
+      },
+    }
+  } catch (error) {
+    console.error('Delete WebAuthn credential action error:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unexpected error occurred',

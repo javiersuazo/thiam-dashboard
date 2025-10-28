@@ -35,7 +35,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import {
   startRegistration,
@@ -99,33 +99,12 @@ export function useWebAuthn() {
   }, [])
 
   // Fetch user's registered passkeys
-  const {
-    data: credentials = [],
-    isLoading: isLoadingCredentials,
-    refetch: refetchCredentials,
-  } = useQuery({
-    queryKey: ['webauthn-credentials'],
-    queryFn: async () => {
-      // @ts-expect-error - WebAuthn route not in generated OpenAPI schema
-      const { data, error } = await api.GET('/auth/webauthn/credentials')
-
-      if (error) {
-        // Don't throw on 401 - user might not be logged in (e.g., on signin page)
-        // Just return empty array
-        if (error.status === 401) {
-          return []
-        }
-        throw new Error(t('fetchFailed'))
-      }
-
-      return (data as WebAuthnCredential[]) || []
-    },
-    // DISABLED: Client-side API calls can't access httpOnly cookies
-    // This needs to be converted to Server Actions or Next.js API routes
-    // For now, disable automatic fetching to prevent 401 errors
-    enabled: false,
-    retry: false, // Don't retry on 401
-  })
+  // DISABLED: Client-side API calls can't access httpOnly cookies
+  // This needs to be converted to Server Actions or Next.js API routes
+  // For now, returning empty data to prevent 401 errors
+  const credentials: WebAuthnCredential[] = []
+  const isLoadingCredentials = false
+  const refetchCredentials = async () => ({ data: [] })
 
   // Register a new passkey
   const registerMutation = useMutation({

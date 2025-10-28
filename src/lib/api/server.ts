@@ -34,18 +34,10 @@ export async function getServerAuthToken(): Promise<string | null> {
     const cookieStore = await cookies()
     const tokenCookie = cookieStore.get(ACCESS_TOKEN_COOKIE)
 
-    console.log('🔐 getServerAuthToken - Cookie check:', {
-      cookieName: ACCESS_TOKEN_COOKIE,
-      hasCookie: !!tokenCookie,
-      tokenPresent: !!tokenCookie?.value
-    })
-
     if (!tokenCookie?.value) {
-      console.log('❌ getServerAuthToken - No access token cookie found')
       return null
     }
 
-    console.log('✅ getServerAuthToken - Token retrieved successfully')
     return tokenCookie.value
   } catch (error) {
     console.error('❌ getServerAuthToken - Error:', error)
@@ -95,8 +87,6 @@ export async function setServerAuthTokens(
       ...TOKEN_COOKIE_OPTIONS,
       maxAge: 60 * 60 * 24 * 7, // 7 days
     })
-
-    console.log('✅ setServerAuthTokens - Tokens saved to cookies')
   } catch (error) {
     console.error('Failed to set auth tokens:', error)
     throw new Error('Could not save authentication tokens')

@@ -1878,7 +1878,7 @@ export async function verifyPasswordlessLoginAction(data: {
     console.log('✅ Passwordless login successful - storing tokens in Next.js httpOnly cookies')
 
     // Store tokens in Next.js httpOnly cookies (same as regular login)
-    const expiresInSeconds = Math.floor((responseData.expiresAt || Date.now() / 1000 + 900) / 1000) - Math.floor(Date.now() / 1000)
+    const expiresInSeconds = calculateTokenTTL(responseData.expiresAt)
     const { setServerAuthTokens } = await import('@/lib/api/server')
     await setServerAuthTokens(responseData.token, responseData.refreshToken, expiresInSeconds)
 

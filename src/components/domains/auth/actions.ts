@@ -95,7 +95,7 @@ export async function loginAction(
     console.log('🔐 Login Action - API Configuration:', {
       apiUrl: process.env.NEXT_PUBLIC_API_URL,
       endpoint: '/auth/login',
-      fullUrl: `$'http://localhost:8080'}/v1/auth/login`,
+      fullUrl: 'http://localhost:8080/v1/auth/login',
     })
 
     const response = await api.POST('/auth/login', {

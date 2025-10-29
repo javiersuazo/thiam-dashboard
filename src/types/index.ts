@@ -72,3 +72,6 @@ export type DeliveryStatus =
   | 'delivered'
   | 'failed'
   | 'cancelled'
+
+// Re-export API types
+export type { paths, components } from '@/lib/api/generated/schema'

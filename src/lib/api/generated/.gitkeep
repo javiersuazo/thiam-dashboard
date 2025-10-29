@@ -1,0 +1,14 @@
+# Generated API Types
+
+This directory contains auto-generated TypeScript types from the Thiam API OpenAPI specification.
+
+**IMPORTANT:**
+- DO NOT edit `schema.ts` manually - it will be overwritten
+- These files SHOULD be committed to git so all developers have consistent types
+- Regenerate with: `npm run api:update`
+
+The schema.ts file (~451KB) is committed because:
+1. Ensures all developers have the same API types
+2. Works offline - no need for API access during development
+3. Provides instant IDE autocomplete
+4. Small enough to commit (< 1MB)

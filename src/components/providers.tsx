@@ -1,26 +1,24 @@
 'use client'
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { Toaster } from '@/components/ui/sonner'
-import { useState } from 'react'
+import { ApiQueryProvider } from '@/lib/api/provider'
+import { SessionProvider } from '@/components/features/session'
+import { Toaster } from '@/components/shared/ui/sonner'
 
+/**
+ * App Providers
+ *
+ * Wraps the entire app with necessary providers:
+ * - React Query (API state management)
+ * - Session management (authentication context)
+ * - Toast notifications
+ */
 export function Providers({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            staleTime: 60 * 1000, // 1 minute
-            refetchOnWindowFocus: false,
-          },
-        },
-      })
-  )
-
   return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-      <Toaster position="top-right" />
-    </QueryClientProvider>
+    <ApiQueryProvider>
+      <SessionProvider>
+        {children}
+        <Toaster position="top-right" />
+      </SessionProvider>
+    </ApiQueryProvider>
   )
 }

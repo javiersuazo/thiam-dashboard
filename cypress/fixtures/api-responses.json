@@ -1,0 +1,90 @@
+{
+  "loginSuccess": {
+    "token": "mock-jwt-token",
+    "expiresAt": 1735027200000,
+    "user": {
+      "id": "1",
+      "email": "test@example.com",
+      "firstName": "Test",
+      "lastName": "User",
+      "role": "customer",
+      "accountType": "customer"
+    }
+  },
+  "loginUnauthorized": {
+    "code": 1002,
+    "key": "UNAUTHORIZED",
+    "message": "Invalid email or password"
+  },
+  "signupSuccess": {
+    "token": "mock-jwt-token",
+    "expiresAt": 1735027200000,
+    "user": {
+      "id": "2",
+      "email": "newuser@example.com",
+      "firstName": "New",
+      "lastName": "User",
+      "role": "customer",
+      "accountType": "customer"
+    }
+  },
+  "emailExists": {
+    "code": 1001,
+    "key": "VALIDATION_ERROR",
+    "message": "Email already exists"
+  },
+  "oauthInit": {
+    "authUrl": "https://accounts.google.com/o/oauth2/auth?client_id=test&redirect_uri=http://localhost:3000/en/oauth-callback&response_type=code&scope=email%20profile&state=random-state-string",
+    "state": "random-state-string"
+  },
+  "oauthSuccess": {
+    "token": "mock-oauth-token",
+    "expiresAt": 1735027200000,
+    "user": {
+      "id": "3",
+      "email": "oauth@example.com",
+      "firstName": "OAuth",
+      "lastName": "User",
+      "role": "customer",
+      "accountType": "customer"
+    }
+  },
+  "oauthError": {
+    "code": 1001,
+    "key": "OAUTH_ERROR",
+    "message": "OAuth authentication failed"
+  },
+  "forgotPasswordSuccess": {
+    "message": "Password reset email sent"
+  },
+  "resetPasswordSuccess": {
+    "message": "Password reset successful"
+  },
+  "login2FARequired": {
+    "requires2FA": true,
+    "message": "Two-factor authentication required"
+  },
+  "verify2FASuccess": {
+    "token": "mock-jwt-token-2fa",
+    "expiresAt": 1735027200000,
+    "user": {
+      "id": "4",
+      "email": "2fa-user@example.com",
+      "firstName": "2FA",
+      "lastName": "User",
+      "role": "customer",
+      "accountType": "customer"
+    }
+  },
+  "sessionValid": {
+    "user": {
+      "id": "1",
+      "email": "test@example.com",
+      "firstName": "Test",
+      "lastName": "User",
+      "role": "customer",
+      "accountType": "customer"
+    },
+    "expiresAt": 1735027200000
+  }
+}

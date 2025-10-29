@@ -1,0 +1,705 @@
+{
+  "common": {
+    "errors": {
+      "network": "Error de red. Por favor verifica tu conexión e intenta de nuevo.",
+      "unknown": "Ocurrió un error inesperado. Por favor intenta de nuevo.",
+      "validation": "Por favor verifica tu información e intenta de nuevo.",
+      "invalidRequest": "Solicitud inválida. Por favor verifica tu información e intenta de nuevo.",
+      "conflict": "Esta información ya está en uso.",
+      "unauthorized": "Debes iniciar sesión para acceder a esto.",
+      "forbidden": "No tienes permiso para realizar esta acción.",
+      "notFound": "No se encontró el recurso solicitado.",
+      "serverError": "Ocurrió un error en el servidor. Por favor intenta más tarde."
+    }
+  },
+  "auth": {
+    "errors": {
+      "rateLimitExceeded": "Demasiadas solicitudes. Por favor intenta de nuevo en unos minutos.",
+      "tooManyLoginAttempts": "Demasiados intentos de inicio de sesión. Por favor intenta de nuevo en 15 minutos.",
+      "accountLocked": "Tu cuenta ha sido temporalmente bloqueada debido a múltiples intentos fallidos de inicio de sesión. Por favor intenta más tarde o contacta a soporte."
+    },
+    "signin": {
+      "title": "Bienvenido de nuevo",
+      "subtitle": "Elige tu método preferido de inicio de sesión",
+      "quickSignIn": "Inicio rápido",
+      "magicLink": "Enlace mágico",
+      "passkey": "Llave de acceso",
+      "orContinueWith": "O continúa con correo y contraseña",
+      "email": "Correo electrónico",
+      "emailPlaceholder": "Ingresa tu correo",
+      "password": "Contraseña",
+      "passwordPlaceholder": "Ingresa tu contraseña",
+      "rememberMe": "Recordarme",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "submit": "Iniciar sesión",
+      "submitting": "Iniciando sesión...",
+      "noAccount": "¿No tienes una cuenta?",
+      "signUp": "Regístrate",
+      "success": "¡Sesión iniciada correctamente!",
+      "passkeySuccess": "¡Sesión iniciada correctamente con llave de acceso!",
+      "errors": {
+        "invalidCredentials": "Correo o contraseña inválidos",
+        "accountLocked": "Cuenta bloqueada. Por favor contacta a soporte.",
+        "emailNotVerified": "Por favor verifica tu correo antes de iniciar sesión.",
+        "generic": "Error al iniciar sesión. Por favor intenta de nuevo.",
+        "passkeyFailed": "Error al iniciar sesión con llave de acceso. Por favor intenta de nuevo."
+      }
+    },
+    "signup": {
+      "title": "Crea tu cuenta",
+      "subtitle": "Comienza con Thiam",
+      "firstName": "Nombre",
+      "firstNamePlaceholder": "Ingresa tu nombre",
+      "lastName": "Apellido",
+      "lastNamePlaceholder": "Ingresa tu apellido",
+      "email": "Correo electrónico",
+      "emailPlaceholder": "Ingresa tu correo",
+      "phone": "Número de teléfono",
+      "phonePlaceholder": "Ingresa tu teléfono (opcional)",
+      "password": "Contraseña",
+      "passwordPlaceholder": "Crea una contraseña",
+      "confirmPassword": "Confirmar contraseña",
+      "confirmPasswordPlaceholder": "Confirma tu contraseña",
+      "agreeToTerms": "Acepto los",
+      "termsOfService": "Términos de Servicio",
+      "and": "y la",
+      "privacyPolicy": "Política de Privacidad",
+      "submit": "Crear cuenta",
+      "submitting": "Creando cuenta...",
+      "hasAccount": "¿Ya tienes una cuenta?",
+      "signIn": "Inicia sesión",
+      "success": "¡Cuenta creada correctamente!",
+      "errors": {
+        "emailExists": "Ya existe una cuenta con este correo",
+        "weakPassword": "La contraseña es muy débil",
+        "generic": "Error al crear cuenta. Por favor intenta de nuevo."
+      }
+    },
+    "forgotPassword": {
+      "title": "¿Olvidaste tu contraseña?",
+      "subtitle": "Elige cómo deseas restablecer tu contraseña",
+      "resetMethod": "Método de restablecimiento",
+      "methodEmail": "Correo",
+      "methodPhone": "Teléfono",
+      "email": "Correo electrónico",
+      "emailPlaceholder": "Ingresa tu correo",
+      "phone": "Número de teléfono",
+      "phonePlaceholder": "+1234567890",
+      "submit": "Enviar enlace",
+      "submitPhone": "Enviar código",
+      "submitting": "Enviando...",
+      "backToSignIn": "Volver a iniciar sesión",
+      "success": {
+        "title": "Revisa tu correo",
+        "emailMessage": "Si el correo {email} existe, recibirás un enlace de restablecimiento.",
+        "phoneMessage": "Si el teléfono {phone} existe, recibirás un SMS con un código de restablecimiento.",
+        "nextSteps": "Próximos Pasos",
+        "emailSteps": {
+          "step1": "Revisa tu bandeja de entrada (y carpeta de spam)",
+          "step2": "Haz clic en el enlace de restablecimiento del correo",
+          "step3": "Ingresa el código de 6 dígitos y crea una nueva contraseña",
+          "step4": "Serás automáticamente conectado"
+        },
+        "phoneSteps": {
+          "step1": "Revisa tu teléfono para un SMS con un código de 6 dígitos",
+          "step2": "Ve a la página de restablecimiento de contraseña",
+          "step3": "Ingresa el código de 6 dígitos y crea una nueva contraseña",
+          "step4": "Serás automáticamente conectado"
+        }
+      }
+    },
+    "resetPassword": {
+      "title": "Restablece tu contraseña",
+      "subtitle": "Ingresa tu nueva contraseña",
+      "resetCode": "Código de restablecimiento",
+      "resetCodeHint": "Ingresa el código que recibiste por correo electrónico o SMS",
+      "newPassword": "Nueva contraseña",
+      "newPasswordPlaceholder": "Ingresa nueva contraseña",
+      "confirmPassword": "Confirmar contraseña",
+      "confirmPasswordPlaceholder": "Confirma nueva contraseña",
+      "showPassword": "Mostrar contraseña",
+      "hidePassword": "Ocultar contraseña",
+      "submit": "Restablecer contraseña",
+      "submitting": "Restableciendo...",
+      "backToSignIn": "Volver a iniciar sesión",
+      "success": {
+        "title": "Contraseña restablecida",
+        "message": "Tu contraseña ha sido restablecida. Ahora puedes iniciar sesión con tu nueva contraseña.",
+        "signIn": "Ir a iniciar sesión"
+      },
+      "errors": {
+        "invalidToken": "Token inválido o expirado",
+        "passwordMismatch": "Las contraseñas no coinciden",
+        "generic": "Error al restablecer contraseña. Por favor intenta de nuevo."
+      },
+      "requirements": {
+        "title": "Requisitos de contraseña:",
+        "minLength": "Mínimo 8 caracteres",
+        "uppercase": "Una letra mayúscula",
+        "lowercase": "Una letra minúscula",
+        "number": "Un número",
+        "special": "Un carácter especial"
+      }
+    },
+    "checkEmail": {
+      "title": "Revisa tu correo electrónico",
+      "description": "Enviamos un correo de verificación a:",
+      "nextSteps": "Próximos pasos",
+      "step1": "Abre tu bandeja de entrada",
+      "step2": "Haz clic en el enlace de verificación que te enviamos",
+      "step3": "Serás automáticamente conectado una vez verificado",
+      "spamNotice": "¿No encuentras el correo? Revisa tu carpeta de spam o correo no deseado",
+      "didntReceive": "¿No recibiste el correo?",
+      "resendButton": "Reenviar correo de verificación",
+      "resendCooldown": "Reenviar disponible en {seconds}s",
+      "resendSuccess": "¡Correo de verificación enviado! Por favor revisa tu bandeja de entrada.",
+      "resendError": "Error al enviar el correo. Por favor intenta de nuevo.",
+      "needHelp": "¿Necesitas ayuda?",
+      "contactSupport": "Contactar soporte",
+      "backToSignIn": "Volver a iniciar sesión"
+    },
+    "verifyEmail": {
+      "title": "Verifica tu dirección de correo electrónico",
+      "description": "Hemos enviado un correo de verificación a:",
+      "nextSteps": "¿Qué sigue?",
+      "step1": "Revisa tu bandeja de entrada (y carpeta de spam)",
+      "step2": "Haz clic en el enlace de verificación del correo",
+      "step3": "Serás automáticamente conectado una vez verificado",
+      "didntReceive": "¿No recibiste el correo?",
+      "resendButton": "Reenviar correo de verificación",
+      "resending": "Enviando...",
+      "resent": "¡Correo enviado!",
+      "resendSuccess": "¡Correo de verificación enviado! Por favor revisa tu bandeja de entrada.",
+      "resendError": "Error al enviar el correo. Por favor intenta de nuevo.",
+      "continuePrompt": "También puedes continuar a tu panel y verificar más tarde.",
+      "continueToDashboard": "Continuar al panel",
+      "backToSignIn": "Volver a iniciar sesión"
+    },
+    "emailVerified": {
+      "title": "¡Correo verificado!",
+      "subtitle": "Tu cuenta ahora está completamente activada",
+      "passkeyTitle": "Inicia sesión más rápido la próxima vez",
+      "passkeyDescription": "Configura una passkey para iniciar sesión de forma segura sin contraseña",
+      "passkeyDescriptionBiometric": "Usa Face ID, Touch ID o Windows Hello para iniciar sesión al instante",
+      "benefit1": "Inicia sesión más rápido - sin contraseña",
+      "benefit2": "Más seguro que las contraseñas",
+      "benefit3": "Funciona en todos tus dispositivos",
+      "setupPasskey": "Configurar passkey",
+      "settingUp": "Configurando...",
+      "skipForNow": "Omitir por ahora",
+      "passkeySuccess": "¡Passkey creada exitosamente!",
+      "passkeyError": "Error al crear passkey. Puedes configurarla más tarde en ajustes.",
+      "redirecting": "Redirigiendo al panel en {seconds} segundos...",
+      "continueToDashboard": "Continuar al panel",
+      "noWebAuthnSupport": "Las passkeys no son compatibles con tu navegador. Puedes continuar a tu panel."
+    },
+    "twoFactor": {
+      "setup": {
+        "title": "Configurar autenticación de dos factores",
+        "subtitle": "Escanea el código QR con tu aplicación de autenticación",
+        "step1": "Instala una aplicación de autenticación",
+        "step1Description": "Descarga Google Authenticator, Authy, o cualquier app compatible con TOTP",
+        "step2": "Escanea el código QR",
+        "step2Description": "Abre tu aplicación de autenticación y escanea este código QR",
+        "step3": "O ingresa el secreto manualmente",
+        "showSecret": "Mostrar clave secreta",
+        "hideSecret": "Ocultar clave secreta",
+        "copySecret": "Copiar secreto",
+        "secretCopied": "¡Secreto copiado!",
+        "next": "Siguiente",
+        "cancel": "Cancelar"
+      },
+      "enable": {
+        "title": "Habilitar autenticación de dos factores",
+        "subtitle": "Ingresa el código de 6 dígitos de tu aplicación de autenticación",
+        "code": "Código de verificación",
+        "codePlaceholder": "Ingresa código de 6 dígitos",
+        "submit": "Habilitar 2FA",
+        "submitting": "Habilitando...",
+        "back": "Atrás",
+        "success": {
+          "title": "2FA habilitado correctamente",
+          "message": "Tu cuenta ahora está protegida con autenticación de dos factores",
+          "backupCodesTitle": "Guarda tus códigos de respaldo",
+          "backupCodesMessage": "Guarda estos códigos en un lugar seguro. Puedes usarlos para acceder a tu cuenta si pierdes tu dispositivo de autenticación.",
+          "downloadCodes": "Descargar códigos",
+          "copyCodes": "Copiar códigos",
+          "codesCopied": "¡Códigos copiados!",
+          "continue": "Continuar"
+        },
+        "errors": {
+          "invalidCode": "Código de verificación inválido",
+          "generic": "Error al habilitar 2FA. Por favor intenta de nuevo."
+        }
+      },
+      "disable": {
+        "title": "Deshabilitar autenticación de dos factores",
+        "message": "¿Estás seguro de que quieres deshabilitar 2FA? Tu cuenta será menos segura.",
+        "code": "Código de verificación",
+        "codePlaceholder": "Ingresa código de 6 dígitos",
+        "submit": "Deshabilitar 2FA",
+        "submitting": "Deshabilitando...",
+        "cancel": "Cancelar",
+        "success": "2FA deshabilitado correctamente",
+        "errors": {
+          "invalidCode": "Código de verificación inválido",
+          "generic": "Error al deshabilitar 2FA. Por favor intenta de nuevo."
+        }
+      },
+      "verify": {
+        "title": "Autenticación de dos factores",
+        "subtitle": "Ingresa el código de 6 dígitos de tu aplicación de autenticación",
+        "code": "Código de verificación",
+        "codePlaceholder": "Ingresa código de 6 dígitos",
+        "submit": "Verificar",
+        "submitting": "Verificando...",
+        "useBackupCode": "Usar código de respaldo",
+        "useSMS": "Enviar código por SMS",
+        "errors": {
+          "invalidCode": "Código de verificación inválido",
+          "generic": "Verificación fallida. Por favor intenta de nuevo."
+        }
+      },
+      "backupCodes": {
+        "title": "Códigos de respaldo",
+        "regenerate": "Regenerar códigos",
+        "regenerating": "Regenerando...",
+        "download": "Descargar códigos",
+        "copy": "Copiar códigos",
+        "copied": "¡Códigos copiados!",
+        "warning": "Cada código solo puede usarse una vez. Genera nuevos códigos si se te acaban.",
+        "codesTitle": "Tus Códigos de Respaldo",
+        "importantTitle": "Importante: Guarda Estos Códigos",
+        "singleUse": "Cada código solo puede usarse una vez",
+        "notShownAgain": "Estos códigos no se mostrarán nuevamente",
+        "keepSecure": "Guárdalos en un lugar seguro (administrador de contraseñas, caja fuerte, etc.)",
+        "previousInvalid": "Tus códigos de respaldo anteriores ya no son válidos",
+        "acknowledgment": "He guardado estos códigos de respaldo en un lugar seguro",
+        "done": "Listo",
+        "completeSetup": "Completar Configuración",
+        "print": "Imprimir"
+      },
+      "settings": {
+        "title": "Autenticación de Dos Factores",
+        "subtitle": "Agrega una capa adicional de seguridad a tu cuenta al requerir un código de verificación al iniciar sesión.",
+        "status": {
+          "enabled": {
+            "title": "2FA Habilitado",
+            "description": "Tu cuenta está protegida con autenticación de dos factores."
+          },
+          "disabled": {
+            "title": "2FA Deshabilitado",
+            "description": "Habilita 2FA para agregar una capa adicional de seguridad a tu cuenta."
+          }
+        },
+        "buttons": {
+          "enable": "Habilitar 2FA",
+          "disable": "Deshabilitar 2FA",
+          "regenerate": "Regenerar Códigos de Respaldo",
+          "regenerating": "Generando..."
+        },
+        "benefits": {
+          "title": "¿Por Qué Habilitar 2FA?",
+          "benefit1": "Protege tu cuenta incluso si tu contraseña está comprometida",
+          "benefit2": "Previene el acceso no autorizado a tus datos",
+          "benefit3": "Práctica de seguridad estándar de la industria",
+          "benefit4": "Toma menos de 2 minutos configurar"
+        },
+        "disableModal": {
+          "title": "¿Deshabilitar Autenticación de Dos Factores?",
+          "message": "Esto hará que tu cuenta sea menos segura. Siempre puedes volver a habilitar 2FA más tarde.",
+          "cancel": "Cancelar",
+          "confirm": "Sí, Deshabilitar 2FA",
+          "disabling": "Deshabilitando..."
+        }
+      },
+      "setupFlow": {
+        "step1Label": "Escanear Código QR",
+        "step2Label": "Verificar Código",
+        "step3Label": "Guardar Códigos de Respaldo"
+      },
+      "verifyLogin": {
+        "title": "Autenticación de dos factores",
+        "subtitle": "Ingresa el código de 6 dígitos de tu aplicación de autenticación para completar el inicio de sesión para {email}",
+        "code": "Código de verificación",
+        "verify": "Verificar e iniciar sesión",
+        "verifying": "Verificando...",
+        "errorTitle": "Verificación fallida",
+        "infoMessage": "El código se actualiza cada 30 segundos. Si el código no funciona, espera un nuevo código e intenta de nuevo.",
+        "alternativeTitle": "¿Tienes problemas?",
+        "useBackupCode": "Usar código de respaldo",
+        "useSMSRecovery": "Usar recuperación por SMS",
+        "errors": {
+          "invalidCodeLength": "El código debe tener exactamente 6 dígitos",
+          "generic": "Verificación fallida. Por favor intenta de nuevo."
+        }
+      },
+      "backupCodeLogin": {
+        "title": "Usar código de respaldo",
+        "subtitle": "Ingresa uno de tus códigos de respaldo para iniciar sesión en {email}",
+        "code": "Código de respaldo",
+        "codePlaceholder": "Ingresa código de respaldo",
+        "verify": "Verificar e iniciar sesión",
+        "verifying": "Verificando...",
+        "errorTitle": "Verificación fallida",
+        "warningTitle": "Importante",
+        "warningMessage": "Cada código de respaldo solo puede usarse una vez. Asegúrate de generar nuevos códigos después de recuperar el acceso a tu autenticador.",
+        "back": "Volver al código 2FA",
+        "errors": {
+          "invalidCodeLength": "El código de respaldo debe tener al menos 8 caracteres",
+          "generic": "Código de respaldo inválido. Por favor intenta de nuevo."
+        }
+      },
+      "smsRecovery": {
+        "request": {
+          "title": "Recuperar Acceso 2FA",
+          "subtitle": "Ingresa tu dirección de correo para recibir un código de recuperación por SMS.",
+          "infoTitle": "Antes de Comenzar",
+          "requirement1": "Debes tener un número de teléfono verificado en tu cuenta",
+          "requirement2": "El código SMS será enviado a tu número de teléfono registrado",
+          "requirement3": "Este proceso deshabilitará 2FA en tu cuenta",
+          "requirement4": "Puedes volver a habilitar 2FA después de recuperar el acceso",
+          "email": "Dirección de Correo",
+          "emailPlaceholder": "tu@ejemplo.com",
+          "cancel": "Cancelar",
+          "sending": "Enviando Código...",
+          "submit": "Enviar Código de Recuperación"
+        },
+        "verify": {
+          "title": "Ingresar Código de Recuperación",
+          "subtitle": "Hemos enviado un código de 6 dígitos al número de teléfono asociado con {email}",
+          "code": "Código de Recuperación",
+          "codePlaceholder": "000000",
+          "errorTitle": "Verificación Fallida",
+          "warningTitle": "Aviso Importante",
+          "warningMessage": "Verificar este código deshabilitará la autenticación de dos factores en tu cuenta. Debes volver a habilitar 2FA después de recuperar el acceso para mejor seguridad.",
+          "helpText": "¿No recibiste el código?",
+          "tryAgain": "Intentar de nuevo",
+          "back": "Atrás",
+          "verifying": "Verificando...",
+          "submit": "Verificar y Deshabilitar 2FA"
+        },
+        "flow": {
+          "step1Label": "Solicitar Código",
+          "step2Label": "Verificar Código",
+          "success": {
+            "title": "2FA Deshabilitado Exitosamente",
+            "message": "La autenticación de dos factores ha sido removida de tu cuenta. Ahora puedes iniciar sesión usando solo tu contraseña.",
+            "recommendation": {
+              "title": "Recomendación de Seguridad",
+              "message": "Recomendamos encarecidamente volver a habilitar la autenticación de dos factores para mantener tu cuenta segura. Puedes hacer esto desde tu configuración de seguridad."
+            },
+            "continueButton": "Continuar al Inicio de Sesión"
+          }
+        }
+      }
+    },
+    "oauth": {
+      "divider": "O continuar con",
+      "buttons": {
+        "google": "Continuar con Google",
+        "twitter": "Continuar con Twitter",
+        "loading": "Conectando..."
+      },
+      "callback": {
+        "processing": {
+          "title": "Completando inicio de sesión",
+          "message": "Por favor espera mientras iniciamos sesión de forma segura..."
+        },
+        "success": {
+          "title": "¡Inicio de sesión exitoso!",
+          "message": "Redirigiendo al panel de control..."
+        },
+        "error": {
+          "title": "Inicio de sesión fallido",
+          "subtitle": "Por favor intenta iniciar sesión nuevamente.",
+          "backToSignIn": "Volver a iniciar sesión",
+          "tryAgain": "Intentar de nuevo"
+        },
+        "errors": {
+          "missingCode": "Falta el código de autorización",
+          "invalidProvider": "Proveedor OAuth inválido",
+          "generic": "Autenticación fallida. Por favor intenta de nuevo."
+        }
+      },
+      "errors": {
+        "generic": "Error al conectar cuenta. Por favor intenta de nuevo."
+      }
+    },
+    "phoneVerification": {
+      "request": {
+        "title": "Verifica tu número de teléfono",
+        "subtitle": "Te enviaremos un código de verificación por SMS",
+        "phone": "Número de teléfono",
+        "phonePlaceholder": "+1 (555) 000-0000",
+        "infoMessage": "Pueden aplicar tarifas estándar de SMS. Nunca compartiremos tu número de teléfono.",
+        "cancel": "Cancelar",
+        "sending": "Enviando...",
+        "submit": "Enviar código de verificación",
+        "errors": {
+          "invalidPhone": "Por favor ingresa un número de teléfono válido",
+          "generic": "Error al enviar código de verificación. Por favor intenta de nuevo."
+        }
+      },
+      "verify": {
+        "title": "Verificar número de teléfono",
+        "subtitle": "Ingresa el código de 6 dígitos enviado a {phone}",
+        "code": "Código de verificación",
+        "errorTitle": "Verificación fallida",
+        "infoMessage": "El código expira en 10 minutos. Si no lo recibes, puedes solicitar uno nuevo.",
+        "back": "Cambiar número de teléfono",
+        "resend": "Reenviar código",
+        "resending": "Reenviando...",
+        "verifying": "Verificando...",
+        "submit": "Verificar número de teléfono",
+        "errors": {
+          "invalidCodeLength": "El código debe tener exactamente 6 dígitos",
+          "generic": "Código de verificación inválido. Por favor intenta de nuevo.",
+          "resendFailed": "Error al reenviar código. Por favor intenta de nuevo."
+        }
+      },
+      "flow": {
+        "step1Label": "Ingresar Teléfono",
+        "step2Label": "Verificar Código",
+        "success": {
+          "title": "¡Teléfono verificado exitosamente!",
+          "message": "Tu número de teléfono ha sido verificado."
+        }
+      }
+    },
+    "emailVerification": {
+      "sent": {
+        "title": "Revisa tu correo",
+        "message": "Hemos enviado un enlace de verificación a {email}",
+        "nextStepsTitle": "Próximos pasos",
+        "step1": "Revisa tu bandeja de entrada (y carpeta de spam)",
+        "step2": "Haz clic en el enlace de verificación del correo",
+        "step3": "Serás redirigido para iniciar sesión",
+        "didntReceive": "¿No recibiste el correo?",
+        "resendLink": "Reenviar",
+        "resending": "Reenviando...",
+        "resentSuccess": "¡Correo de verificación enviado exitosamente!",
+        "backToSignIn": "Volver a iniciar sesión"
+      },
+      "verify": {
+        "verifying": "Verificando tu correo...",
+        "verifyingMessage": "Por favor espera mientras verificamos tu dirección de correo.",
+        "success": {
+          "title": "¡Correo verificado exitosamente!",
+          "message": "Tu correo ha sido verificado. Ahora puedes iniciar sesión en tu cuenta.",
+          "redirecting": "Redirigiendo al inicio de sesión en {seconds} segundos...",
+          "signInNow": "Iniciar sesión ahora"
+        },
+        "error": {
+          "title": "Verificación fallida",
+          "possibleReasonsTitle": "Posibles razones",
+          "reason1": "El enlace de verificación ha expirado",
+          "reason2": "El enlace de verificación es inválido o ya fue usado",
+          "reason3": "Tu correo ya ha sido verificado",
+          "trySignIn": "Intentar iniciar sesión",
+          "createNewAccount": "Crear una nueva cuenta"
+        },
+        "errors": {
+          "invalidToken": "Token de verificación inválido o expirado",
+          "generic": "Error al verificar el correo. Por favor intenta de nuevo."
+        }
+      }
+    },
+    "session": {
+      "timeout": {
+        "title": "Sesión por expirar",
+        "message": "Tu sesión expirará en",
+        "autoLogout": "Serás desconectado automáticamente cuando el temporizador llegue a cero.",
+        "logoutNow": "Cerrar sesión ahora",
+        "stayLoggedIn": "Mantener sesión",
+        "extending": "Extendiendo..."
+      },
+      "expired": {
+        "title": "Sesión expirada",
+        "reasons": {
+          "timeout": "Tu sesión expiró por inactividad. Por favor inicia sesión de nuevo para continuar.",
+          "forced": "Tu sesión fue terminada por razones de seguridad. Esto pudo haber pasado porque cambiaste tu contraseña o cerraste sesión desde otro dispositivo.",
+          "expired": "Tu sesión ha expirado. Por favor inicia sesión de nuevo para continuar."
+        },
+        "securityTitle": "¿Por qué pasó esto?",
+        "securityMessage": "Las sesiones expiran automáticamente para mantener tu cuenta segura. Inicia sesión de nuevo para continuar donde lo dejaste.",
+        "signInButton": "Iniciar sesión de nuevo",
+        "needHelp": "¿Necesitas ayuda?",
+        "contactSupport": "Contactar soporte"
+      }
+    },
+    "passwordless": {
+      "title": "Iniciar sesión sin contraseña",
+      "subtitle": "Elige cómo te gustaría iniciar sesión. Te enviaremos un enlace seguro o código.",
+      "methodToggle": {
+        "email": "Correo",
+        "phone": "Teléfono"
+      },
+      "email": {
+        "label": "Correo electrónico",
+        "placeholder": "tu@ejemplo.com",
+        "description": "Te enviaremos un enlace mágico para iniciar sesión al instante",
+        "submit": "Enviar enlace mágico",
+        "submitting": "Enviando..."
+      },
+      "phone": {
+        "label": "Número de teléfono",
+        "placeholder": "+14155552671",
+        "description": "Usa el formato E.164 (ej. +14155552671). Te enviaremos un código de 6 dígitos.",
+        "submit": "Enviar código",
+        "submitting": "Enviando..."
+      },
+      "success": {
+        "email": {
+          "title": "Revisa tu bandeja de entrada",
+          "message": "Te hemos enviado un enlace mágico para iniciar sesión. Haz clic en el enlace de tu correo para continuar.",
+          "toast": "¡Enlace mágico enviado! Revisa tu correo."
+        },
+        "phone": {
+          "title": "Revisa tus mensajes",
+          "message": "Te hemos enviado un código de 6 dígitos. Ingrésalo en la siguiente pantalla para continuar.",
+          "toast": "¡Código enviado! Revisa tus mensajes."
+        },
+        "tryDifferentMethod": "Probar un método diferente",
+        "returnToSignIn": "Volver a iniciar sesión"
+      },
+      "resend": {
+        "button": "Reenviar",
+        "cooldown": "Reenviar en {seconds}s",
+        "sending": "Enviando...",
+        "success": "¡Enviado exitosamente!"
+      },
+      "verify": {
+        "title": "Ingresa tu código",
+        "subtitle": "Enviamos un código de 6 dígitos a tu teléfono",
+        "code": "Código de verificación",
+        "codePlaceholder": "Ingresa código de 6 dígitos",
+        "submit": "Verificar e iniciar sesión",
+        "submitting": "Verificando...",
+        "resend": "¿No recibiste el código?",
+        "resendButton": "Reenviar código"
+      },
+      "alternativeSignIn": {
+        "message": "¿Prefieres usar una contraseña?",
+        "link": "Iniciar sesión con contraseña"
+      },
+      "backToSignIn": "Volver a iniciar sesión",
+      "errors": {
+        "invalidEmail": "Correo electrónico inválido",
+        "invalidPhone": "Formato de teléfono inválido. Usa el formato E.164 (ej. +14155552671)",
+        "invalidToken": "Token inválido o expirado",
+        "generic": "Error al procesar la solicitud. Por favor intenta de nuevo.",
+        "sendFailed": "Error al enviar. Por favor intenta de nuevo."
+      }
+    },
+    "passkey": {
+      "errors": {
+        "notSupported": "Las llaves de acceso no son compatibles con tu navegador. Por favor usa un navegador moderno como Chrome, Safari o Edge.",
+        "fetchFailed": "Error al obtener llaves de acceso",
+        "registerBeginFailed": "Error al iniciar registro de llave de acceso",
+        "registerCancelled": "Registro cancelado por el usuario",
+        "registerFailed": "Error al crear llave de acceso",
+        "registerSaveFailed": "Error al guardar llave de acceso",
+        "authNotSupported": "Las llaves de acceso no son compatibles con tu navegador. Por favor usa un navegador moderno.",
+        "authBeginFailed": "Error al iniciar autenticación con llave de acceso",
+        "authCancelled": "Autenticación cancelada por el usuario",
+        "authFailed": "Error al autenticar",
+        "authCompleteFailed": "Autenticación fallida",
+        "deleteFailed": "Error al eliminar llave de acceso"
+      },
+      "settings": {
+        "title": "Llaves de acceso",
+        "subtitle": "Administra tus llaves de acceso para autenticación sin contraseña usando biometría o llaves de seguridad",
+        "notSupported": {
+          "title": "Llaves de acceso no compatibles",
+          "message": "Tu navegador no soporta llaves de acceso. Por favor usa un navegador moderno como Chrome, Safari, Edge o Firefox."
+        },
+        "platformAuth": {
+          "title": "Autenticación biométrica disponible",
+          "message": "Este dispositivo soporta autenticación biométrica (Touch ID, Face ID o Windows Hello). Puedes usarlo para iniciar sesión de forma segura sin contraseña."
+        },
+        "list": {
+          "title": "Tus llaves de acceso",
+          "subtitle": "Dispositivos y llaves de seguridad que usas para iniciar sesión",
+          "addButton": "Agregar llave",
+          "loading": "Cargando llaves de acceso...",
+          "empty": {
+            "title": "Sin llaves registradas",
+            "message": "Agrega tu primera llave de acceso para habilitar el inicio de sesión sin contraseña"
+          },
+          "unnamed": "Llave sin nombre",
+          "created": "Creada",
+          "lastUsed": "Último uso",
+          "delete": "Eliminar"
+        },
+        "add": {
+          "title": "Agregar nueva llave de acceso",
+          "subtitle": "Dale un nombre a tu llave para identificarla después",
+          "nameLabel": "Nombre de la llave",
+          "namePlaceholder": "ej. Mi iPhone, YubiKey 5, Windows Hello",
+          "registerButton": "Registrar llave",
+          "registering": "Registrando...",
+          "cancel": "Cancelar"
+        },
+        "delete": {
+          "confirm": "¿Estás seguro de eliminar esta llave de acceso? No podrás usarla para iniciar sesión.",
+          "confirmButton": "Eliminar llave",
+          "cancel": "Cancelar"
+        },
+        "success": {
+          "added": "¡Llave de acceso registrada exitosamente!",
+          "deleted": "Llave de acceso eliminada exitosamente"
+        },
+        "errors": {
+          "nameRequired": "Por favor ingresa un nombre para tu llave",
+          "addFailed": "Error al registrar llave de acceso. Por favor intenta de nuevo.",
+          "deleteFailed": "Error al eliminar llave de acceso. Por favor intenta de nuevo."
+        }
+      }
+    },
+    "validation": {
+      "required": "Este campo es requerido",
+      "email": "Por favor ingresa un correo válido",
+      "password": {
+        "minLength": "La contraseña debe tener al menos 8 caracteres",
+        "maxLength": "La contraseña debe tener máximo 128 caracteres",
+        "uppercase": "La contraseña debe contener al menos una letra mayúscula",
+        "lowercase": "La contraseña debe contener al menos una letra minúscula",
+        "number": "La contraseña debe contener al menos un número",
+        "special": "La contraseña debe contener al menos un carácter especial",
+        "mismatch": "Las contraseñas no coinciden"
+      },
+      "phone": "Por favor ingresa un número de teléfono válido",
+      "name": {
+        "minLength": "El nombre debe tener al menos 2 caracteres",
+        "maxLength": "El nombre debe tener máximo 50 caracteres"
+      },
+      "code": {
+        "length": "El código debe tener exactamente 6 dígitos",
+        "numeric": "El código solo debe contener números"
+      },
+      "token": {
+        "length": "El token debe tener exactamente 32 caracteres",
+        "format": "Formato de token inválido"
+      }
+    }
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "cancel": "Cancelar",
+    "continue": "Continuar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "submit": "Enviar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Cerrar",
+    "confirm": "Confirmar",
+    "yes": "Sí",
+    "no": "No",
+    "ok": "OK"
+  }
+}

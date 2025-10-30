@@ -14,6 +14,7 @@ export interface TokenClaims extends JWTPayload {
   email?: string
   sub?: string // Standard JWT claim for user ID
   user_id?: string // Alternative user ID claim
+  account_id?: string // Account ID (hardcoded for now, will be dynamic later)
   exp?: number // Expiry timestamp
   iat?: number // Issued at timestamp
 }

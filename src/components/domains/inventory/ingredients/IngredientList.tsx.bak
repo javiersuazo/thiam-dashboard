@@ -564,6 +564,360 @@ export function IngredientList({ accountId }: IngredientListProps) {
         data={data?.data || []}
         isLoading={isLoading}
       />
+                  <div className="flex items-center gap-3">
+                    <p className="text-theme-xs font-medium text-gray-700 dark:text-gray-400">
+                      Name
+                    </p>
+                    <span className="flex flex-col gap-0.5">
+                      <svg
+                        className={
+                          params.sortBy === "name" && params.sortOrder === "asc"
+                            ? "text-gray-500"
+                            : "text-gray-300"
+                        }
+                        width="8"
+                        height="5"
+                        viewBox="0 0 8 5"
+                        fill="none"
+                      >
+                        <path
+                          d="M4.40962 0.585167C4.21057 0.300808 3.78943 0.300807 3.59038 0.585166L1.05071 4.21327C0.81874 4.54466 1.05582 5 1.46033 5H6.53967C6.94418 5 7.18126 4.54466 6.94929 4.21327L4.40962 0.585167Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                      <svg
+                        className={
+                          params.sortBy === "name" && params.sortOrder === "desc"
+                            ? "text-gray-500"
+                            : "text-gray-300"
+                        }
+                        width="8"
+                        height="5"
+                        viewBox="0 0 8 5"
+                        fill="none"
+                      >
+                        <path
+                          d="M4.40962 4.41483C4.21057 4.69919 3.78943 4.69919 3.59038 4.41483L1.05071 0.786732C0.81874 0.455343 1.05582 0 1.46033 0H6.53967C6.94418 0 7.18126 0.455342 6.94929 0.786731L4.40962 4.41483Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </span>
+                  </div>
+                </th>
+                <th
+                  className="cursor-pointer p-4 text-left text-xs font-medium text-gray-700 dark:text-gray-400"
+                  onClick={() => handleSort("category")}
+                >
+                  <div className="flex items-center gap-3">
+                    <p className="text-theme-xs font-medium">Category</p>
+                    <span className="flex flex-col gap-0.5">
+                      <svg
+                        className={
+                          params.sortBy === "category" && params.sortOrder === "asc"
+                            ? "text-gray-500"
+                            : "text-gray-300"
+                        }
+                        width="8"
+                        height="5"
+                        viewBox="0 0 8 5"
+                        fill="none"
+                      >
+                        <path
+                          d="M4.40962 0.585167C4.21057 0.300808 3.78943 0.300807 3.59038 0.585166L1.05071 4.21327C0.81874 4.54466 1.05582 5 1.46033 5H6.53967C6.94418 5 7.18126 4.54466 6.94929 4.21327L4.40962 0.585167Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                      <svg
+                        className={
+                          params.sortBy === "category" && params.sortOrder === "desc"
+                            ? "text-gray-500"
+                            : "text-gray-300"
+                        }
+                        width="8"
+                        height="5"
+                        viewBox="0 0 8 5"
+                        fill="none"
+                      >
+                        <path
+                          d="M4.40962 4.41483C4.21057 4.69919 3.78943 4.69919 3.59038 4.41483L1.05071 0.786732C0.81874 0.455343 1.05582 0 1.46033 0H6.53967C6.94418 0 7.18126 0.455342 6.94929 0.786731L4.40962 4.41483Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </span>
+                  </div>
+                </th>
+                <th
+                  className="cursor-pointer p-4 text-left text-xs font-medium text-gray-700 dark:text-gray-400"
+                  onClick={() => handleSort("stock")}
+                >
+                  <div className="flex items-center gap-3">
+                    <p className="text-theme-xs font-medium">Stock</p>
+                    <span className="flex flex-col gap-0.5">
+                      <svg
+                        className={
+                          params.sortBy === "stock" && params.sortOrder === "asc"
+                            ? "text-gray-500"
+                            : "text-gray-300"
+                        }
+                        width="8"
+                        height="5"
+                        viewBox="0 0 8 5"
+                        fill="none"
+                      >
+                        <path
+                          d="M4.40962 0.585167C4.21057 0.300808 3.78943 0.300807 3.59038 0.585166L1.05071 4.21327C0.81874 4.54466 1.05582 5 1.46033 5H6.53967C6.94418 5 7.18126 4.54466 6.94929 4.21327L4.40962 0.585167Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                      <svg
+                        className={
+                          params.sortBy === "stock" && params.sortOrder === "desc"
+                            ? "text-gray-500"
+                            : "text-gray-300"
+                        }
+                        width="8"
+                        height="5"
+                        viewBox="0 0 8 5"
+                        fill="none"
+                      >
+                        <path
+                          d="M4.40962 4.41483C4.21057 4.69919 3.78943 4.69919 3.59038 4.41483L1.05071 0.786732C0.81874 0.455343 1.05582 0 1.46033 0H6.53967C6.94418 0 7.18126 0.455342 6.94929 0.786731L4.40962 4.41483Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </span>
+                  </div>
+                </th>
+                <th className="p-4 text-left text-xs font-medium text-gray-700 dark:text-gray-400">
+                  Unit
+                </th>
+                <th
+                  className="cursor-pointer p-4 text-left text-xs font-medium text-gray-700 dark:text-gray-400"
+                  onClick={() => handleSort("cost")}
+                >
+                  <div className="flex items-center gap-3">
+                    <p className="text-theme-xs font-medium">Cost/Unit</p>
+                    <span className="flex flex-col gap-0.5">
+                      <svg
+                        className={
+                          params.sortBy === "cost" && params.sortOrder === "asc"
+                            ? "text-gray-500"
+                            : "text-gray-300"
+                        }
+                        width="8"
+                        height="5"
+                        viewBox="0 0 8 5"
+                        fill="none"
+                      >
+                        <path
+                          d="M4.40962 0.585167C4.21057 0.300808 3.78943 0.300807 3.59038 0.585166L1.05071 4.21327C0.81874 4.54466 1.05582 5 1.46033 5H6.53967C6.94418 5 7.18126 4.54466 6.94929 4.21327L4.40962 0.585167Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                      <svg
+                        className={
+                          params.sortBy === "cost" && params.sortOrder === "desc"
+                            ? "text-gray-500"
+                            : "text-gray-300"
+                        }
+                        width="8"
+                        height="5"
+                        viewBox="0 0 8 5"
+                        fill="none"
+                      >
+                        <path
+                          d="M4.40962 4.41483C4.21057 4.69919 3.78943 4.69919 3.59038 4.41483L1.05071 0.786732C0.81874 0.455343 1.05582 0 1.46033 0H6.53967C6.94418 0 7.18126 0.455342 6.94929 0.786731L4.40962 4.41483Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </span>
+                  </div>
+                </th>
+                <th className="p-4 text-left text-xs font-medium text-gray-700 dark:text-gray-400">
+                  Supplier
+                </th>
+                <th className="p-4 text-left text-xs font-medium text-gray-700 dark:text-gray-400">
+                  Status
+                </th>
+                <th className="p-4 text-center text-xs font-medium text-gray-700 dark:text-gray-400">
+                  Active
+                </th>
+                <th className="p-4 text-left text-xs font-medium text-gray-700 dark:text-gray-400">
+                  <span className="sr-only">Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-x divide-y divide-gray-200 dark:divide-gray-800">
+              {data?.data.map((ingredient) => {
+                const stockStatus = getStockStatus(ingredient.currentStock, ingredient.reorderLevel);
+                const isEditing = editingRowId === ingredient.id;
+                return (
+                  <tr
+                    key={ingredient.id}
+                    onDoubleClick={() => handleRowDoubleClick(ingredient)}
+                    className={`transition ${isEditing ? 'bg-blue-50 dark:bg-blue-950/20' : 'hover:bg-gray-50 dark:hover:bg-gray-900'} ${!isEditing ? 'cursor-pointer' : ''}`}
+                  >
+                    <td className="p-4 whitespace-nowrap">
+                      {isEditing ? (
+                        <div className="flex flex-col gap-1">
+                          <input
+                            type="text"
+                            value={editFormData.name || ''}
+                            onChange={(e) => setEditFormData({...editFormData, name: e.target.value})}
+                            className="text-sm font-medium px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Ingredient name"
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-400">
+                            {ingredient.name}
+                          </span>
+                          {ingredient.description && (
+                            <span className="text-xs text-gray-500 dark:text-gray-500 truncate max-w-xs">
+                              {ingredient.description}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </td>
+                    <td className="p-4 whitespace-nowrap">
+                      <span className="text-sm text-gray-700 dark:text-gray-400 capitalize">
+                        {ingredient.category}
+                      </span>
+                    </td>
+                    <td className="p-4 whitespace-nowrap">
+                      {isEditing ? (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={editFormData.currentStock ?? ''}
+                            onChange={(e) => setEditFormData({...editFormData, currentStock: parseFloat(e.target.value)})}
+                            className="text-sm w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Stock"
+                          />
+                          <span className="text-xs text-gray-500">(reorder: {ingredient.reorderLevel})</span>
+                        </div>
+                      ) : (
+                        <>
+                          <span className="text-sm text-gray-700 dark:text-gray-400">
+                            {ingredient.currentStock.toFixed(2)}
+                          </span>
+                          <span className="text-xs text-gray-500 dark:text-gray-500 ml-1">
+                            (reorder: {ingredient.reorderLevel})
+                          </span>
+                        </>
+                      )}
+                    </td>
+                    <td className="p-4 whitespace-nowrap">
+                      <span className="text-sm text-gray-700 dark:text-gray-400 uppercase">
+                        {ingredient.unit}
+                      </span>
+                    </td>
+                    <td className="p-4 whitespace-nowrap">
+                      {isEditing ? (
+                        <input
+                          type="number"
+                          step="1"
+                          value={editFormData.costPerUnitCents ?? ''}
+                          onChange={(e) => setEditFormData({...editFormData, costPerUnitCents: parseInt(e.target.value)})}
+                          className="text-sm w-24 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Cost (cents)"
+                        />
+                      ) : (
+                        <span className="text-sm text-gray-700 dark:text-gray-400">
+                          {formatCurrency(ingredient.costPerUnitCents, ingredient.currency)}
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-4 whitespace-nowrap">
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          value={editFormData.supplier || ''}
+                          onChange={(e) => setEditFormData({...editFormData, supplier: e.target.value})}
+                          className="text-sm w-32 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Supplier"
+                        />
+                      ) : (
+                        <span className="text-sm text-gray-700 dark:text-gray-400">
+                          {ingredient.supplier || "—"}
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-4 whitespace-nowrap">
+                      <span
+                        className={`text-theme-xs rounded-full px-2 py-0.5 font-medium ${stockStatus.className}`}
+                      >
+                        {stockStatus.label}
+                      </span>
+                    </td>
+                    <td className="p-4 whitespace-nowrap text-center">
+                      {isEditing ? (
+                        <input
+                          type="checkbox"
+                          checked={editFormData.isActive ?? ingredient.isActive}
+                          onChange={(e) => setEditFormData({...editFormData, isActive: e.target.checked})}
+                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800"
+                        />
+                      ) : (
+                        <input
+                          type="checkbox"
+                          checked={ingredient.isActive}
+                          disabled
+                          className="h-4 w-4 rounded border-gray-300 text-blue-600 disabled:opacity-50 dark:border-gray-600"
+                        />
+                      )}
+                    </td>
+                    <td className="p-4 whitespace-nowrap">
+                      {isEditing ? (
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => saveInlineEdit(ingredient.id)}
+                            disabled={updateMutation.isPending}
+                            className="p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-950/20 rounded disabled:opacity-50"
+                            title="Save"
+                          >
+                            <Check className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={cancelInlineEdit}
+                            disabled={updateMutation.isPending}
+                            className="p-1.5 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 rounded disabled:opacity-50"
+                            title="Cancel"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => startInlineEdit(ingredient)}
+                            className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/20 rounded"
+                            title="Edit"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(ingredient)}
+                            disabled={deleteMutation.isPending}
+                            className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 rounded disabled:opacity-50"
+                            title="Delete"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+
       {/* Pagination */}
       {data && data.data.length > 0 && (
         <div className="flex items-center flex-col sm:flex-row justify-between border-t border-gray-200 px-5 py-4 dark:border-gray-800">

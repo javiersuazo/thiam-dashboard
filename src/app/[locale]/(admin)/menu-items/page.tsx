@@ -1,15 +1,15 @@
-import { IngredientList } from "@/components/domains/inventory/ingredients";
+import { MenuItemList } from "@/components/domains/menu/menu-items/MenuItemList";
 import { getServerAuthToken } from "@/lib/api/server";
 import { decodeToken } from "@/lib/auth/jwt";
 import { redirect } from "next/navigation";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Ingredients | Inventory Management",
-  description: "Manage your ingredient inventory with batch tracking and FIFO consumption",
+  title: "Menu Items | Inventory Management",
+  description: "Manage your menu items and recipes",
 };
 
-export default async function IngredientsPage() {
+export default async function MenuItemsPage() {
   // Get JWT token from httpOnly cookie
   const token = await getServerAuthToken();
 
@@ -22,7 +22,6 @@ export default async function IngredientsPage() {
   const accountId = claims.account_id;
 
   if (!accountId) {
-    // This shouldn't happen if JWT is properly issued
     return (
       <div className="p-8">
         <p className="text-error-600">No account ID found in session. Please sign in again.</p>
@@ -35,8 +34,8 @@ export default async function IngredientsPage() {
   const devAccountId = "550e8400-e29b-41d4-a716-446655440002";
 
   return (
-    <div>
-      <IngredientList accountId={devAccountId} />
+    <div className="p-6">
+      <MenuItemList catererId={devAccountId} />
     </div>
   );
 }

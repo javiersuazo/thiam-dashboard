@@ -40,6 +40,7 @@ const navItems: NavItem[] = [
     new: true,
     subItems: [
       { name: "Ingredients", path: "/inventory/ingredients", new: true },
+      { name: "Menu Items", path: "/menu-items", new: true },
     ],
   },
   {

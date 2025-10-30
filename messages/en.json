@@ -725,7 +725,9 @@
         "costPerUnit": "Cost/Unit",
         "supplier": "Supplier",
         "status": "Status",
-        "actions": "Actions"
+        "active": "Active",
+        "actions": "Actions",
+        "reorderLevel": "Reorder level"
       },
       "stockStatus": {
         "outOfStock": "Out of Stock",
@@ -735,8 +737,29 @@
       "actions": {
         "edit": "Edit",
         "delete": "Delete",
+        "save": "Save",
+        "cancel": "Cancel",
         "viewBatches": "View Batches",
-        "confirmDelete": "Are you sure you want to delete \"{name}\"?"
+        "confirmDelete": "Are you sure you want to delete \"{name}\"?",
+        "confirmDeleteDescription": "This action cannot be undone."
+      },
+      "inlineEdit": {
+        "doubleClickHint": "Double-click a row to edit",
+        "validation": {
+          "nameRequired": "Name is required",
+          "stockPositive": "Current stock must be a positive number",
+          "reorderLevelPositive": "Reorder level must be a positive number",
+          "costPositive": "Cost must be a positive number"
+        },
+        "success": "Ingredient updated successfully",
+        "error": "Failed to update ingredient"
+      },
+      "filters": {
+        "activeFilters": "Active filters:",
+        "search": "Search",
+        "category": "Category",
+        "status": "Status",
+        "clearAll": "Clear all"
       },
       "categories": {
         "vegetables": "Vegetables",
@@ -882,5 +905,86 @@
       "deleteSuccess": "Ingredient deleted successfully",
       "deleteFailed": "Failed to delete ingredient"
     }
+  },
+  "menu": {
+    "items": {
+      "title": "Menu Items",
+      "subtitle": "Manage your menu items and recipes",
+      "addButton": "Add Menu Item",
+      "search": "Search menu items...",
+      "emptyState": "No menu items found. Add your first menu item to get started.",
+      "loading": "Loading menu items...",
+      "error": "Failed to load menu items. Please try again.",
+      "table": {
+        "name": "Name",
+        "courseType": "Course Type",
+        "price": "Price",
+        "portionSize": "Portion Size",
+        "servings": "Servings",
+        "deliveryType": "Delivery Type",
+        "visibility": "Visibility",
+        "active": "Active",
+        "actions": "Actions"
+      },
+      "actions": {
+        "edit": "Edit",
+        "delete": "Delete",
+        "save": "Save",
+        "cancel": "Cancel",
+        "viewIngredients": "View Ingredients",
+        "viewMedia": "View Media"
+      },
+      "inlineEdit": {
+        "validation": {
+          "nameRequired": "Name is required",
+          "pricePositive": "Price must be a positive number"
+        },
+        "success": "Menu item updated successfully",
+        "error": "Failed to update menu item"
+      },
+      "deleteSuccess": "Menu item deleted successfully",
+      "deleteFailed": "Failed to delete menu item",
+      "ingredients": {
+        "title": "Ingredients",
+        "subtitle": "Manage recipe ingredients for this menu item",
+        "emptyState": "No ingredients added yet. Add your first ingredient to start building your recipe.",
+        "table": {
+          "name": "Ingredient",
+          "quantity": "Quantity",
+          "costPerUnit": "Cost/Unit",
+          "totalCost": "Total Cost",
+          "available": "Available"
+        },
+        "summary": {
+          "ingredientCost": "Ingredient Cost",
+          "sellingPrice": "Selling Price",
+          "margin": "Margin"
+        },
+        "actions": {
+          "addIngredient": "Add Ingredient",
+          "remove": "Remove"
+        },
+        "deleteSuccess": "Ingredient removed successfully",
+        "deleteFailed": "Failed to remove ingredient"
+      },
+      "media": {
+        "title": "Media Gallery",
+        "subtitle": "Manage images and videos for this menu item",
+        "attachSuccess": "Media attached successfully",
+        "attachFailed": "Failed to attach media",
+        "removeSuccess": "Media removed successfully",
+        "removeFailed": "Failed to remove media",
+        "setPrimarySuccess": "Primary image set successfully",
+        "setPrimaryFailed": "Failed to set primary image",
+        "reorderSuccess": "Media reordered successfully",
+        "reorderFailed": "Failed to reorder media"
+      }
+    }
+  },
+  "media": {
+    "uploadSuccess": "Files uploaded successfully",
+    "uploadFailed": "Failed to upload files",
+    "deleteSuccess": "Media deleted successfully",
+    "deleteFailed": "Failed to delete media"
   }
 }

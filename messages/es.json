@@ -699,5 +699,92 @@
       "notFound": "No se encontró el recurso solicitado.",
       "serverError": "Ocurrió un error en el servidor. Por favor intenta más tarde."
     }
+  },
+  "inventory": {
+    "ingredients": {
+      "title": "Ingredientes",
+      "subtitle": "Gestiona tu inventario de ingredientes",
+      "addButton": "Añadir Ingrediente",
+      "importCSV": "Importar CSV",
+      "search": "Buscar ingredientes...",
+      "filterCategory": "Categoría",
+      "allCategories": "Todas las Categorías",
+      "statusAll": "Todos",
+      "statusActive": "Activos",
+      "statusLowStock": "Stock Bajo",
+      "emptyState": "No se encontraron ingredientes. Añade tu primer ingrediente para comenzar.",
+      "loading": "Cargando ingredientes...",
+      "error": "Error al cargar ingredientes. Por favor intenta de nuevo.",
+      "table": {
+        "name": "Nombre",
+        "category": "Categoría",
+        "stock": "Stock",
+        "unit": "Unidad",
+        "costPerUnit": "Costo/Unidad",
+        "supplier": "Proveedor",
+        "status": "Estado",
+        "active": "Activo",
+        "actions": "Acciones",
+        "reorderLevel": "Nivel de reorden"
+      },
+      "stockStatus": {
+        "outOfStock": "Sin Stock",
+        "lowStock": "Stock Bajo",
+        "inStock": "En Stock"
+      },
+      "actions": {
+        "edit": "Editar",
+        "delete": "Eliminar",
+        "save": "Guardar",
+        "cancel": "Cancelar",
+        "viewBatches": "Ver Lotes",
+        "confirmDelete": "¿Estás seguro de que quieres eliminar \"{name}\"?",
+        "confirmDeleteDescription": "Esta acción no se puede deshacer."
+      },
+      "inlineEdit": {
+        "doubleClickHint": "Haz doble clic en una fila para editar",
+        "validation": {
+          "nameRequired": "El nombre es obligatorio",
+          "stockPositive": "El stock actual debe ser un número positivo",
+          "reorderLevelPositive": "El nivel de reorden debe ser un número positivo",
+          "costPositive": "El costo debe ser un número positivo"
+        },
+        "success": "Ingrediente actualizado correctamente",
+        "error": "Error al actualizar ingrediente"
+      },
+      "filters": {
+        "activeFilters": "Filtros activos:",
+        "search": "Buscar",
+        "category": "Categoría",
+        "status": "Estado",
+        "clearAll": "Limpiar todo"
+      },
+      "categories": {
+        "vegetables": "Vegetales",
+        "fruits": "Frutas",
+        "meat": "Carnes",
+        "seafood": "Mariscos",
+        "dairy": "Lácteos",
+        "grains": "Granos",
+        "bakery": "Panadería",
+        "spices": "Especias",
+        "oils": "Aceites",
+        "condiments": "Condimentos",
+        "beverages": "Bebidas",
+        "canned": "Enlatados",
+        "frozen": "Congelados",
+        "supplies": "Suministros",
+        "other": "Otros"
+      },
+      "units": {
+        "kg": "Kilogramos (kg)",
+        "g": "Gramos (g)",
+        "l": "Litros (l)",
+        "ml": "Mililitros (ml)",
+        "piece": "Piezas"
+      },
+      "deleteSuccess": "Ingrediente eliminado correctamente",
+      "deleteFailed": "Error al eliminar ingrediente"
+    }
   }
 }

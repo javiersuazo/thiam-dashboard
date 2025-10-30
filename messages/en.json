@@ -1,17 +1,4 @@
 {
-  "common": {
-    "errors": {
-      "network": "Network error. Please check your connection and try again.",
-      "unknown": "An unexpected error occurred. Please try again.",
-      "validation": "Please check your input and try again.",
-      "invalidRequest": "Invalid request. Please check your information and try again.",
-      "conflict": "This information is already in use.",
-      "unauthorized": "You must be logged in to access this.",
-      "forbidden": "You don't have permission to perform this action.",
-      "notFound": "The requested resource was not found.",
-      "serverError": "A server error occurred. Please try again later."
-    }
-  },
   "auth": {
     "errors": {
       "rateLimitExceeded": "Too many requests. Please try again in a few minutes.",
@@ -702,6 +689,198 @@
     "confirm": "Confirm",
     "yes": "Yes",
     "no": "No",
-    "ok": "OK"
+    "ok": "OK",
+    "errors": {
+      "network": "Network error. Please check your connection and try again.",
+      "unknown": "An unexpected error occurred. Please try again.",
+      "validation": "Please check your input and try again.",
+      "invalidRequest": "Invalid request. Please check your information and try again.",
+      "conflict": "This information is already in use.",
+      "unauthorized": "You must be logged in to access this.",
+      "forbidden": "You don't have permission to perform this action.",
+      "notFound": "The requested resource was not found.",
+      "serverError": "A server error occurred. Please try again later."
+    }
+  },
+  "inventory": {
+    "ingredients": {
+      "title": "Ingredients",
+      "subtitle": "Manage your ingredient inventory",
+      "addButton": "Add Ingredient",
+      "importCSV": "Import CSV",
+      "search": "Search ingredients...",
+      "filterCategory": "Category",
+      "allCategories": "All Categories",
+      "statusAll": "All",
+      "statusActive": "Active",
+      "statusLowStock": "Low Stock",
+      "emptyState": "No ingredients found. Add your first ingredient to get started.",
+      "loading": "Loading ingredients...",
+      "error": "Failed to load ingredients. Please try again.",
+      "table": {
+        "name": "Name",
+        "category": "Category",
+        "stock": "Stock",
+        "unit": "Unit",
+        "costPerUnit": "Cost/Unit",
+        "supplier": "Supplier",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "stockStatus": {
+        "outOfStock": "Out of Stock",
+        "lowStock": "Low Stock",
+        "inStock": "In Stock"
+      },
+      "actions": {
+        "edit": "Edit",
+        "delete": "Delete",
+        "viewBatches": "View Batches",
+        "confirmDelete": "Are you sure you want to delete \"{name}\"?"
+      },
+      "categories": {
+        "vegetables": "Vegetables",
+        "fruits": "Fruits",
+        "meat": "Meat",
+        "seafood": "Seafood",
+        "dairy": "Dairy",
+        "grains": "Grains",
+        "bakery": "Bakery",
+        "spices": "Spices",
+        "oils": "Oils",
+        "condiments": "Condiments",
+        "beverages": "Beverages",
+        "canned": "Canned",
+        "frozen": "Frozen",
+        "supplies": "Supplies",
+        "other": "Other"
+      },
+      "units": {
+        "kg": "Kilograms (kg)",
+        "g": "Grams (g)",
+        "l": "Liters (l)",
+        "ml": "Milliliters (ml)",
+        "piece": "Pieces"
+      },
+      "form": {
+        "createTitle": "Add New Ingredient",
+        "editTitle": "Edit Ingredient",
+        "fields": {
+          "name": {
+            "label": "Ingredient Name",
+            "placeholder": "e.g., Organic Tomatoes"
+          },
+          "category": {
+            "label": "Category",
+            "placeholder": "Select category"
+          },
+          "unit": {
+            "label": "Unit",
+            "placeholder": "Select unit"
+          },
+          "currentStock": {
+            "label": "Current Stock"
+          },
+          "reorderLevel": {
+            "label": "Reorder Level"
+          },
+          "costPerUnit": {
+            "label": "Cost per Unit",
+            "placeholder": "0.00"
+          },
+          "currency": {
+            "label": "Currency",
+            "placeholder": "USD"
+          },
+          "supplier": {
+            "label": "Supplier",
+            "placeholder": "e.g., Fresh Farms Co."
+          },
+          "description": {
+            "label": "Description",
+            "placeholder": "Optional notes about this ingredient"
+          },
+          "isActive": {
+            "label": "Active ingredient"
+          }
+        },
+        "required": "Required",
+        "cancel": "Cancel",
+        "create": "Create Ingredient",
+        "update": "Update Ingredient",
+        "creating": "Creating...",
+        "updating": "Updating...",
+        "success": {
+          "created": "Ingredient created successfully",
+          "updated": "Ingredient updated successfully"
+        },
+        "errors": {
+          "createFailed": "Failed to create ingredient",
+          "updateFailed": "Failed to update ingredient"
+        }
+      },
+      "batches": {
+        "title": "Batches for {name}",
+        "subtitle": "View and manage stock batches (FIFO consumption)",
+        "emptyState": "No batches found. Add a batch to track stock.",
+        "addButton": "Add Batch",
+        "close": "Close",
+        "batchNumber": "Batch #{number}",
+        "received": "Received",
+        "expires": "Expires",
+        "current": "Current",
+        "reserved": "Reserved",
+        "supplier": "Supplier",
+        "unitCost": "Unit Cost",
+        "notes": "Notes",
+        "expiresIn": "Expires in {days} days",
+        "expiredAgo": "Expired {days} days ago",
+        "qualityStatus": {
+          "good": "Good",
+          "nearExpiry": "Near Expiry",
+          "expired": "Expired",
+          "damaged": "Damaged",
+          "recalled": "Recalled"
+        }
+      },
+      "csvImport": {
+        "title": "Import Ingredients from CSV",
+        "subtitle": "Upload a CSV file to bulk import ingredients",
+        "instructions": {
+          "title": "CSV Format Requirements",
+          "required": "Required columns: name, category, unit, current_stock, reorder_level",
+          "optional": "Optional columns: cost_per_unit, currency, supplier, description, is_active",
+          "categories": "Categories: vegetables, fruits, meat, seafood, dairy, grains, bakery, spices, oils, condiments, beverages, canned, frozen, supplies, other",
+          "units": "Units: kg, g, l, ml, piece"
+        },
+        "downloadTemplate": "Download template CSV",
+        "selectFile": "Select CSV File",
+        "chooseFile": "Choose File",
+        "fileSize": "{size} KB",
+        "preview": "Preview ({count} ingredient)",
+        "preview_plural": "Preview ({count} ingredients)",
+        "cancel": "Cancel",
+        "import": "Import {count} Ingredient",
+        "import_plural": "Import {count} Ingredients",
+        "importing": "Importing...",
+        "success": "Successfully imported {imported} ingredient(s). {skipped, plural, =0 {} other {Skipped # duplicate(s).}}",
+        "errors": {
+          "invalidFile": "Please select a CSV file",
+          "emptyFile": "CSV file is empty or has no data rows",
+          "missingColumns": "Missing required columns: {columns}",
+          "parseFailed": "Failed to parse CSV file. Please check the format.",
+          "importFailed": "Failed to import ingredients",
+          "noData": "No ingredients to import"
+        }
+      },
+      "pagination": {
+        "showing": "Showing",
+        "to": "to",
+        "of": "of",
+        "page": "Page {current} of {total}"
+      },
+      "deleteSuccess": "Ingredient deleted successfully",
+      "deleteFailed": "Failed to delete ingredient"
+    }
   }
 }

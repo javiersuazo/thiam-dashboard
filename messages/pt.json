@@ -1,17 +1,4 @@
 {
-  "common": {
-    "errors": {
-      "network": "Erro de rede. Por favor verifique sua conexão e tente novamente.",
-      "unknown": "Ocorreu um erro inesperado. Por favor tente novamente.",
-      "validation": "Por favor verifique suas informações e tente novamente.",
-      "invalidRequest": "Solicitação inválida. Por favor verifique suas informações e tente novamente.",
-      "conflict": "Esta informação já está em uso.",
-      "unauthorized": "Você deve fazer login para acessar isso.",
-      "forbidden": "Você não tem permissão para realizar esta ação.",
-      "notFound": "O recurso solicitado não foi encontrado.",
-      "serverError": "Ocorreu um erro no servidor. Por favor tente mais tarde."
-    }
-  },
   "auth": {
     "errors": {
       "rateLimitExceeded": "Muitas solicitações. Por favor tente novamente em alguns minutos.",
@@ -697,6 +684,19 @@
     "confirm": "Confirmar",
     "yes": "Sim",
     "no": "Não",
-    "ok": "OK"
+    "ok": "OK",
+    "common": {
+      "errors": {
+        "network": "Erro de rede. Por favor verifique sua conexão e tente novamente.",
+        "unknown": "Ocorreu um erro inesperado. Por favor tente novamente.",
+        "validation": "Por favor verifique suas informações e tente novamente.",
+        "invalidRequest": "Solicitação inválida. Por favor verifique suas informações e tente novamente.",
+        "conflict": "Esta informação já está em uso.",
+        "unauthorized": "Você deve fazer login para acessar isso.",
+        "forbidden": "Você não tem permissão para realizar esta ação.",
+        "notFound": "O recurso solicitado não foi encontrado.",
+        "serverError": "Ocorreu um erro no servidor. Por favor tente mais tarde."
+      }
+    }
   }
 }

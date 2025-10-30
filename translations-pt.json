@@ -1,0 +1,183 @@
+{
+  "inventory": {
+    "ingredients": {
+      "title": "Ingredientes",
+      "subtitle": "Gerencie seu inventário de ingredientes",
+      "addButton": "Adicionar Ingrediente",
+      "importCSV": "Importar CSV",
+      "search": "Pesquisar ingredientes...",
+      "filterCategory": "Categoria",
+      "allCategories": "Todas as Categorias",
+      "statusAll": "Todos",
+      "statusActive": "Ativo",
+      "statusLowStock": "Estoque Baixo",
+      "emptyState": "Nenhum ingrediente encontrado. Adicione seu primeiro ingrediente para começar.",
+      "loading": "Carregando ingredientes...",
+      "error": "Falha ao carregar ingredientes. Por favor, tente novamente.",
+      "table": {
+        "name": "Nome",
+        "category": "Categoria",
+        "stock": "Estoque",
+        "unit": "Unidade",
+        "costPerUnit": "Custo/Unidade",
+        "supplier": "Fornecedor",
+        "status": "Status",
+        "actions": "Ações"
+      },
+      "stockStatus": {
+        "outOfStock": "Sem Estoque",
+        "lowStock": "Estoque Baixo",
+        "inStock": "Em Estoque"
+      },
+      "actions": {
+        "edit": "Editar",
+        "delete": "Excluir",
+        "viewBatches": "Ver Lotes",
+        "confirmDelete": "Tem certeza que deseja excluir \"{name}\"?"
+      },
+      "categories": {
+        "vegetables": "Vegetais",
+        "fruits": "Frutas",
+        "meat": "Carne",
+        "seafood": "Frutos do Mar",
+        "dairy": "Laticínios",
+        "grains": "Grãos",
+        "bakery": "Padaria",
+        "spices": "Temperos",
+        "oils": "Óleos",
+        "condiments": "Condimentos",
+        "beverages": "Bebidas",
+        "canned": "Enlatados",
+        "frozen": "Congelados",
+        "supplies": "Suprimentos",
+        "other": "Outros"
+      },
+      "units": {
+        "kg": "Quilogramas (kg)",
+        "g": "Gramas (g)",
+        "l": "Litros (l)",
+        "ml": "Mililitros (ml)",
+        "piece": "Peças"
+      },
+      "form": {
+        "createTitle": "Adicionar Novo Ingrediente",
+        "editTitle": "Editar Ingrediente",
+        "fields": {
+          "name": {
+            "label": "Nome do Ingrediente",
+            "placeholder": "ex: Tomates Orgânicos"
+          },
+          "category": {
+            "label": "Categoria",
+            "placeholder": "Selecione a categoria"
+          },
+          "unit": {
+            "label": "Unidade",
+            "placeholder": "Selecione a unidade"
+          },
+          "currentStock": {
+            "label": "Estoque Atual"
+          },
+          "reorderLevel": {
+            "label": "Nível de Reposição"
+          },
+          "costPerUnit": {
+            "label": "Custo por Unidade",
+            "placeholder": "0.00"
+          },
+          "currency": {
+            "label": "Moeda",
+            "placeholder": "USD"
+          },
+          "supplier": {
+            "label": "Fornecedor",
+            "placeholder": "ex: Fazenda Fresca Ltda."
+          },
+          "description": {
+            "label": "Descrição",
+            "placeholder": "Notas opcionais sobre este ingrediente"
+          },
+          "isActive": {
+            "label": "Ingrediente ativo"
+          }
+        },
+        "required": "Obrigatório",
+        "cancel": "Cancelar",
+        "create": "Criar Ingrediente",
+        "update": "Atualizar Ingrediente",
+        "creating": "Criando...",
+        "updating": "Atualizando...",
+        "success": {
+          "created": "Ingrediente criado com sucesso",
+          "updated": "Ingrediente atualizado com sucesso"
+        },
+        "errors": {
+          "createFailed": "Falha ao criar ingrediente",
+          "updateFailed": "Falha ao atualizar ingrediente"
+        }
+      },
+      "batches": {
+        "title": "Lotes de {name}",
+        "subtitle": "Visualize e gerencie lotes de estoque (consumo FIFO)",
+        "emptyState": "Nenhum lote encontrado. Adicione um lote para rastrear o estoque.",
+        "addButton": "Adicionar Lote",
+        "close": "Fechar",
+        "batchNumber": "Lote #{number}",
+        "received": "Recebido",
+        "expires": "Expira",
+        "current": "Atual",
+        "reserved": "Reservado",
+        "supplier": "Fornecedor",
+        "unitCost": "Custo Unitário",
+        "notes": "Notas",
+        "expiresIn": "Expira em {days} dias",
+        "expiredAgo": "Expirou há {days} dias",
+        "qualityStatus": {
+          "good": "Bom",
+          "nearExpiry": "Próximo ao Vencimento",
+          "expired": "Expirado",
+          "damaged": "Danificado",
+          "recalled": "Recolhido"
+        }
+      },
+      "csvImport": {
+        "title": "Importar Ingredientes do CSV",
+        "subtitle": "Carregue um arquivo CSV para importar ingredientes em massa",
+        "instructions": {
+          "title": "Requisitos do Formato CSV",
+          "required": "Colunas obrigatórias: name, category, unit, current_stock, reorder_level",
+          "optional": "Colunas opcionais: cost_per_unit, currency, supplier, description, is_active",
+          "categories": "Categorias: vegetables, fruits, meat, seafood, dairy, grains, bakery, spices, oils, condiments, beverages, canned, frozen, supplies, other",
+          "units": "Unidades: kg, g, l, ml, piece"
+        },
+        "downloadTemplate": "Baixar modelo CSV",
+        "selectFile": "Selecionar Arquivo CSV",
+        "chooseFile": "Escolher Arquivo",
+        "fileSize": "{size} KB",
+        "preview": "Pré-visualização ({count} ingrediente)",
+        "preview_plural": "Pré-visualização ({count} ingredientes)",
+        "cancel": "Cancelar",
+        "import": "Importar {count} Ingrediente",
+        "import_plural": "Importar {count} Ingredientes",
+        "importing": "Importando...",
+        "success": "Importados com sucesso {imported} ingrediente(s). {skipped, plural, =0 {} other {# duplicado(s) ignorado(s).}}",
+        "errors": {
+          "invalidFile": "Por favor, selecione um arquivo CSV",
+          "emptyFile": "Arquivo CSV está vazio ou não possui linhas de dados",
+          "missingColumns": "Colunas obrigatórias ausentes: {columns}",
+          "parseFailed": "Falha ao analisar arquivo CSV. Por favor, verifique o formato.",
+          "importFailed": "Falha ao importar ingredientes",
+          "noData": "Nenhum ingrediente para importar"
+        }
+      },
+      "pagination": {
+        "showing": "Mostrando",
+        "to": "a",
+        "of": "de",
+        "page": "Página {current} de {total}"
+      },
+      "deleteSuccess": "Ingrediente excluído com sucesso",
+      "deleteFailed": "Falha ao excluir ingrediente"
+    }
+  }
+}

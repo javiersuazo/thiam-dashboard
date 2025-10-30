@@ -1,17 +1,4 @@
 {
-  "common": {
-    "errors": {
-      "network": "Error de red. Por favor verifica tu conexión e intenta de nuevo.",
-      "unknown": "Ocurrió un error inesperado. Por favor intenta de nuevo.",
-      "validation": "Por favor verifica tu información e intenta de nuevo.",
-      "invalidRequest": "Solicitud inválida. Por favor verifica tu información e intenta de nuevo.",
-      "conflict": "Esta información ya está en uso.",
-      "unauthorized": "Debes iniciar sesión para acceder a esto.",
-      "forbidden": "No tienes permiso para realizar esta acción.",
-      "notFound": "No se encontró el recurso solicitado.",
-      "serverError": "Ocurrió un error en el servidor. Por favor intenta más tarde."
-    }
-  },
   "auth": {
     "errors": {
       "rateLimitExceeded": "Demasiadas solicitudes. Por favor intenta de nuevo en unos minutos.",
@@ -700,6 +687,17 @@
     "confirm": "Confirmar",
     "yes": "Sí",
     "no": "No",
-    "ok": "OK"
+    "ok": "OK",
+    "errors": {
+      "network": "Error de red. Por favor verifica tu conexión e intenta de nuevo.",
+      "unknown": "Ocurrió un error inesperado. Por favor intenta de nuevo.",
+      "validation": "Por favor verifica tu información e intenta de nuevo.",
+      "invalidRequest": "Solicitud inválida. Por favor verifica tu información e intenta de nuevo.",
+      "conflict": "Esta información ya está en uso.",
+      "unauthorized": "Debes iniciar sesión para acceder a esto.",
+      "forbidden": "No tienes permiso para realizar esta acción.",
+      "notFound": "No se encontró el recurso solicitado.",
+      "serverError": "Ocurrió un error en el servidor. Por favor intenta más tarde."
+    }
   }
 }

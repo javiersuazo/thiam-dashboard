@@ -13,6 +13,9 @@ A comprehensive, reusable table component built on TanStack Table v8, designed f
 - ✅ **Bulk Actions** - Perform actions on multiple selected rows
 - ✅ **Export** - CSV and JSON export functionality
 - ✅ **Column Visibility** - Show/hide columns dynamically
+- ✅ **Inline Editing** - Edit cells directly with multiple input types (text, number, select, multiselect, date)
+- ✅ **Virtual Scrolling** - Handle 100k+ rows efficiently
+- ✅ **Skeleton Loading** - Beautiful loading states with animated skeletons
 - ✅ **Responsive** - Mobile-friendly with horizontal scrolling
 - ✅ **Dark Mode** - Full support for light and dark themes
 - ✅ **Loading States** - Built-in loading and empty state handling
@@ -239,6 +242,181 @@ const columns: ColumnDef<User>[] = [
   data={data}
   onRowClick={(row) => {
     router.push(`/users/${row.id}`)
+  }}
+/>
+```
+
+### Inline Editing
+
+Enable inline editing for specific columns:
+
+```tsx
+const columns: ColumnDef<Employee>[] = [
+  {
+    accessorKey: 'name',
+    header: 'Name',
+    meta: {
+      editType: 'text', // Text input
+    },
+  },
+  {
+    accessorKey: 'salary',
+    header: 'Salary',
+    meta: {
+      editType: 'number', // Number input
+    },
+  },
+  {
+    accessorKey: 'department',
+    header: 'Department',
+    meta: {
+      editType: 'select', // Dropdown
+      editOptions: [
+        { label: 'Engineering', value: 'Engineering' },
+        { label: 'Product', value: 'Product' },
+        { label: 'Design', value: 'Design' },
+      ],
+    },
+  },
+  {
+    accessorKey: 'status',
+    header: 'Status',
+    meta: {
+      editType: 'select', // Dropdown
+      editOptions: [
+        { label: 'Active', value: 'active' },
+        { label: 'Inactive', value: 'inactive' },
+      ],
+    },
+  },
+  {
+    accessorKey: 'skills',
+    header: 'Skills',
+    meta: {
+      editType: 'multiselect', // Multiple selection
+      editOptions: [
+        { label: 'JavaScript', value: 'JavaScript' },
+        { label: 'TypeScript', value: 'TypeScript' },
+        { label: 'React', value: 'React' },
+      ],
+    },
+  },
+  {
+    accessorKey: 'joinDate',
+    header: 'Join Date',
+    meta: {
+      editType: 'date', // Date picker
+    },
+  },
+]
+
+<AdvancedTableEnhanced
+  columns={columns}
+  data={data}
+  editableColumns={['name', 'salary', 'department', 'status', 'skills', 'joinDate']}
+  onCellEdit={async (rowId, columnId, value) => {
+    // Update backend
+    await updateEmployee(rowId, { [columnId]: value })
+  }}
+/>
+```
+
+#### Bulk Edit Mode
+
+Track multiple edits and save them all at once:
+
+```tsx
+const [editedRows, setEditedRows] = useState<Record<string, Partial<Employee>>>({})
+
+const handleCellEdit = async (rowId: string, columnId: string, value: any) => {
+  setEditedRows(prev => ({
+    ...prev,
+    [rowId]: { ...prev[rowId], [columnId]: value }
+  }))
+}
+
+const handleSaveAll = async () => {
+  // Save all changes to backend
+  await Promise.all(
+    Object.entries(editedRows).map(([id, changes]) =>
+      updateEmployee(id, changes)
+    )
+  )
+  setEditedRows({})
+}
+
+<AdvancedTableEnhanced
+  columns={columns}
+  data={data}
+  editableColumns={['department', 'salary', 'status']}
+  onCellEdit={handleCellEdit}
+  showBulkSave={Object.keys(editedRows).length > 0}
+  onSaveAll={handleSaveAll}
+  onCancelAll={() => setEditedRows({})}
+  bulkSaveLabel={`Save Changes (${Object.keys(editedRows).length})`}
+  getRowClassName={(row) =>
+    editedRows[row.id] ? 'bg-yellow-50 dark:bg-yellow-900/10' : ''
+  }
+/>
+```
+
+#### Supported Input Types
+
+| Type | Description | Example |
+|------|-------------|---------|
+| `text` | Single-line text input | Name, Description |
+| `number` | Numeric input | Age, Salary, Quantity |
+| `select` | Single-select dropdown | Department, Status |
+| `multiselect` | Multiple-select with checkboxes | Skills, Tags, Categories |
+| `date` | Date picker | Join Date, Birth Date |
+| `datetime` | Date and time picker | Created At, Updated At |
+
+### Column Filtering
+
+Add filters to specific columns:
+
+```tsx
+{
+  accessorKey: 'status',
+  header: 'Status',
+  meta: {
+    filterType: 'select', // 'text' | 'select' | 'range'
+    filterOptions: [
+      { label: 'Active', value: 'active' },
+      { label: 'Inactive', value: 'inactive' },
+    ],
+  },
+}
+
+{
+  accessorKey: 'salary',
+  header: 'Salary',
+  meta: {
+    filterType: 'range', // Min/Max range filter
+  },
+}
+
+{
+  accessorKey: 'name',
+  header: 'Name',
+  meta: {
+    filterType: 'text', // Text search
+  },
+}
+```
+
+### Virtual Scrolling
+
+For large datasets (10k+ rows), enable virtual scrolling:
+
+```tsx
+<AdvancedTableEnhanced
+  columns={columns}
+  data={largeDataset}
+  enableVirtualization
+  virtualizerOptions={{
+    estimateSize: 50, // Row height in pixels
+    overscan: 10, // Extra rows to render outside viewport
   }}
 />
 ```

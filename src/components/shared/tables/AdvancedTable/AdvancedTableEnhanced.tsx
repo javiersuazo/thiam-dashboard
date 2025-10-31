@@ -23,6 +23,7 @@ import { TableToolbar } from './components/TableToolbar'
 import { TablePagination } from './components/TablePagination'
 import { EditableCell } from './components/EditableCell'
 import { ColumnFilter } from './components/ColumnFilter'
+import { TableSkeleton } from './components/TableSkeleton'
 import type { AdvancedTableProps } from './types'
 import { AngleDownIcon, AngleUpIcon } from '@/icons'
 import { debounce } from './utils'
@@ -187,11 +188,7 @@ export function AdvancedTableEnhanced<TData, TValue = unknown>({
   const renderLoadingState = () => {
     if (loadingState) return loadingState
 
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500" />
-      </div>
-    )
+    return <TableSkeleton rows={defaultPageSize} columns={table.getVisibleLeafColumns().length} />
   }
 
   const handleCellEdit = async (rowId: string, columnId: string, value: any) => {
@@ -256,43 +253,43 @@ export function AdvancedTableEnhanced<TData, TValue = unknown>({
                       }}
                     >
                       {header.isPlaceholder ? null : (
-                        <div
-                          className={`flex items-center justify-between ${
-                            header.column.getCanSort() ? 'cursor-pointer select-none' : ''
-                          }`}
-                          onClick={header.column.getToggleSortingHandler()}
-                        >
-                          <div className="flex items-center gap-1">
+                        <div className="flex items-center justify-between w-full">
+                          <div
+                            className={`flex items-center gap-1 ${
+                              header.column.getCanSort() ? 'cursor-pointer select-none' : ''
+                            }`}
+                            onClick={header.column.getToggleSortingHandler()}
+                          >
                             <p className="font-medium text-gray-700 text-theme-xs dark:text-gray-400">
                               {flexRender(
                                 header.column.columnDef.header,
                                 header.getContext()
                               )}
                             </p>
-                            <ColumnFilter
-                              column={header.column}
-                              type={(header.column.columnDef.meta as any)?.filterType}
-                              options={(header.column.columnDef.meta as any)?.filterOptions}
-                            />
+                            {header.column.getCanSort() && (
+                              <div className="flex flex-col">
+                                <AngleUpIcon
+                                  className={`w-3 h-3 ${
+                                    header.column.getIsSorted() === 'asc'
+                                      ? 'text-brand-500 dark:text-brand-500'
+                                      : 'text-gray-300 dark:text-gray-700'
+                                  }`}
+                                />
+                                <AngleDownIcon
+                                  className={`w-3 h-3 -mt-1 ${
+                                    header.column.getIsSorted() === 'desc'
+                                      ? 'text-brand-500 dark:text-brand-500'
+                                      : 'text-gray-300 dark:text-gray-700'
+                                  }`}
+                                />
+                              </div>
+                            )}
                           </div>
-                          {header.column.getCanSort() && (
-                            <button className="flex flex-col gap-0.5 ml-2">
-                              <AngleUpIcon
-                                className={`text-gray-300 dark:text-gray-700 ${
-                                  header.column.getIsSorted() === 'asc'
-                                    ? 'text-brand-500'
-                                    : ''
-                                }`}
-                              />
-                              <AngleDownIcon
-                                className={`text-gray-300 dark:text-gray-700 ${
-                                  header.column.getIsSorted() === 'desc'
-                                    ? 'text-brand-500'
-                                    : ''
-                                }`}
-                              />
-                            </button>
-                          )}
+                          <ColumnFilter
+                            column={header.column}
+                            type={(header.column.columnDef.meta as any)?.filterType}
+                            options={(header.column.columnDef.meta as any)?.filterOptions}
+                          />
                         </div>
                       )}
                     </TableHead>
@@ -305,7 +302,7 @@ export function AdvancedTableEnhanced<TData, TValue = unknown>({
             {isLoading ? (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={table.getVisibleLeafColumns().length}
                   className="px-4 py-3 border border-gray-100 dark:border-white/[0.05]"
                 >
                   {renderLoadingState()}
@@ -336,7 +333,9 @@ export function AdvancedTableEnhanced<TData, TValue = unknown>({
                           return (
                             <TableCell
                               key={cell.id}
-                              className="px-4 py-3 border border-gray-100 dark:border-white/[0.05] text-theme-sm"
+                              className={`px-4 py-3 border border-gray-100 dark:border-white/[0.05] text-theme-sm ${
+                                isEditable ? 'relative' : ''
+                              }`}
                               style={{
                                 width: cell.column.getSize(),
                               }}
@@ -394,7 +393,7 @@ export function AdvancedTableEnhanced<TData, TValue = unknown>({
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={table.getVisibleLeafColumns().length}
                   className="px-4 py-3 border border-gray-100 dark:border-white/[0.05]"
                 >
                   {renderEmptyState()}

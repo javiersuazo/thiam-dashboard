@@ -103,13 +103,13 @@ export function AdvancedSearch<TData>({
     onSearchChange('')
   }
 
-  const hasActiveFilters = activeFilters.length > 0 || searchValue.length > 0
+  const hasActiveSearch = searchValue.length > 0
 
   return (
     <div className="flex-1">
       <div className="relative">
         <div
-          className={`relative flex items-center gap-2 flex-wrap p-2 pr-10 border rounded-lg transition-colors ${
+          className={`relative flex items-center gap-2 h-11 px-4 border rounded-lg transition-colors ${
             isFocused
               ? 'border-brand-300 ring-3 ring-brand-500/10 dark:border-brand-800'
               : 'border-gray-300 dark:border-gray-700'
@@ -133,33 +133,6 @@ export function AdvancedSearch<TData>({
             </svg>
           </button>
 
-          {activeFilters.map((filter) => (
-            <div
-              key={filter.id}
-              className="flex items-center gap-1 px-2 py-1 text-xs font-medium bg-brand-50 text-brand-700 dark:bg-brand-900/20 dark:text-brand-300 rounded-md"
-            >
-              <span className="text-gray-500 dark:text-gray-400">{filter.label}:</span>
-              {filter.type === 'text' ? (
-                <input
-                  type="text"
-                  value={filter.value}
-                  onChange={(e) => updateFilter(filter.id, e.target.value)}
-                  className="bg-transparent border-none outline-none w-20 text-brand-700 dark:text-brand-300 placeholder:text-brand-400"
-                  placeholder="value"
-                  autoFocus
-                />
-              ) : (
-                <span>{filter.value}</span>
-              )}
-              <button
-                onClick={() => removeFilter(filter.id)}
-                className="ml-1 text-brand-600 hover:text-brand-800 dark:text-brand-400 dark:hover:text-brand-200"
-              >
-                <CloseIcon className="w-3 h-3" />
-              </button>
-            </div>
-          ))}
-
           <input
             ref={searchInputRef}
             type="text"
@@ -167,76 +140,21 @@ export function AdvancedSearch<TData>({
             onChange={(e) => onSearchChange(e.target.value)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
-            placeholder={activeFilters.length > 0 ? 'Add text...' : searchPlaceholder}
-            className="flex-1 min-w-[150px] bg-transparent border-none outline-none text-sm text-gray-800 dark:text-white/90 placeholder:text-gray-400 dark:placeholder:text-white/30"
+            placeholder={searchPlaceholder}
+            className="flex-1 bg-transparent border-none outline-none text-sm text-gray-800 dark:text-white/90 placeholder:text-gray-400 dark:placeholder:text-white/30"
           />
 
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-            {hasActiveFilters && (
-              <button
-                onClick={clearAllFilters}
-                className="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 px-2 py-1"
-                title="Clear all filters"
-              >
-                Clear
-              </button>
-            )}
+          {hasActiveSearch && (
             <button
-              onClick={() => setShowFilterMenu(!showFilterMenu)}
-              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-1"
-              title="Add filter"
+              onClick={clearAllFilters}
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 flex-shrink-0"
+              title="Clear search"
             >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 20 20"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="fill-current"
-              >
-                <path
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  d="M3 5C3 4.44772 3.44772 4 4 4H16C16.5523 4 17 4.44772 17 5C17 5.55228 16.5523 6 16 6H4C3.44772 6 3 5.55228 3 5ZM5 10C5 9.44772 5.44772 9 6 9H14C14.5523 9 15 9.44772 15 10C15 10.5523 14.5523 11 14 11H6C5.44772 11 5 10.5523 5 10ZM8 14C7.44772 14 7 14.4477 7 15C7 15.5523 7.44772 16 8 16H12C12.5523 16 13 15.5523 13 15C13 14.4477 12.5523 14 12 14H8Z"
-                  fill="currentColor"
-                />
-              </svg>
+              <CloseIcon className="w-4 h-4" />
             </button>
-          </div>
+          )}
         </div>
-
-        {showFilterMenu && filterOptions.length > 0 && (
-          <div
-            ref={menuRef}
-            className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-theme-lg z-50 max-h-64 overflow-y-auto"
-          >
-            <div className="p-2">
-              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 px-3 py-2">
-                Add filter
-              </p>
-              {filterOptions.map((option) => (
-                <button
-                  key={option.columnId}
-                  onClick={() => addFilter(option)}
-                  className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md flex items-center justify-between"
-                >
-                  <span>{option.label}</span>
-                  <span className="text-xs text-gray-400">{option.type}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
-
-      {hasActiveFilters && (
-        <div className="mt-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-          <span>
-            {activeFilters.length} filter{activeFilters.length !== 1 ? 's' : ''} applied
-            {searchValue && ` • searching for "${searchValue}"`}
-          </span>
-        </div>
-      )}
     </div>
   )
 }

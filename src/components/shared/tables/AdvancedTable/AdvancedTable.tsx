@@ -1,0 +1,290 @@
+'use client'
+
+import { useMemo, useState, useEffect } from 'react'
+import {
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from '@tanstack/react-table'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../../ui/table/index'
+import { TableToolbar } from './components/TableToolbar'
+import { TablePagination } from './components/TablePagination'
+import type { AdvancedTableProps } from './types'
+import { AngleDownIcon, AngleUpIcon } from '@/icons'
+import { debounce } from './utils'
+import Checkbox from '../../form/input/Checkbox'
+
+export function AdvancedTable<TData, TValue = unknown>({
+  columns,
+  data,
+  enableSorting = true,
+  enableFiltering = true,
+  enableGlobalFilter = true,
+  enablePagination = true,
+  enableColumnVisibility = true,
+  enableColumnResizing = false,
+  enableRowSelection = false,
+  enableMultiRowSelection = true,
+  serverSide,
+  bulkActions = [],
+  searchPlaceholder = 'Search...',
+  emptyState,
+  loadingState,
+  onRowClick,
+  className = '',
+  defaultPageSize = 10,
+  pageSizeOptions = [5, 10, 20, 50],
+  showSearch = true,
+  showPagination = true,
+  showColumnVisibility = true,
+  showExport = true,
+  showRowsPerPage = true,
+  exportFileName = 'export',
+  onExport,
+  onStateChange,
+  initialState,
+}: AdvancedTableProps<TData, TValue>) {
+  const [sorting, setSorting] = useState(initialState?.sorting ?? [])
+  const [columnFilters, setColumnFilters] = useState(initialState?.columnFilters ?? [])
+  const [columnVisibility, setColumnVisibility] = useState(initialState?.columnVisibility ?? {})
+  const [rowSelection, setRowSelection] = useState(initialState?.rowSelection ?? {})
+  const [globalFilter, setGlobalFilter] = useState(initialState?.globalFilter ?? '')
+  const [searchInput, setSearchInput] = useState('')
+
+  const debouncedSetGlobalFilter = useMemo(
+    () => debounce((value: string) => setGlobalFilter(value), 300),
+    []
+  )
+
+  useEffect(() => {
+    debouncedSetGlobalFilter(searchInput)
+  }, [searchInput, debouncedSetGlobalFilter])
+
+  useEffect(() => {
+    if (onStateChange) {
+      onStateChange({
+        sorting,
+        columnFilters,
+        columnVisibility,
+        rowSelection,
+        pagination: {
+          pageIndex: table.getState().pagination.pageIndex,
+          pageSize: table.getState().pagination.pageSize,
+        },
+        globalFilter,
+      })
+    }
+  }, [sorting, columnFilters, columnVisibility, rowSelection, globalFilter])
+
+  const table = useReactTable({
+    data,
+    columns,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+      globalFilter,
+    },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    onGlobalFilterChange: setGlobalFilter,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: enableFiltering ? getFilteredRowModel() : undefined,
+    getSortedRowModel: enableSorting ? getSortedRowModel() : undefined,
+    getPaginationRowModel: enablePagination ? getPaginationRowModel() : undefined,
+    enableRowSelection,
+    enableMultiRowSelection,
+    enableSorting,
+    enableColumnResizing,
+    manualPagination: serverSide?.enabled,
+    manualSorting: serverSide?.enabled,
+    manualFiltering: serverSide?.enabled,
+    pageCount: serverSide?.totalPages,
+    initialState: {
+      pagination: {
+        pageIndex: 0,
+        pageSize: defaultPageSize,
+      },
+    },
+  })
+
+  const isLoading = serverSide?.isLoading ?? false
+  const isFetching = serverSide?.isFetching ?? false
+
+  const renderEmptyState = () => {
+    if (emptyState) return emptyState
+
+    return (
+      <div className="flex flex-col items-center justify-center py-12">
+        <svg
+          className="w-16 h-16 text-gray-300 dark:text-gray-700 mb-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+          />
+        </svg>
+        <p className="text-sm text-gray-500 dark:text-gray-400">No data found</p>
+      </div>
+    )
+  }
+
+  const renderLoadingState = () => {
+    if (loadingState) return loadingState
+
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500" />
+      </div>
+    )
+  }
+
+  return (
+    <div className={`overflow-hidden bg-white dark:bg-white/[0.03] rounded-xl ${className}`}>
+      {(showSearch || bulkActions.length > 0 || showExport || showColumnVisibility) && (
+        <TableToolbar
+          table={table}
+          searchValue={searchInput}
+          onSearchChange={setSearchInput}
+          searchPlaceholder={searchPlaceholder}
+          bulkActions={bulkActions}
+          showSearch={showSearch}
+          showExport={showExport}
+          showColumnVisibility={showColumnVisibility}
+          exportFileName={exportFileName}
+          onExport={onExport}
+        />
+      )}
+
+      <div className="max-w-full overflow-x-auto custom-scrollbar relative">
+        {isFetching && !isLoading && (
+          <div className="absolute top-0 left-0 right-0 h-1 bg-brand-500/20">
+            <div className="h-full bg-brand-500 animate-[loading_1s_ease-in-out_infinite]" />
+          </div>
+        )}
+
+        <Table>
+          <TableHeader className="border-t border-gray-100 dark:border-white/[0.05]">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead
+                      key={header.id}
+                      className="px-4 py-3 border border-gray-100 dark:border-white/[0.05]"
+                      style={{
+                        width: header.getSize(),
+                      }}
+                    >
+                      {header.isPlaceholder ? null : (
+                        <div
+                          className={`flex items-center justify-between ${
+                            header.column.getCanSort() ? 'cursor-pointer select-none' : ''
+                          }`}
+                          onClick={header.column.getToggleSortingHandler()}
+                        >
+                          <p className="font-medium text-gray-700 text-theme-xs dark:text-gray-400">
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                          </p>
+                          {header.column.getCanSort() && (
+                            <button className="flex flex-col gap-0.5 ml-2">
+                              <AngleUpIcon
+                                className={`text-gray-300 dark:text-gray-700 ${
+                                  header.column.getIsSorted() === 'asc'
+                                    ? 'text-brand-500'
+                                    : ''
+                                }`}
+                              />
+                              <AngleDownIcon
+                                className={`text-gray-300 dark:text-gray-700 ${
+                                  header.column.getIsSorted() === 'desc'
+                                    ? 'text-brand-500'
+                                    : ''
+                                }`}
+                              />
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </TableHead>
+                  )
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="px-4 py-3 border border-gray-100 dark:border-white/[0.05]"
+                >
+                  {renderLoadingState()}
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && 'selected'}
+                  onClick={() => onRowClick?.(row.original)}
+                  className={onRowClick ? 'cursor-pointer' : ''}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      className="px-4 py-3 border border-gray-100 dark:border-white/[0.05] text-theme-sm"
+                      style={{
+                        width: cell.column.getSize(),
+                      }}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="px-4 py-3 border border-gray-100 dark:border-white/[0.05]"
+                >
+                  {renderEmptyState()}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {showPagination && enablePagination && (
+        <TablePagination
+          table={table}
+          showRowsPerPage={showRowsPerPage}
+          pageSizeOptions={pageSizeOptions}
+        />
+      )}
+    </div>
+  )
+}

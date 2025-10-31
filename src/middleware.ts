@@ -32,6 +32,7 @@ const PUBLIC_ROUTES = [
   '/error-500',
   '/error-503',
   '/maintenance',
+  '/table-test',
 ]
 
 /**

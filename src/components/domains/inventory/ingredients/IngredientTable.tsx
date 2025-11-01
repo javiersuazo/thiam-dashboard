@@ -3,15 +3,13 @@
 import { useMemo, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ColumnDef, SortingState, ColumnFiltersState } from '@tanstack/react-table'
-import { AdvancedTableEnhanced } from '@/components/shared/tables/AdvancedTable/AdvancedTableEnhanced'
+import { AdvancedTable } from '@/components/shared/tables/AdvancedTable'
 import { api, type components } from '@/lib/api'
 import { toast } from 'sonner'
-import { Trash2, Pencil } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 type Ingredient = components['schemas']['response.IngredientResponse']
-type IngredientCategory = components['schemas']['entity.IngredientCategory']
-type IngredientUnit = components['schemas']['entity.IngredientUnit']
 
 interface IngredientTableProps {
   accountId: string
@@ -25,16 +23,17 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
   const [sorting, setSorting] = useState<SortingState>([{ id: 'name', desc: false }])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState('')
+  const [editedRows, setEditedRows] = useState<Record<string, Partial<Ingredient>>>({})
 
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ['ingredients', accountId, pagination, sorting, columnFilters, globalFilter],
     queryFn: async () => {
-      const { data, error } = await api.GET('/ingredients', {
+      const { data, error } = await api.GET('/v1/accounts/{accountId}/ingredients', {
         params: {
+          path: { accountId },
           query: {
-            location_id: accountId,
             limit: pagination.pageSize,
-            offset: pagination.pageIndex * pagination.pageSize,
+            page: pagination.pageIndex + 1,
             sort_by: sorting[0]?.id as any,
             sort_order: sorting[0]?.desc ? 'desc' : 'asc',
             search: globalFilter || undefined,
@@ -47,24 +46,24 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
       if (error) throw error
 
       return {
-        data: data?.ingredients || [],
-        total: data?.total || 0,
+        data: data?.data || [],
+        total: data?.meta?.total || 0,
         page: pagination.pageIndex + 1,
         pageSize: pagination.pageSize,
       }
     },
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData,
   })
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await api.DELETE('/ingredients/{id}', {
-        params: { path: { id } },
+      const { error } = await api.DELETE('/v1/accounts/{accountId}/ingredients/{id}', {
+        params: { path: { accountId, id } },
       })
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['ingredients', accountId])
+      queryClient.invalidateQueries({ queryKey: ['ingredients', accountId] })
       toast.success(t('deleteSuccess'))
     },
     onError: () => {
@@ -74,14 +73,14 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
 
   const bulkDeleteMutation = useMutation({
     mutationFn: async (ids: string[]) => {
-      await Promise.all(ids.map(id =>
-        api.DELETE('/ingredients/{id}', {
-          params: { path: { id } },
-        })
-      ))
+      const { error } = await api.DELETE('/v1/accounts/{accountId}/ingredients/bulk-delete', {
+        params: { path: { accountId } },
+        body: { ids },
+      })
+      if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['ingredients', accountId])
+      queryClient.invalidateQueries({ queryKey: ['ingredients', accountId] })
       toast.success(t('deleteSuccess'))
     },
     onError: () => {
@@ -91,20 +90,49 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<Ingredient> }) => {
-      const { error } = await api.PUT('/ingredients/{id}', {
-        params: { path: { id } },
+      const { error } = await api.PUT('/v1/accounts/{accountId}/ingredients/{id}', {
+        params: { path: { accountId, id } },
         body: updates as any,
       })
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['ingredients', accountId])
+      queryClient.invalidateQueries({ queryKey: ['ingredients', accountId] })
       toast.success(t('inlineEdit.success'))
     },
     onError: () => {
       toast.error(t('inlineEdit.error'))
     },
   })
+
+  const handleCellEdit = (rowId: string, columnId: string, value: any) => {
+    setEditedRows(prev => ({
+      ...prev,
+      [rowId]: {
+        ...prev[rowId],
+        [columnId]: value,
+      },
+    }))
+  }
+
+  const handleSaveAll = async () => {
+    try {
+      await Promise.all(
+        Object.entries(editedRows).map(([id, updates]) =>
+          updateMutation.mutateAsync({ id, updates })
+        )
+      )
+      setEditedRows({})
+      toast.success(t('bulkSaveSuccess'))
+    } catch (error) {
+      toast.error(t('bulkSaveFailed'))
+    }
+  }
+
+  const handleCancelAll = () => {
+    setEditedRows({})
+    toast.info(t('changesDiscarded'))
+  }
 
   const formatCurrency = (cents: number | null | undefined, currency?: string) => {
     if (cents === null || cents === undefined) return '—'
@@ -134,53 +162,15 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
     }
   }
 
-  const handleCellEdit = async (rowId: string, columnId: string, value: any) => {
-    if (columnId === 'name' && typeof value === 'string' && value.trim() === '') {
-      toast.error(t('inlineEdit.validation.nameRequired'))
-      throw new Error('Name is required')
-    }
-
-    if ((columnId === 'currentStock' || columnId === 'reorderLevel' || columnId === 'costPerUnitCents') &&
-        (value < 0 || isNaN(value))) {
-      toast.error(t('inlineEdit.validation.stockPositive'))
-      throw new Error('Invalid value')
-    }
-
-    updateMutation.mutate({
-      id: rowId,
-      updates: { [columnId]: value },
-    })
-  }
-
   const columns = useMemo<ColumnDef<Ingredient>[]>(
     () => [
-      {
-        id: 'select',
-        header: ({ table }) => (
-          <input
-            type="checkbox"
-            checked={table.getIsAllPageRowsSelected()}
-            onChange={table.getToggleAllPageRowsSelectedHandler()}
-            className="rounded border-gray-300"
-          />
-        ),
-        cell: ({ row }) => (
-          <input
-            type="checkbox"
-            checked={row.getIsSelected()}
-            onChange={row.getToggleSelectedHandler()}
-            className="rounded border-gray-300"
-          />
-        ),
-        size: 50,
-      },
       {
         accessorKey: 'name',
         header: t('table.name'),
         cell: ({ row }) => (
           <div className="flex flex-col">
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              {row.original.name}
+              {editedRows[row.id]?.name ?? row.original.name}
             </span>
             {row.original.description && (
               <span className="text-xs text-gray-500 dark:text-gray-500 truncate max-w-xs">
@@ -199,7 +189,7 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
         header: t('table.category'),
         cell: ({ row }) => (
           <span className="text-sm text-gray-700 dark:text-gray-400 capitalize">
-            {row.original.category}
+            {editedRows[row.id]?.category ?? row.original.category}
           </span>
         ),
         meta: {
@@ -226,18 +216,21 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
       {
         accessorKey: 'currentStock',
         header: t('table.stock'),
-        cell: ({ row }) => (
-          <div>
-            <span className="text-sm text-gray-700 dark:text-gray-400">
-              {row.original.currentStock?.toFixed(2) || '0.00'}
-            </span>
-            {row.original.reorderLevel && (
-              <span className="text-xs text-gray-500 dark:text-gray-500 ml-1">
-                ({t('table.reorderLevel')}: {row.original.reorderLevel})
+        cell: ({ row }) => {
+          const stock = editedRows[row.id]?.currentStock ?? row.original.currentStock
+          return (
+            <div>
+              <span className="text-sm text-gray-700 dark:text-gray-400">
+                {stock?.toFixed(2) || '0.00'}
               </span>
-            )}
-          </div>
-        ),
+              {row.original.reorderLevel && (
+                <span className="text-xs text-gray-500 dark:text-gray-500 ml-1">
+                  ({t('table.reorderLevel')}: {row.original.reorderLevel})
+                </span>
+              )}
+            </div>
+          )
+        },
         meta: {
           editType: 'number',
         },
@@ -256,7 +249,10 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
         header: t('table.costPerUnit'),
         cell: ({ row }) => (
           <span className="text-sm text-gray-700 dark:text-gray-400">
-            {formatCurrency(row.original.costPerUnitCents, row.original.currency)}
+            {formatCurrency(
+              editedRows[row.id]?.costPerUnitCents ?? row.original.costPerUnitCents,
+              row.original.currency
+            )}
           </span>
         ),
         meta: {
@@ -268,7 +264,7 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
         header: t('table.supplier'),
         cell: ({ row }) => (
           <span className="text-sm text-gray-700 dark:text-gray-400">
-            {row.original.supplier || '—'}
+            {editedRows[row.id]?.supplier ?? row.original.supplier ?? '—'}
           </span>
         ),
         meta: {
@@ -313,7 +309,8 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
         header: t('table.actions'),
         cell: ({ row }) => (
           <button
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation()
               if (confirm(t('confirmDelete', { name: row.original.name }))) {
                 deleteMutation.mutate(row.original.id!)
               }
@@ -325,58 +322,98 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
         ),
       },
     ],
-    [t]
+    [t, editedRows]
   )
 
   return (
-    <AdvancedTableEnhanced
+    <AdvancedTable
       columns={columns}
       data={data?.data || []}
-      enableSorting
-      enableFiltering
-      enableGlobalFilter
-      enablePagination
-      enableRowSelection
-      enableMultiRowSelection
-      serverSide={{
+
+      features={{
+        sorting: true,
+        filtering: true,
+        globalSearch: true,
+        pagination: true,
+        rowSelection: true,
+        export: true,
+      }}
+
+      server={{
         enabled: true,
         isLoading,
         isFetching,
         totalPages: Math.ceil((data?.total || 0) / pagination.pageSize),
       }}
-      bulkActions={[
-        {
-          label: t('actions.delete') + ' Selected',
-          variant: 'destructive',
-          icon: <Trash2 className="w-4 h-4" />,
-          onClick: (selectedRows) => {
-            const ids = selectedRows.map((row) => row.id!)
-            if (confirm(t('confirmBulkDelete', { count: ids.length }))) {
-              bulkDeleteMutation.mutate(ids)
-            }
+
+      state={{
+        controlled: {
+          pagination: [pagination, setPagination],
+          sorting: [sorting, setSorting],
+          filters: [columnFilters, setColumnFilters],
+          search: [globalFilter, setGlobalFilter],
+        },
+      }}
+
+      editing={{
+        enabled: true,
+        mode: 'cell',
+        columns: ['name', 'currentStock', 'costPerUnitCents', 'supplier'],
+        onEdit: handleCellEdit,
+        bulk: {
+          enabled: Object.keys(editedRows).length > 0,
+          onSaveAll: handleSaveAll,
+          onCancelAll: handleCancelAll,
+          saveLabel: `${t('saveChanges')} (${Object.keys(editedRows).length})`,
+          cancelLabel: t('cancelChanges'),
+        },
+      }}
+
+      actions={{
+        bulk: [
+          {
+            label: t('actions.delete') + ' Selected',
+            variant: 'destructive',
+            icon: <Trash2 className="w-4 h-4" />,
+            onClick: (selectedRows) => {
+              const ids = selectedRows.map((row) => row.id!)
+              if (confirm(t('confirmBulkDelete', { count: ids.length }))) {
+                bulkDeleteMutation.mutate(ids)
+              }
+            },
+          },
+        ],
+      }}
+
+      ui={{
+        toolbar: {
+          search: {
+            placeholder: t('searchPlaceholder'),
+          },
+          export: {
+            filename: 'ingredients',
           },
         },
-      ]}
-      editableColumns={['name', 'currentStock', 'costPerUnitCents', 'supplier']}
-      onCellEdit={handleCellEdit}
-      onStateChange={(state) => {
-        if (state.sorting) setSorting(state.sorting)
-        if (state.columnFilters) setColumnFilters(state.columnFilters)
-        if (state.pagination) setPagination(state.pagination)
-        if (state.globalFilter !== undefined) setGlobalFilter(state.globalFilter)
+        states: {
+          empty: (
+            <div className="flex flex-col items-center justify-center py-12">
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t('emptyState')}</p>
+            </div>
+          ),
+        },
       }}
-      initialState={{
-        sorting,
-        columnFilters,
-        pagination,
+
+      styling={{
+        row: {
+          className: (row) =>
+            editedRows[row.id] ? 'bg-yellow-50 dark:bg-yellow-900/10' : '',
+          highlightSelected: true,
+        },
+        table: {
+          striped: true,
+          hoverable: true,
+        },
       }}
-      searchPlaceholder={t('searchPlaceholder')}
-      exportFileName="ingredients"
-      emptyState={
-        <div className="flex flex-col items-center justify-center py-12">
-          <p className="text-sm text-gray-500 dark:text-gray-400">{t('emptyState')}</p>
-        </div>
-      }
     />
   )
 }

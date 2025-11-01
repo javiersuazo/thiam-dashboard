@@ -94,11 +94,11 @@ export async function loginAction(
 
     console.log('🔐 Login Action - API Configuration:', {
       apiUrl: process.env.NEXT_PUBLIC_API_URL,
-      endpoint: '/auth/login',
+      endpoint: '/v1/auth/login',
       fullUrl: 'http://localhost:8080/v1/auth/login',
     })
 
-    const response = await api.POST('/auth/login', {
+    const response = await api.POST('/v1/auth/login', {
       body: {
         email: credentials.email,
         password: credentials.password,
@@ -266,7 +266,7 @@ export async function verify2FALoginAction(
 
     console.log('🔐 Verifying 2FA code')
 
-    const response = await api.POST('/auth/2fa/verify', {
+    const response = await api.POST('/v1/auth/2fa/verify', {
       body: {
         challengeToken,
         code,
@@ -379,7 +379,7 @@ export async function signupAction(
     const api = createPublicClient()
 
     // Step 1: Create the user
-    const createUserResponse = await api.POST('/users/', {
+    const createUserResponse = await api.POST('/v1/users/', {
       body: {
         email: data.email,
         password: data.password,
@@ -482,7 +482,7 @@ export async function refreshTokenAction(
 
     console.log('🔄 Refreshing access token...')
 
-    const response = await api.POST('/auth/refresh', {
+    const response = await api.POST('/v1/auth/refresh', {
       body: {
         refreshToken,
       },
@@ -611,7 +611,7 @@ export async function setup2FAAction(): Promise<ActionResult<TwoFactorSetupRespo
     }
 
     console.log('✅ Setup 2FA Action - API client created, calling /auth/2fa/setup')
-    const response = await api.POST('/auth/2fa/setup', {})
+    const response = await api.POST('/v1/auth/2fa/setup', {})
 
     if (response.error) {
       console.error('2FA setup error:', response.error)
@@ -669,7 +669,7 @@ export async function enable2FAAction(
       }
     }
 
-    const response = await api.POST('/auth/2fa/enable', {
+    const response = await api.POST('/v1/auth/2fa/enable', {
       body: {
         code: data.code,
       },
@@ -719,7 +719,7 @@ export async function disable2FAAction(): Promise<ActionResult<TwoFactorDisableR
       }
     }
 
-    const response = await api.POST('/auth/2fa/disable', {})
+    const response = await api.POST('/v1/auth/2fa/disable', {})
 
     if (response.error) {
       console.error('2FA disable error:', response.error)
@@ -765,7 +765,7 @@ export async function regenerateBackupCodesAction(): Promise<ActionResult<Backup
       }
     }
 
-    const response = await api.POST('/auth/2fa/backup-codes', {})
+    const response = await api.POST('/v1/auth/2fa/backup-codes', {})
 
     if (response.error) {
       console.error('Backup codes regeneration error:', response.error)
@@ -818,7 +818,7 @@ export async function requestSMSRecoveryAction(
     const api = createPublicClient()
 
     // Intentionally ignoring response to prevent email enumeration
-    await api.POST('/auth/2fa/recovery/sms', {
+    await api.POST('/v1/auth/2fa/recovery/sms', {
       body: {
         email: data.email,
       },
@@ -861,7 +861,7 @@ export async function verifySMSRecoveryAction(
 
     const api = createPublicClient()
 
-    const response = await api.POST('/auth/2fa/recovery/verify', {
+    const response = await api.POST('/v1/auth/2fa/recovery/verify', {
       body: {
         email: data.email,
         code: data.code,
@@ -923,7 +923,7 @@ export async function forgotPasswordAction(
     const api = createPublicClient()
 
     // Intentionally ignoring response to prevent email enumeration
-    await api.POST('/auth/password/forgot', {
+    await api.POST('/v1/auth/password/forgot', {
       body: {
         email: data.email,
       },
@@ -967,7 +967,7 @@ export async function forgotPasswordPhoneAction(
     const api = createPublicClient()
 
     // Intentionally ignoring response to prevent phone enumeration
-    await api.POST('/auth/password/forgot/phone', {
+    await api.POST('/v1/auth/password/forgot/phone', {
       body: {
         phone: data.phone,
       },
@@ -1023,7 +1023,7 @@ export async function resetPasswordAction(
     // Cast to match OpenAPI schema type (even though we're sending different fields)
     // Schema expects: { token: string, newPassword: string }
     // API actually wants: { token: string, password: string }
-    const response = await api.POST('/auth/password/reset', {
+    const response = await api.POST('/v1/auth/password/reset', {
       body: {
         token: requestBody.token,
         newPassword: requestBody.newPassword,
@@ -1154,7 +1154,7 @@ export async function verifyEmailAction(
       }
     }
 
-    const response = await api.POST('/auth/email/verify', {
+    const response = await api.POST('/v1/auth/email/verify', {
       body: {
         token: data.token,
       },
@@ -1228,7 +1228,7 @@ export async function resendVerificationAction(
       }
     }
 
-    await api.POST('/auth/email/resend', {
+    await api.POST('/v1/auth/email/resend', {
       body: {
         email: data.email,
       },
@@ -1271,7 +1271,7 @@ export async function verifyEmailWithTokenAction(
     // Call public API endpoint
     const api = createPublicClient()
 
-    const response = await api.GET('/auth/email/verify', {
+    const response = await api.GET('/v1/auth/email/verify', {
       params: {
         query: { token },
       },
@@ -1389,7 +1389,7 @@ export async function requestPasswordlessEmailAction(data: {
 
     // Send request but don't check response (always return success for security)
     // @ts-expect-error - passwordless endpoints not yet in generated types
-    await api.POST('/auth/passwordless/email', {
+    await api.POST('/v1/auth/passwordless/email', {
       body: {
         email: data.email,
       },
@@ -1433,7 +1433,7 @@ export async function requestPasswordlessPhoneAction(data: {
 
     // Send request but don't check response (always return success for security)
     // @ts-expect-error - passwordless endpoints not yet in generated types
-    await api.POST('/auth/passwordless/phone', {
+    await api.POST('/v1/auth/passwordless/phone', {
       body: {
         phone: data.phone,
       },
@@ -1468,7 +1468,7 @@ export async function passkeyLoginBeginAction(): Promise<ActionResult<{ publicKe
 
     // Passkey route not in generated OpenAPI schema - use any for now
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response = (await (api as any).POST('/passkey/login/begin')) as {
+    const response = (await (api as any).POST('/v1/auth/passkey/login/begin')) as {
       error?: Record<string, unknown>
       data?: { publicKey: unknown }
     }
@@ -1519,7 +1519,7 @@ export async function passkeyLoginFinishAction(
 
     // Passkey route not in generated OpenAPI schema - use any for now
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response = (await (api as any).POST('/passkey/login/finish', {
+    const response = (await (api as any).POST('/v1/auth/passkey/login/finish', {
       body: {
         response: authResponse,
       },
@@ -1601,7 +1601,7 @@ export async function webAuthnRegisterBeginAction(): Promise<ActionResult<{ publ
     console.log('🔐 WebAuthn Register Begin - Calling /auth/webauthn/register/begin')
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response = (await (api as any).POST('/auth/webauthn/register/begin')) as {
+    const response = (await (api as any).POST('/v1/auth/webauthn/register/begin')) as {
       error?: Record<string, unknown>
       data?: { publicKey: unknown }
     }
@@ -1655,7 +1655,7 @@ export async function webAuthnRegisterFinishAction(
     console.log('🔐 WebAuthn Register Finish - Calling /auth/webauthn/register/finish')
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response = (await (api as any).POST('/auth/webauthn/register/finish', {
+    const response = (await (api as any).POST('/v1/auth/webauthn/register/finish', {
       body: {
         name: credentialName,
         response: registrationResponse,
@@ -1711,7 +1711,7 @@ export async function getWebAuthnCredentialsAction(): Promise<ActionResult<{ cre
     console.log('🔐 Getting WebAuthn credentials')
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response = (await (api as any).GET('/auth/webauthn/credentials')) as {
+    const response = (await (api as any).GET('/v1/auth/webauthn/credentials')) as {
       error?: Record<string, unknown>
       data?: unknown[]
     }
@@ -1759,7 +1759,7 @@ export async function deleteWebAuthnCredentialAction(
     console.log('🔐 Deleting WebAuthn credential:', credentialId)
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response = (await (api as any).DELETE('/auth/webauthn/credentials/{id}', {
+    const response = (await (api as any).DELETE('/v1/auth/webauthn/credentials/{id}', {
       params: {
         path: { id: credentialId },
       },
@@ -1822,7 +1822,7 @@ export async function verifyPasswordlessLoginAction(data: {
       }
     } = await api.POST(
       // @ts-expect-error - passwordless endpoints not yet in generated types
-      '/auth/passwordless/verify',
+      '/v1/auth/passwordless/verify',
       {
         body: {
           token: data.token,

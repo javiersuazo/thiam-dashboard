@@ -393,5 +393,176 @@ export function useInvoice(
   })
 }
 
+/**
+ * GET /accounts/{accountId}/ingredients - List ingredients
+ */
+export function useIngredients(
+  accountId: string,
+  params?: {
+    location_id?: string
+    status?: 'active' | 'inactive' | 'low_stock'
+    category?: string
+    search?: string
+    sort_by?: 'name' | 'category' | 'cost' | 'stock' | 'created_at'
+    sort_order?: 'asc' | 'desc'
+    page?: number
+    limit?: number
+  },
+  options?: Omit<UseQueryOptions<components['schemas']['response.IngredientListResponse']>, 'queryKey' | 'queryFn'>
+) {
+  return useQuery({
+    queryKey: ['ingredients', accountId, params],
+    queryFn: async () => {
+      const { data, error } = await api.GET('/accounts/{accountId}/ingredients', {
+        params: {
+          path: { accountId },
+          query: params,
+        },
+      })
+      if (error) throw error
+      return data!
+    },
+    enabled: !!accountId,
+    ...options,
+  })
+}
+
+/**
+ * GET /accounts/{accountId}/ingredients/{id} - Get single ingredient
+ */
+export function useIngredient(
+  accountId: string,
+  ingredientId: string,
+  options?: Omit<UseQueryOptions<components['schemas']['response.IngredientResponse']>, 'queryKey' | 'queryFn'>
+) {
+  return useQuery({
+    queryKey: ['ingredients', accountId, ingredientId],
+    queryFn: async () => {
+      const { data, error } = await api.GET('/accounts/{accountId}/ingredients/{id}', {
+        params: { path: { accountId, id: ingredientId } },
+      })
+      if (error) throw error
+      return data!
+    },
+    enabled: !!accountId && !!ingredientId,
+    ...options,
+  })
+}
+
+/**
+ * POST /accounts/{accountId}/ingredients - Create ingredient
+ */
+export function useCreateIngredient(
+  accountId: string,
+  options?: UseMutationOptions<
+    components['schemas']['response.IngredientResponse'],
+    any,
+    components['schemas']['request.CreateIngredientRequest']
+  >
+) {
+  return useMutation({
+    mutationFn: async (body: components['schemas']['request.CreateIngredientRequest']) => {
+      const { data, error } = await api.POST('/accounts/{accountId}/ingredients', {
+        params: { path: { accountId } },
+        body,
+      })
+      if (error) throw error
+      return data!
+    },
+    ...options,
+  })
+}
+
+/**
+ * PUT /accounts/{accountId}/ingredients/{id} - Update ingredient
+ */
+export function useUpdateIngredient(
+  accountId: string,
+  options?: UseMutationOptions<
+    components['schemas']['response.IngredientResponse'],
+    any,
+    { id: string; body: components['schemas']['request.UpdateIngredientRequest'] }
+  >
+) {
+  return useMutation({
+    mutationFn: async ({ id, body }: { id: string; body: components['schemas']['request.UpdateIngredientRequest'] }) => {
+      const { data, error } = await api.PUT('/accounts/{accountId}/ingredients/{id}', {
+        params: { path: { accountId, id } },
+        body,
+      })
+      if (error) throw error
+      return data!
+    },
+    ...options,
+  })
+}
+
+/**
+ * DELETE /accounts/{accountId}/ingredients/{id} - Delete ingredient
+ */
+export function useDeleteIngredient(
+  accountId: string,
+  options?: UseMutationOptions<void, any, string>
+) {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await api.DELETE('/accounts/{accountId}/ingredients/{id}', {
+        params: { path: { accountId, id } },
+      })
+      if (error) throw error
+    },
+    ...options,
+  })
+}
+
+/**
+ * POST /accounts/{accountId}/ingredients/bulk-import - Bulk import ingredients
+ */
+export function useBulkImportIngredients(
+  accountId: string,
+  options?: UseMutationOptions<
+    any,
+    any,
+    components['schemas']['request.BulkImportIngredientsRequest']
+  >
+) {
+  return useMutation({
+    mutationFn: async (body: components['schemas']['request.BulkImportIngredientsRequest']) => {
+      const { data, error } = await api.POST('/accounts/{accountId}/ingredients/bulk-import', {
+        params: { path: { accountId } },
+        body,
+      })
+      if (error) throw error
+      return data!
+    },
+    ...options,
+  })
+}
+
+/**
+ * GET /accounts/{accountId}/ingredients/low-stock - List low stock ingredients
+ */
+export function useLowStockIngredients(
+  accountId: string,
+  params?: { location_id?: string },
+  options?: Omit<UseQueryOptions<components['schemas']['response.IngredientListResponse']>, 'queryKey' | 'queryFn'>
+) {
+  return useQuery({
+    queryKey: ['ingredients', accountId, 'low-stock', params],
+    queryFn: async () => {
+      const { data, error } = await api.GET('/accounts/{accountId}/ingredients/low-stock', {
+        params: {
+          path: { accountId },
+          query: params,
+        },
+      })
+      if (error) throw error
+      return data!
+    },
+    enabled: !!accountId,
+    ...options,
+  })
+}
+
 // Add more hooks as needed for other endpoints...
 // This is a starter set - you can generate more as you build features

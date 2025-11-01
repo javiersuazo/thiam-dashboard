@@ -1,6 +1,5 @@
 import { IngredientList } from "@/components/domains/inventory/ingredients";
-import { getServerAuthToken } from "@/lib/api/server";
-import { decodeToken } from "@/lib/auth/jwt";
+import { createServerClient } from "@/lib/api/server";
 import { redirect } from "next/navigation";
 import { Metadata } from "next";
 
@@ -10,33 +9,56 @@ export const metadata: Metadata = {
 };
 
 export default async function IngredientsPage() {
-  // Get JWT token from httpOnly cookie
-  const token = await getServerAuthToken();
+  const api = await createServerClient();
 
-  if (!token) {
+  if (!api) {
     redirect("/signin");
   }
 
-  // Decode JWT to get account_id claim
-  const claims = decodeToken(token);
-  const accountId = claims.account_id;
+  const { data: accounts, error } = await api.GET('/v1/accounts');
 
-  if (!accountId) {
-    // This shouldn't happen if JWT is properly issued
+  console.log('🔍 Accounts Debug:', {
+    hasAccounts: !!accounts,
+    accountsLength: accounts?.length,
+    accounts: accounts,
+    error: error,
+  });
+
+  let accountId: string;
+
+  if (error || !accounts || accounts.length === 0) {
+    console.warn('⚠️ No accounts found via /accounts endpoint - Using fallback account');
+
+    accountId = "550e8400-e29b-41d4-a716-446655440002";
+
     return (
-      <div className="p-8">
-        <p className="text-error-600">No account ID found in session. Please sign in again.</p>
+      <div>
+        <div className="mb-4 rounded-lg border border-warning-200 bg-warning-50 p-4 dark:border-warning-800 dark:bg-warning-900/20">
+          <h3 className="text-sm font-semibold text-warning-800 dark:text-warning-200">
+            Using Development Account
+          </h3>
+          <p className="mt-1 text-xs text-warning-700 dark:text-warning-300">
+            No accounts found via API. Using fallback account ID for development.
+          </p>
+          {error && (
+            <details className="mt-2">
+              <summary className="cursor-pointer text-xs text-warning-600">View Error</summary>
+              <pre className="mt-2 text-xs text-error-600">
+                {JSON.stringify(error, null, 2)}
+              </pre>
+            </details>
+          )}
+        </div>
+        <IngredientList accountId={accountId} />
       </div>
     );
   }
 
-  // DEV MODE: Hardcoded account for staff@test.thiam.com
-  // TODO: Remove this once we have proper account assignment
-  const devAccountId = "550e8400-e29b-41d4-a716-446655440002";
+  accountId = accounts[0].id!;
 
   return (
     <div>
-      <IngredientList accountId={devAccountId} />
+      <IngredientList accountId={accountId} />
     </div>
   );
 }

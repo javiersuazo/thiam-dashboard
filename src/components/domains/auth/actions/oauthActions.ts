@@ -31,7 +31,7 @@ export async function initiateOAuthAction(
     }
 
     // Get authorization URL from API
-    const endpoint = `/auth/${provider}/login` as '/auth/google/login'
+    const endpoint = `/auth/${provider}/login` as '/v1/auth/google/login'
     const response = await api.GET(endpoint, {})
 
     if (response.error) {
@@ -99,7 +99,7 @@ export async function completeOAuthAction(
     }
 
     // Exchange code for token and user data
-    const endpoint = `/auth/${provider}/callback` as '/auth/google/callback'
+    const endpoint = `/auth/${provider}/callback` as '/v1/auth/google/callback'
     const response = await api.GET(endpoint, {
       params: {
         query: {

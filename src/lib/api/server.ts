@@ -126,7 +126,7 @@ export async function clearServerAuthTokens(): Promise<void> {
  *
  * export async function loginAction(credentials) {
  *   const api = createPublicClient()
- *   const { data, error } = await api.POST('/auth/login', {
+ *   const { data, error } = await api.POST('/v1/auth/login', {
  *     body: credentials
  *   })
  *   // ...
@@ -193,6 +193,12 @@ export function createPublicClient() {
  */
 export async function createServerClient() {
   const token = await getServerAuthToken()
+
+  console.log('🔐 createServerClient - Token check:', {
+    hasToken: !!token,
+    tokenLength: token?.length,
+    tokenPreview: token ? `${token.substring(0, 20)}...` : null,
+  })
 
   if (!token) {
     return null

@@ -82,6 +82,10 @@ export function adaptTableConfig<TData>(
   // Map state
   const initialState = state.initial
   const onStateChange = state.onChange
+  const controlledPagination = state.controlled?.pagination
+  const controlledSorting = state.controlled?.sorting
+  const controlledFilters = state.controlled?.filters
+  const controlledSearch = state.controlled?.search
 
   // Map styling
   const className = styling.table?.className ?? ''
@@ -130,6 +134,10 @@ export function adaptTableConfig<TData>(
     onCancelAll,
     bulkSaveLabel,
     filterOptions: filterOptions as any,
+    controlledPagination,
+    controlledSorting,
+    controlledFilters,
+    controlledSearch,
   }
 }
 

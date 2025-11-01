@@ -193,7 +193,7 @@ export function useIngredients(
   return useQuery({
     queryKey: ['ingredients', accountId, params],
     queryFn: async () => {
-      const { data, error } = await api.GET('/accounts/{accountId}/ingredients', {
+      const { data, error } = await api.GET('/v1/accounts/{accountId}/ingredients', {
         params: {
           path: { accountId },
           query: params as any,
@@ -218,7 +218,7 @@ export function useIngredient(
   return useQuery({
     queryKey: ['ingredients', accountId, ingredientId],
     queryFn: async () => {
-      const { data, error } = await api.GET('/accounts/{accountId}/ingredients/{id}', {
+      const { data, error } = await api.GET('/v1/accounts/{accountId}/ingredients/{id}', {
         params: {
           path: { accountId, id: ingredientId },
         },
@@ -242,7 +242,7 @@ export function useIngredientBatches(
   return useQuery({
     queryKey: ['ingredient-batches', accountId, ingredientId],
     queryFn: async () => {
-      const { data, error } = await api.GET('/accounts/{accountId}/ingredients/{id}/batches', {
+      const { data, error } = await api.GET('/v1/accounts/{accountId}/ingredients/{id}/batches', {
         params: {
           path: { accountId, id: ingredientId },
         },
@@ -265,7 +265,7 @@ export function useLowStockIngredients(
   return useQuery({
     queryKey: ['ingredients', accountId, 'low-stock'],
     queryFn: async () => {
-      const { data, error } = await api.GET('/accounts/{accountId}/ingredients/low-stock', {
+      const { data, error } = await api.GET('/v1/accounts/{accountId}/ingredients/low-stock', {
         params: {
           path: { accountId },
         },
@@ -289,7 +289,7 @@ export function useExpiringBatches(
   return useQuery({
     queryKey: ['ingredients', accountId, 'expiring-batches', daysAhead],
     queryFn: async () => {
-      const { data, error } = await api.GET('/accounts/{accountId}/ingredients/expiring-batches', {
+      const { data, error } = await api.GET('/v1/accounts/{accountId}/ingredients/expiring-batches', {
         params: {
           path: { accountId },
           query: { days_ahead: daysAhead } as any,
@@ -336,7 +336,7 @@ export function useCreateIngredient(
 
   return useMutation({
     mutationFn: async (body: CreateIngredientRequest) => {
-      const { data, error } = await api.POST('/accounts/{accountId}/ingredients', {
+      const { data, error } = await api.POST('/v1/accounts/{accountId}/ingredients', {
         params: { path: { accountId } },
         body: body as any,
       })
@@ -361,7 +361,7 @@ export function useUpdateIngredient(
 
   return useMutation({
     mutationFn: async ({ ingredientId, data: body }) => {
-      const { data, error } = await api.PUT('/accounts/{accountId}/ingredients/{id}', {
+      const { data, error } = await api.PUT('/v1/accounts/{accountId}/ingredients/{id}', {
         params: {
           path: { accountId, id: ingredientId },
         },
@@ -389,7 +389,7 @@ export function useDeleteIngredient(
 
   return useMutation({
     mutationFn: async (ingredientId: string) => {
-      const { error } = await api.DELETE('/accounts/{accountId}/ingredients/{id}', {
+      const { error } = await api.DELETE('/v1/accounts/{accountId}/ingredients/{id}', {
         params: {
           path: { accountId, id: ingredientId },
         },
@@ -415,7 +415,7 @@ export function useAddBatch(
 
   return useMutation({
     mutationFn: async (body: CreateBatchRequest) => {
-      const { data, error } = await api.POST('/accounts/{accountId}/ingredients/batches', {
+      const { data, error } = await api.POST('/v1/accounts/{accountId}/ingredients/batches', {
         params: { path: { accountId } },
         body: body as any,
       })
@@ -441,7 +441,7 @@ export function useConsumeStock(
 
   return useMutation({
     mutationFn: async ({ ingredientId, data: body }) => {
-      const { error } = await api.POST('/accounts/{accountId}/ingredients/{id}/consume', {
+      const { error } = await api.POST('/v1/accounts/{accountId}/ingredients/{id}/consume', {
         params: {
           path: { accountId, id: ingredientId },
         },
@@ -468,12 +468,63 @@ export function useBulkImportIngredients(
 
   return useMutation({
     mutationFn: async (ingredients: CreateIngredientRequest[]) => {
-      const { data, error } = await api.POST('/accounts/{accountId}/ingredients/bulk-import', {
+      const { data, error } = await api.POST('/v1/accounts/{accountId}/ingredients/bulk-import', {
         params: { path: { accountId } },
         body: { ingredients } as any,
       })
       if (error) throw error
       return data as { imported: number; skipped: number; errors?: string[] }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ingredients', accountId] })
+    },
+    ...options,
+  })
+}
+
+/**
+ * DELETE /accounts/{accountId}/ingredients/bulk-delete - Bulk delete ingredients
+ */
+export function useBulkDeleteIngredients(
+  accountId: string,
+  options?: UseMutationOptions<{ deleted: number }, Error, string[]>
+) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { data, error } = await api.DELETE('/v1/accounts/{accountId}/ingredients/bulk-delete', {
+        params: { path: { accountId } },
+        body: { ids } as any,
+      })
+      if (error) throw error
+      return data as { deleted: number }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ingredients', accountId] })
+    },
+    ...options,
+  })
+}
+
+/**
+ * PATCH /accounts/{accountId}/ingredients/batch-update - Batch update ingredients
+ * Updates multiple ingredients with different values for each
+ */
+export function useBatchUpdateIngredients(
+  accountId: string,
+  options?: UseMutationOptions<{ updated: number }, Error, Record<string, Partial<UpdateIngredientRequest>>>
+) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (updates: Record<string, Partial<UpdateIngredientRequest>>) => {
+      const { data, error } = await api.PATCH('/v1/accounts/{accountId}/ingredients/batch-update', {
+        params: { path: { accountId } },
+        body: { updates } as any,
+      })
+      if (error) throw error
+      return data as { updated: number }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ingredients', accountId] })

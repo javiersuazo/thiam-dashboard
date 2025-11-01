@@ -70,15 +70,38 @@ export function AdvancedTableEnhanced<TData, TValue = unknown>({
   onCancelAll,
   bulkSaveLabel,
   filterOptions = [],
+  controlledPagination,
+  controlledSorting,
+  controlledFilters,
+  controlledSearch,
 }: AdvancedTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useState(initialState?.sorting ?? [])
-  const [columnFilters, setColumnFilters] = useState(initialState?.columnFilters ?? [])
+  const [internalSorting, setInternalSorting] = useState(initialState?.sorting ?? [])
+  const [internalColumnFilters, setInternalColumnFilters] = useState(initialState?.columnFilters ?? [])
   const [columnVisibility, setColumnVisibility] = useState(initialState?.columnVisibility ?? {})
   const [rowSelection, setRowSelection] = useState(initialState?.rowSelection ?? {})
-  const [globalFilter, setGlobalFilter] = useState(initialState?.globalFilter ?? '')
+  const [internalGlobalFilter, setInternalGlobalFilter] = useState(initialState?.globalFilter ?? '')
   const [searchInput, setSearchInput] = useState('')
   const [expanded, setExpanded] = useState({})
   const [columnOrder, setColumnOrder] = useState<string[]>(initialState?.columnOrder ?? [])
+
+  const [sorting, setSorting] = controlledSorting || [internalSorting, setInternalSorting]
+  const [columnFilters, setColumnFilters] = controlledFilters || [internalColumnFilters, setInternalColumnFilters]
+  const [globalFilter, setGlobalFilter] = controlledSearch || [internalGlobalFilter, setInternalGlobalFilter]
+
+  console.log('🔄 AdvancedTableEnhanced - State:', {
+    isControlled: {
+      pagination: !!controlledPagination,
+      sorting: !!controlledSorting,
+      filters: !!controlledFilters,
+      search: !!controlledSearch,
+    },
+    currentState: {
+      sorting,
+      columnFilters,
+      globalFilter,
+      pagination: controlledPagination?.[0],
+    },
+  })
 
   const tableContainerRef = useRef<HTMLDivElement>(null)
 
@@ -118,6 +141,7 @@ export function AdvancedTableEnhanced<TData, TValue = unknown>({
       globalFilter,
       expanded,
       columnOrder,
+      pagination: controlledPagination?.[0] || { pageIndex: 0, pageSize: defaultPageSize },
     },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -126,6 +150,7 @@ export function AdvancedTableEnhanced<TData, TValue = unknown>({
     onGlobalFilterChange: setGlobalFilter,
     onExpandedChange: setExpanded,
     onColumnOrderChange: setColumnOrder,
+    onPaginationChange: controlledPagination?.[1],
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: enableFiltering ? getFilteredRowModel() : undefined,
     getSortedRowModel: enableSorting ? getSortedRowModel() : undefined,

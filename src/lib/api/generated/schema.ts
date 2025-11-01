@@ -4666,6 +4666,80 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/accounts/{accountId}/ingredients/batch-update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Batch update ingredients
+         * @description Updates multiple ingredients with different values for each in a single transaction
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Account ID (UUID) */
+                    accountId: string;
+                };
+                cookie?: never;
+            };
+            /** @description Map of ingredient IDs to their updates */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["request.BatchUpdateIngredients"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.BatchUpdateResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
     "/v1/accounts/{accountId}/ingredients/batches": {
         parameters: {
             query?: never;
@@ -15706,6 +15780,15 @@ export interface components {
         };
         /** @enum {string} */
         "entity.AuthorType": "customer" | "caterer" | "staff" | "system";
+        "entity.BulkOperation": {
+            allowedFields?: string[];
+            enabled?: boolean;
+            endpoint?: string;
+        };
+        "entity.BulkOperations": {
+            delete?: components["schemas"]["entity.BulkOperation"];
+            update?: components["schemas"]["entity.BulkOperation"];
+        };
         /** @enum {string} */
         "entity.CateringOfferStatus": "invited" | "draft" | "sent" | "viewed" | "accepted" | "rejected" | "declined" | "expired" | "cancelled";
         /** @enum {string} */
@@ -15716,10 +15799,50 @@ export interface components {
         "entity.ChangeRequestType": "quantity_change" | "item_addition" | "item_removal" | "item_substitution" | "time_change" | "date_change" | "address_change" | "special_instruction" | "pricing_adjustment" | "cancellation" | "other";
         /** @enum {string} */
         "entity.ChangeRequestUrgency": "low" | "normal" | "high" | "critical";
+        "entity.ColumnSchema": {
+            dataType?: components["schemas"]["entity.DataType"];
+            display?: components["schemas"]["entity.DisplaySettings"];
+            editable?: boolean;
+            filterable?: boolean;
+            key?: string;
+            label?: string;
+            multiSelect?: boolean;
+            options?: components["schemas"]["entity.SelectOption"][];
+            required?: boolean;
+            searchable?: boolean;
+            sortKey?: string;
+            sortable?: boolean;
+            type?: components["schemas"]["entity.ColumnType"];
+            validation?: components["schemas"]["entity.Validation"];
+        };
+        /** @enum {string} */
+        "entity.ColumnType": "text" | "number" | "boolean" | "select" | "date" | "datetime" | "currency";
+        /** @enum {string} */
+        "entity.DataType": "string" | "integer" | "decimal" | "boolean" | "date";
         /** @enum {string} */
         "entity.DiscountType": "percentage" | "fixed";
+        "entity.DisplaySettings": {
+            align?: string;
+            component?: string;
+            currency?: string;
+            format?: string;
+            priority?: number;
+            width?: string;
+        };
+        "entity.EntitySchema": {
+            bulkOperations?: components["schemas"]["entity.BulkOperations"];
+            columns?: components["schemas"]["entity.ColumnSchema"][];
+            displayName?: string;
+            entity?: string;
+            filters?: components["schemas"]["entity.FilterConfig"];
+        };
         /** @enum {string} */
         "entity.EventStatus": "planning" | "published" | "in_progress" | "confirmed" | "completed" | "cancelled";
+        "entity.FilterConfig": {
+            search?: boolean;
+            sortBy?: string[];
+            status?: string[];
+        };
         /** @enum {string} */
         "entity.IngredientCategory": "vegetables" | "fruits" | "meat" | "seafood" | "dairy" | "grains" | "bakery" | "spices" | "oils" | "condiments" | "beverages" | "canned" | "frozen" | "supplies" | "other";
         /** @enum {string} */
@@ -15757,6 +15880,12 @@ export interface components {
         "entity.RequestStatus": "submitted" | "qualified" | "open" | "in_progress" | "converted" | "cancelled" | "closed";
         /** @enum {string} */
         "entity.RequestType": "catering" | "event";
+        "entity.SelectOption": {
+            color?: string;
+            icon?: string;
+            label?: string;
+            value?: string;
+        };
         "entity.Translation": {
             /** @example en */
             destination?: string;
@@ -15784,6 +15913,14 @@ export interface components {
             location?: string;
             revokedAt?: string;
             userId?: string;
+        };
+        "entity.Validation": {
+            max?: number;
+            maxLength?: number;
+            min?: number;
+            minLength?: number;
+            pattern?: string;
+            step?: number;
         };
         "request.AcceptOffer": {
             /** @description Optional: for partial acceptance */
@@ -15852,6 +15989,13 @@ export interface components {
         };
         "request.AttachTag": {
             tagId: string;
+        };
+        "request.BatchUpdateIngredients": {
+            updates: {
+                [key: string]: {
+                    [key: string]: unknown;
+                };
+            };
         };
         "request.BlockEntity": {
             entity_id: string;
@@ -16530,6 +16674,17 @@ export interface components {
             unitCostCents?: number;
             updatedAt?: string;
         };
+        "response.BatchUpdateError": {
+            error?: string;
+            id?: string;
+        };
+        "response.BatchUpdateResponse": {
+            failed?: components["schemas"]["response.BatchUpdateError"][];
+            failedCount?: number;
+            message?: string;
+            success?: boolean;
+            updatedCount?: number;
+        };
         "response.Block": {
             created_at?: string;
             entity_id?: string;
@@ -17160,6 +17315,7 @@ export interface components {
             hasPreviousPage?: boolean;
             limit?: number;
             page?: number;
+            schema?: components["schemas"]["entity.EntitySchema"];
             total?: number;
             totalPages?: number;
         };

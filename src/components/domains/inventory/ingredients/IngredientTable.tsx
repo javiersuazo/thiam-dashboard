@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ColumnDef, SortingState, ColumnFiltersState } from '@tanstack/react-table'
 import { AdvancedTable } from '@/components/shared/tables/AdvancedTable'
 import { api, type components } from '@/lib/api'
+import { useBulkDeleteIngredients, useBatchUpdateIngredients } from '@/lib/api/ingredients.hooks'
 import { toast } from 'sonner'
 import { Trash2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -28,6 +29,14 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ['ingredients', accountId, pagination, sorting, columnFilters, globalFilter],
     queryFn: async () => {
+      console.log('🔍 Fetching ingredients with params:', {
+        accountId,
+        pagination,
+        sorting,
+        columnFilters,
+        globalFilter,
+      })
+
       const { data, error } = await api.GET('/v1/accounts/{accountId}/ingredients', {
         params: {
           path: { accountId },
@@ -43,7 +52,15 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
         },
       })
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ Failed to fetch ingredients:', error)
+        throw error
+      }
+
+      console.log('✅ Ingredients fetched:', {
+        count: data?.data?.length || 0,
+        total: data?.meta?.total || 0,
+      })
 
       return {
         data: data?.data || [],
@@ -52,6 +69,7 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
         pageSize: pagination.pageSize,
       }
     },
+    enabled: !!accountId,
     placeholderData: (previousData) => previousData,
   })
 
@@ -71,19 +89,13 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
     },
   })
 
-  const bulkDeleteMutation = useMutation({
-    mutationFn: async (ids: string[]) => {
-      const { error } = await api.DELETE('/v1/accounts/{accountId}/ingredients/bulk-delete', {
-        params: { path: { accountId } },
-        body: { ids },
-      })
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ingredients', accountId] })
+  const bulkDeleteMutation = useBulkDeleteIngredients(accountId, {
+    onSuccess: (data) => {
+      console.log(`✅ Bulk Delete - Success: ${data.deleted} items deleted`)
       toast.success(t('deleteSuccess'))
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('❌ Bulk Delete - Failed:', error)
       toast.error(t('deleteFailed'))
     },
   })
@@ -105,28 +117,44 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
     },
   })
 
+  const batchUpdateMutation = useBatchUpdateIngredients(accountId, {
+    onSuccess: (data) => {
+      console.log(`✅ Batch Update - Success: ${data.updated} items updated`)
+      setEditedRows({})
+      toast.success(t('bulkSaveSuccess'))
+    },
+    onError: (error) => {
+      console.error('❌ Batch Update - Failed:', error)
+      toast.error(t('bulkSaveFailed'))
+    },
+  })
+
   const handleCellEdit = (rowId: string, columnId: string, value: any) => {
-    setEditedRows(prev => ({
-      ...prev,
-      [rowId]: {
-        ...prev[rowId],
-        [columnId]: value,
-      },
-    }))
+    console.log('✏️ Cell Edit:', { rowId, columnId, value })
+    setEditedRows(prev => {
+      const updated = {
+        ...prev,
+        [rowId]: {
+          ...prev[rowId],
+          [columnId]: value,
+        },
+      }
+      console.log('📊 Updated editedRows state:', updated)
+      return updated
+    })
   }
 
   const handleSaveAll = async () => {
-    try {
-      await Promise.all(
-        Object.entries(editedRows).map(([id, updates]) =>
-          updateMutation.mutateAsync({ id, updates })
-        )
-      )
-      setEditedRows({})
-      toast.success(t('bulkSaveSuccess'))
-    } catch (error) {
-      toast.error(t('bulkSaveFailed'))
-    }
+    console.log('💾 Batch Update - Starting for edited rows:', {
+      totalEdited: Object.keys(editedRows).length,
+      editedData: editedRows,
+    })
+
+    console.log('🚀 Sending PATCH /v1/accounts/{accountId}/ingredients/batch-update', {
+      updates: editedRows,
+    })
+
+    await batchUpdateMutation.mutateAsync(editedRows)
   }
 
   const handleCancelAll = () => {
@@ -165,6 +193,28 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
   const columns = useMemo<ColumnDef<Ingredient>[]>(
     () => [
       {
+        id: 'select',
+        header: ({ table }) => (
+          <input
+            type="checkbox"
+            checked={table.getIsAllPageRowsSelected()}
+            onChange={table.getToggleAllPageRowsSelectedHandler()}
+            className="rounded border-gray-300"
+          />
+        ),
+        cell: ({ row }) => (
+          <input
+            type="checkbox"
+            checked={row.getIsSelected()}
+            onChange={row.getToggleSelectedHandler()}
+            className="rounded border-gray-300"
+          />
+        ),
+        size: 50,
+        enableSorting: false,
+        enableHiding: false,
+      },
+      {
         accessorKey: 'name',
         header: t('table.name'),
         cell: ({ row }) => (
@@ -194,7 +244,25 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
         ),
         meta: {
           filterType: 'select',
+          editType: 'select',
           filterOptions: [
+            { label: t('categories.vegetables'), value: 'vegetables' },
+            { label: t('categories.fruits'), value: 'fruits' },
+            { label: t('categories.meat'), value: 'meat' },
+            { label: t('categories.seafood'), value: 'seafood' },
+            { label: t('categories.dairy'), value: 'dairy' },
+            { label: t('categories.grains'), value: 'grains' },
+            { label: t('categories.bakery'), value: 'bakery' },
+            { label: t('categories.spices'), value: 'spices' },
+            { label: t('categories.oils'), value: 'oils' },
+            { label: t('categories.condiments'), value: 'condiments' },
+            { label: t('categories.beverages'), value: 'beverages' },
+            { label: t('categories.canned'), value: 'canned' },
+            { label: t('categories.frozen'), value: 'frozen' },
+            { label: t('categories.supplies'), value: 'supplies' },
+            { label: t('categories.other'), value: 'other' },
+          ],
+          editOptions: [
             { label: t('categories.vegetables'), value: 'vegetables' },
             { label: t('categories.fruits'), value: 'fruits' },
             { label: t('categories.meat'), value: 'meat' },
@@ -329,6 +397,7 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
     <AdvancedTable
       columns={columns}
       data={data?.data || []}
+      getRowId={(row) => row.id!}
 
       features={{
         sorting: true,
@@ -358,7 +427,7 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
       editing={{
         enabled: true,
         mode: 'cell',
-        columns: ['name', 'currentStock', 'costPerUnitCents', 'supplier'],
+        columns: ['name', 'category', 'currentStock', 'costPerUnitCents', 'supplier'],
         onEdit: handleCellEdit,
         bulk: {
           enabled: Object.keys(editedRows).length > 0,

@@ -735,6 +735,8 @@
         "inStock": "In Stock"
       },
       "actions": {
+        "add": "Add Ingredient",
+        "importCSV": "Import CSV",
         "edit": "Edit",
         "delete": "Delete",
         "save": "Save",
@@ -743,6 +745,16 @@
         "confirmDelete": "Are you sure you want to delete \"{name}\"?",
         "confirmDeleteDescription": "This action cannot be undone."
       },
+      "searchPlaceholder": "Search ingredients...",
+      "saveChanges": "Save Changes",
+      "cancelChanges": "Cancel Changes",
+      "bulkSaveSuccess": "All changes saved successfully",
+      "bulkSaveFailed": "Failed to save changes. Please try again.",
+      "changesDiscarded": "Changes discarded",
+      "confirmDelete": "Are you sure you want to delete this ingredient?",
+      "confirmBulkDelete": "Are you sure you want to delete {count} ingredient(s)?",
+      "deleteSuccess": "Ingredient(s) deleted successfully",
+      "deleteFailed": "Failed to delete ingredient(s)",
       "inlineEdit": {
         "doubleClickHint": "Double-click a row to edit",
         "validation": {

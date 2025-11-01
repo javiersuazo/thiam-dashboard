@@ -106,6 +106,11 @@ export interface AdvancedTableProps<TData, TValue = unknown> {
     estimateSize?: number
     overscan?: number
   }
+
+  controlledPagination?: [PaginationState, (updater: PaginationState | ((old: PaginationState) => PaginationState)) => void]
+  controlledSorting?: [SortingState, (updater: SortingState | ((old: SortingState) => SortingState)) => void]
+  controlledFilters?: [ColumnFiltersState, (updater: ColumnFiltersState | ((old: ColumnFiltersState) => ColumnFiltersState)) => void]
+  controlledSearch?: [string, (updater: string | ((old: string) => string)) => void]
 }
 
 export interface ExportOptions {

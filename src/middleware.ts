@@ -33,6 +33,7 @@ const PUBLIC_ROUTES = [
   '/error-503',
   '/maintenance',
   '/table-test',
+  '/menu-builder-test',
 ]
 
 /**

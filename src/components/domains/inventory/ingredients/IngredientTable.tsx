@@ -1,291 +1,382 @@
-"use client";
+'use client'
 
-import React from "react";
-import { useTranslations } from "next-intl";
-import { DataTable, DataTableColumn } from "@/components/shared/common/DataTable";
-import { useBulkOperations } from "@/hooks/useBulkOperations";
-import { useDeleteIngredient, useUpdateIngredient } from "@/lib/api/ingredients.hooks";
-import type { Ingredient } from "@/lib/api/ingredients.hooks";
-import { Trash2 } from "lucide-react";
-import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMemo, useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { ColumnDef, SortingState, ColumnFiltersState } from '@tanstack/react-table'
+import { AdvancedTableEnhanced } from '@/components/shared/tables/AdvancedTable/AdvancedTableEnhanced'
+import { api, type components } from '@/lib/api'
+import { toast } from 'sonner'
+import { Trash2, Pencil } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+
+type Ingredient = components['schemas']['response.IngredientResponse']
+type IngredientCategory = components['schemas']['entity.IngredientCategory']
+type IngredientUnit = components['schemas']['entity.IngredientUnit']
 
 interface IngredientTableProps {
-  accountId: string;
-  data: Ingredient[];
-  isLoading: boolean;
+  accountId: string
 }
 
-export function IngredientTable({ accountId, data, isLoading }: IngredientTableProps) {
-  const t = useTranslations("inventory.ingredients");
-  const queryClient = useQueryClient();
+export function IngredientTable({ accountId }: IngredientTableProps) {
+  const t = useTranslations('inventory.ingredients')
+  const queryClient = useQueryClient()
 
-  const deleteMutation = useDeleteIngredient(accountId);
-  const updateMutation = useUpdateIngredient(accountId);
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 20 })
+  const [sorting, setSorting] = useState<SortingState>([{ id: 'name', desc: false }])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [globalFilter, setGlobalFilter] = useState('')
 
-  // Format currency helper
-  const formatCurrency = (cents: number | null | undefined, currency: string) => {
-    if (cents === null || cents === undefined) return "—";
-    const amount = cents / 100;
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: currency || "USD",
-    }).format(amount);
-  };
+  const { data, isLoading, isFetching } = useQuery({
+    queryKey: ['ingredients', accountId, pagination, sorting, columnFilters, globalFilter],
+    queryFn: async () => {
+      const { data, error } = await api.GET('/ingredients', {
+        params: {
+          query: {
+            location_id: accountId,
+            limit: pagination.pageSize,
+            offset: pagination.pageIndex * pagination.pageSize,
+            sort_by: sorting[0]?.id as any,
+            sort_order: sorting[0]?.desc ? 'desc' : 'asc',
+            search: globalFilter || undefined,
+            category: (columnFilters.find(f => f.id === 'category')?.value as string) || undefined,
+            status: (columnFilters.find(f => f.id === 'status')?.value as any) || undefined,
+          },
+        },
+      })
 
-  // Get stock status helper
-  const getStockStatus = (currentStock: number, reorderLevel: number) => {
-    if (currentStock <= 0) {
+      if (error) throw error
+
       return {
-        label: t("stockStatus.outOfStock"),
-        className: "bg-error-50 text-error-600 dark:bg-error-500/15 dark:text-error-500"
-      };
-    }
-    if (currentStock <= reorderLevel) {
-      return {
-        label: t("stockStatus.lowStock"),
-        className: "bg-warning-50 text-warning-600 dark:bg-warning-500/15 dark:text-warning-500"
-      };
-    }
-    return {
-      label: t("stockStatus.inStock"),
-      className: "bg-success-50 text-success-700 dark:bg-success-500/15 dark:text-success-500"
-    };
-  };
+        data: data?.ingredients || [],
+        total: data?.total || 0,
+        page: pagination.pageIndex + 1,
+        pageSize: pagination.pageSize,
+      }
+    },
+    keepPreviousData: true,
+  })
 
-  // Bulk operations
-  const { bulkDelete } = useBulkOperations<Ingredient>({
-    deleteFn: async (ids) => {
-      // Delete all selected ingredients
-      await Promise.all(ids.map(id => deleteMutation.mutateAsync(id)));
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await api.DELETE('/ingredients/{id}', {
+        params: { path: { id } },
+      })
+      if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ingredients', accountId] });
-      toast.success(t("deleteSuccess"));
+      queryClient.invalidateQueries(['ingredients', accountId])
+      toast.success(t('deleteSuccess'))
     },
     onError: () => {
-      toast.error(t("deleteFailed"));
+      toast.error(t('deleteFailed'))
     },
-    messages: {
-      deleted: t("deleteSuccess"),
-    },
-  });
+  })
 
-  // Define columns
-  const columns: DataTableColumn<Ingredient>[] = [
-    {
-      key: "name",
-      label: t("table.name"),
-      sortable: true,
-      editable: true,
-      width: "200px",
-      render: (value, row) => (
-        <div className="flex flex-col">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-400">
-            {value}
-          </span>
-          {row.description && (
-            <span className="text-xs text-gray-500 dark:text-gray-500 truncate max-w-xs">
-              {row.description}
-            </span>
-          )}
-        </div>
-      ),
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      await Promise.all(ids.map(id =>
+        api.DELETE('/ingredients/{id}', {
+          params: { path: { id } },
+        })
+      ))
     },
-    {
-      key: "category",
-      label: t("table.category"),
-      sortable: true,
-      render: (value) => (
-        <span className="text-sm text-gray-700 dark:text-gray-400 capitalize">
-          {t(`categories.${value}`)}
-        </span>
-      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['ingredients', accountId])
+      toast.success(t('deleteSuccess'))
     },
-    {
-      key: "currentStock",
-      label: t("table.stock"),
-      sortable: true,
-      editable: true,
-      render: (value, row) => (
-        <div>
-          <span className="text-sm text-gray-700 dark:text-gray-400">
-            {value.toFixed(2)}
-          </span>
-          <span className="text-xs text-gray-500 dark:text-gray-500 ml-1">
-            ({t("table.reorderLevel")}: {row.reorderLevel})
-          </span>
-        </div>
-      ),
-      renderEdit: (value, onChange) => (
-        <div className="flex items-center gap-2">
+    onError: () => {
+      toast.error(t('deleteFailed'))
+    },
+  })
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Ingredient> }) => {
+      const { error } = await api.PUT('/ingredients/{id}', {
+        params: { path: { id } },
+        body: updates as any,
+      })
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['ingredients', accountId])
+      toast.success(t('inlineEdit.success'))
+    },
+    onError: () => {
+      toast.error(t('inlineEdit.error'))
+    },
+  })
+
+  const formatCurrency = (cents: number | null | undefined, currency?: string) => {
+    if (cents === null || cents === undefined) return '—'
+    const amount = cents / 100
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency || 'USD',
+    }).format(amount)
+  }
+
+  const getStockStatus = (currentStock?: number, reorderLevel?: number) => {
+    if (!currentStock || currentStock <= 0) {
+      return {
+        label: t('stockStatus.outOfStock'),
+        className: 'bg-error-50 text-error-600 dark:bg-error-500/15 dark:text-error-500',
+      }
+    }
+    if (reorderLevel && currentStock <= reorderLevel) {
+      return {
+        label: t('stockStatus.lowStock'),
+        className: 'bg-warning-50 text-warning-600 dark:bg-warning-500/15 dark:text-warning-500',
+      }
+    }
+    return {
+      label: t('stockStatus.inStock'),
+      className: 'bg-success-50 text-success-700 dark:bg-success-500/15 dark:text-success-500',
+    }
+  }
+
+  const handleCellEdit = async (rowId: string, columnId: string, value: any) => {
+    if (columnId === 'name' && typeof value === 'string' && value.trim() === '') {
+      toast.error(t('inlineEdit.validation.nameRequired'))
+      throw new Error('Name is required')
+    }
+
+    if ((columnId === 'currentStock' || columnId === 'reorderLevel' || columnId === 'costPerUnitCents') &&
+        (value < 0 || isNaN(value))) {
+      toast.error(t('inlineEdit.validation.stockPositive'))
+      throw new Error('Invalid value')
+    }
+
+    updateMutation.mutate({
+      id: rowId,
+      updates: { [columnId]: value },
+    })
+  }
+
+  const columns = useMemo<ColumnDef<Ingredient>[]>(
+    () => [
+      {
+        id: 'select',
+        header: ({ table }) => (
           <input
-            type="number"
-            step="0.01"
-            value={value ?? ""}
-            onChange={(e) => onChange(parseFloat(e.target.value))}
-            className="text-sm w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            type="checkbox"
+            checked={table.getIsAllPageRowsSelected()}
+            onChange={table.getToggleAllPageRowsSelectedHandler()}
+            className="rounded border-gray-300"
           />
-        </div>
-      ),
-    },
-    {
-      key: "unit",
-      label: t("table.unit"),
-      render: (value) => (
-        <span className="text-sm text-gray-700 dark:text-gray-400 uppercase">
-          {value}
-        </span>
-      ),
-    },
-    {
-      key: "costPerUnitCents",
-      label: t("table.costPerUnit"),
-      sortable: true,
-      editable: true,
-      render: (value, row) => (
-        <span className="text-sm text-gray-700 dark:text-gray-400">
-          {formatCurrency(value, row.currency)}
-        </span>
-      ),
-      renderEdit: (value, onChange) => (
-        <input
-          type="number"
-          step="1"
-          value={value ?? ""}
-          onChange={(e) => onChange(parseInt(e.target.value))}
-          className="text-sm w-24 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Cost (cents)"
-        />
-      ),
-    },
-    {
-      key: "supplier",
-      label: t("table.supplier"),
-      editable: true,
-      render: (value) => (
-        <span className="text-sm text-gray-700 dark:text-gray-400">
-          {value || "—"}
-        </span>
-      ),
-      renderEdit: (value, onChange) => (
-        <input
-          type="text"
-          value={value || ""}
-          onChange={(e) => onChange(e.target.value)}
-          className="text-sm w-32 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Supplier"
-        />
-      ),
-    },
-    {
-      key: "stockStatus",
-      label: t("table.status"),
-      render: (_, row) => {
-        const status = getStockStatus(row.currentStock, row.reorderLevel);
-        return (
-          <span className={`text-theme-xs rounded-full px-2 py-0.5 font-medium ${status.className}`}>
-            {status.label}
-          </span>
-        );
+        ),
+        cell: ({ row }) => (
+          <input
+            type="checkbox"
+            checked={row.getIsSelected()}
+            onChange={row.getToggleSelectedHandler()}
+            className="rounded border-gray-300"
+          />
+        ),
+        size: 50,
       },
-    },
-    {
-      key: "isActive",
-      label: t("table.active"),
-      align: "center",
-      editable: true,
-      render: (value) => (
-        <input
-          type="checkbox"
-          checked={value}
-          disabled
-          className="h-4 w-4 rounded border-gray-300 text-blue-600 disabled:opacity-50 dark:border-gray-600"
-        />
-      ),
-      renderEdit: (value, onChange) => (
-        <input
-          type="checkbox"
-          checked={value}
-          onChange={(e) => onChange(e.target.checked)}
-          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800"
-        />
-      ),
-    },
-  ];
-
-  // Handle update with validation
-  const handleUpdate = async (id: string, updateData: Partial<Ingredient>) => {
-    // Validation
-    if (updateData.name !== undefined && updateData.name.trim() === '') {
-      toast.error(t("inlineEdit.validation.nameRequired"));
-      throw new Error("Name is required");
-    }
-    if (updateData.currentStock !== undefined && (updateData.currentStock < 0 || isNaN(updateData.currentStock))) {
-      toast.error(t("inlineEdit.validation.stockPositive"));
-      throw new Error("Invalid stock");
-    }
-    if (updateData.reorderLevel !== undefined && (updateData.reorderLevel < 0 || isNaN(updateData.reorderLevel))) {
-      toast.error(t("inlineEdit.validation.reorderLevelPositive"));
-      throw new Error("Invalid reorder level");
-    }
-    if (updateData.costPerUnitCents !== undefined && (updateData.costPerUnitCents < 0 || isNaN(updateData.costPerUnitCents))) {
-      toast.error(t("inlineEdit.validation.costPositive"));
-      throw new Error("Invalid cost");
-    }
-
-    try {
-      await updateMutation.mutateAsync({
-        ingredientId: id,
-        data: updateData,
-      });
-      toast.success(t("inlineEdit.success"));
-    } catch (error) {
-      toast.error(t("inlineEdit.error"));
-      throw error;
-    }
-  };
-
-  // Handle delete
-  const handleDelete = async (id: string) => {
-    try {
-      await deleteMutation.mutateAsync(id);
-      toast.success(t("deleteSuccess"));
-    } catch (error) {
-      toast.error(t("deleteFailed"));
-    }
-  };
+      {
+        accessorKey: 'name',
+        header: t('table.name'),
+        cell: ({ row }) => (
+          <div className="flex flex-col">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              {row.original.name}
+            </span>
+            {row.original.description && (
+              <span className="text-xs text-gray-500 dark:text-gray-500 truncate max-w-xs">
+                {row.original.description}
+              </span>
+            )}
+          </div>
+        ),
+        meta: {
+          filterType: 'text',
+          editType: 'text',
+        },
+      },
+      {
+        accessorKey: 'category',
+        header: t('table.category'),
+        cell: ({ row }) => (
+          <span className="text-sm text-gray-700 dark:text-gray-400 capitalize">
+            {row.original.category}
+          </span>
+        ),
+        meta: {
+          filterType: 'select',
+          filterOptions: [
+            { label: t('categories.vegetables'), value: 'vegetables' },
+            { label: t('categories.fruits'), value: 'fruits' },
+            { label: t('categories.meat'), value: 'meat' },
+            { label: t('categories.seafood'), value: 'seafood' },
+            { label: t('categories.dairy'), value: 'dairy' },
+            { label: t('categories.grains'), value: 'grains' },
+            { label: t('categories.bakery'), value: 'bakery' },
+            { label: t('categories.spices'), value: 'spices' },
+            { label: t('categories.oils'), value: 'oils' },
+            { label: t('categories.condiments'), value: 'condiments' },
+            { label: t('categories.beverages'), value: 'beverages' },
+            { label: t('categories.canned'), value: 'canned' },
+            { label: t('categories.frozen'), value: 'frozen' },
+            { label: t('categories.supplies'), value: 'supplies' },
+            { label: t('categories.other'), value: 'other' },
+          ],
+        },
+      },
+      {
+        accessorKey: 'currentStock',
+        header: t('table.stock'),
+        cell: ({ row }) => (
+          <div>
+            <span className="text-sm text-gray-700 dark:text-gray-400">
+              {row.original.currentStock?.toFixed(2) || '0.00'}
+            </span>
+            {row.original.reorderLevel && (
+              <span className="text-xs text-gray-500 dark:text-gray-500 ml-1">
+                ({t('table.reorderLevel')}: {row.original.reorderLevel})
+              </span>
+            )}
+          </div>
+        ),
+        meta: {
+          editType: 'number',
+        },
+      },
+      {
+        accessorKey: 'unit',
+        header: t('table.unit'),
+        cell: ({ row }) => (
+          <span className="text-sm text-gray-700 dark:text-gray-400 uppercase">
+            {row.original.unit}
+          </span>
+        ),
+      },
+      {
+        accessorKey: 'costPerUnitCents',
+        header: t('table.costPerUnit'),
+        cell: ({ row }) => (
+          <span className="text-sm text-gray-700 dark:text-gray-400">
+            {formatCurrency(row.original.costPerUnitCents, row.original.currency)}
+          </span>
+        ),
+        meta: {
+          editType: 'number',
+        },
+      },
+      {
+        accessorKey: 'supplier',
+        header: t('table.supplier'),
+        cell: ({ row }) => (
+          <span className="text-sm text-gray-700 dark:text-gray-400">
+            {row.original.supplier || '—'}
+          </span>
+        ),
+        meta: {
+          filterType: 'text',
+          editType: 'text',
+        },
+      },
+      {
+        id: 'stockStatus',
+        header: t('table.status'),
+        cell: ({ row }) => {
+          const status = getStockStatus(row.original.currentStock, row.original.reorderLevel)
+          return (
+            <span className={`text-xs rounded-full px-2 py-0.5 font-medium ${status.className}`}>
+              {status.label}
+            </span>
+          )
+        },
+        meta: {
+          filterType: 'select',
+          filterOptions: [
+            { label: t('stockStatus.inStock'), value: 'active' },
+            { label: t('stockStatus.lowStock'), value: 'low_stock' },
+            { label: t('stockStatus.outOfStock'), value: 'inactive' },
+          ],
+        },
+      },
+      {
+        accessorKey: 'isActive',
+        header: t('table.active'),
+        cell: ({ row }) => (
+          <input
+            type="checkbox"
+            checked={row.original.isActive}
+            disabled
+            className="h-4 w-4 rounded border-gray-300 text-blue-600 disabled:opacity-50"
+          />
+        ),
+      },
+      {
+        id: 'actions',
+        header: t('table.actions'),
+        cell: ({ row }) => (
+          <button
+            onClick={() => {
+              if (confirm(t('confirmDelete', { name: row.original.name }))) {
+                deleteMutation.mutate(row.original.id!)
+              }
+            }}
+            className="text-red-600 hover:text-red-700"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        ),
+      },
+    ],
+    [t]
+  )
 
   return (
-    <DataTable
-      data={data}
+    <AdvancedTableEnhanced
       columns={columns}
-      loading={isLoading}
-      emptyMessage={t("emptyState")}
-      selectable
-      onDoubleClickEdit
-      onUpdate={handleUpdate}
-      onDelete={handleDelete}
+      data={data?.data || []}
+      enableSorting
+      enableFiltering
+      enableGlobalFilter
+      enablePagination
+      enableRowSelection
+      enableMultiRowSelection
+      serverSide={{
+        enabled: true,
+        isLoading,
+        isFetching,
+        totalPages: Math.ceil((data?.total || 0) / pagination.pageSize),
+      }}
       bulkActions={[
         {
-          label: t("actions.delete") + " selected",
-          variant: "danger",
-          onClick: (ids) => {
-            const items = data.filter(item => ids.includes(item.id));
-            bulkDelete(ids, items);
+          label: t('actions.delete') + ' Selected',
+          variant: 'destructive',
+          icon: <Trash2 className="w-4 h-4" />,
+          onClick: (selectedRows) => {
+            const ids = selectedRows.map((row) => row.id!)
+            if (confirm(t('confirmBulkDelete', { count: ids.length }))) {
+              bulkDeleteMutation.mutate(ids)
+            }
           },
         },
       ]}
-      actions={[
-        {
-          label: t("actions.delete"),
-          icon: <Trash2 className="h-4 w-4" />,
-          variant: "danger",
-          onClick: (row) => handleDelete(row.id),
-        },
-      ]}
-      defaultSortBy="name"
-      defaultSortOrder="asc"
+      editableColumns={['name', 'currentStock', 'costPerUnitCents', 'supplier']}
+      onCellEdit={handleCellEdit}
+      onStateChange={(state) => {
+        if (state.sorting) setSorting(state.sorting)
+        if (state.columnFilters) setColumnFilters(state.columnFilters)
+        if (state.pagination) setPagination(state.pagination)
+        if (state.globalFilter !== undefined) setGlobalFilter(state.globalFilter)
+      }}
+      initialState={{
+        sorting,
+        columnFilters,
+        pagination,
+      }}
+      searchPlaceholder={t('searchPlaceholder')}
+      exportFileName="ingredients"
+      emptyState={
+        <div className="flex flex-col items-center justify-center py-12">
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t('emptyState')}</p>
+        </div>
+      }
     />
-  );
+  )
 }

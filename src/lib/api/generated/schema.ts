@@ -418,6 +418,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/accounts/{accountId}/payment-methods/default": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get default payment method
+         * @description Retrieves the default payment method for an account
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Account ID */
+                    accountId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.PaymentMethod"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/accounts/{accountId}/payment-methods/{id}": {
         parameters: {
             query?: never;
@@ -545,66 +605,6 @@ export interface paths {
                 };
             };
         };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/accounts/{accountId}/payment-methods/default": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get default payment method
-         * @description Retrieves the default payment method for an account
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Account ID */
-                    accountId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.PaymentMethod"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-                /** @description Internal Server Error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2418,7 +2418,7 @@ export interface paths {
         };
         /**
          * Verify email address
-         * @description Verifies a user's email address using the verification token
+         * @description Verifies a user's email address using the verification token and returns session tokens
          */
         get: {
             parameters: {
@@ -2438,7 +2438,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Success"];
+                        "application/json": components["schemas"]["response.AccessToken"];
                     };
                 };
                 /** @description Bad Request */
@@ -2839,6 +2839,125 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/passkey/login/begin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Begin WebAuthn login
+         * @description Start the WebAuthn authentication flow using discoverable credentials (no user ID required)
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/passkey/login/finish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Finish WebAuthn login
+         * @description Complete the WebAuthn authentication and receive access token (user identified by credential)
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Authentication response */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["request.FinishWebAuthnLogin"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.AccessToken"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/password/forgot": {
         parameters: {
             query?: never;
@@ -2982,6 +3101,205 @@ export interface paths {
             requestBody: {
                 content: {
                     "application/json": components["schemas"]["request.ResetPassword"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.AccessToken"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/passwordless/email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Request passwordless login by email
+         * @description Send a magic link to user's email for passwordless authentication
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Request Passwordless Login */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["request.PasswordlessLoginByEmail"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/passwordless/phone": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Request passwordless login by phone
+         * @description Send a 6-digit code to user's phone for passwordless authentication
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Request Passwordless Login */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["request.PasswordlessLoginByPhone"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/passwordless/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Verify passwordless login
+         * @description Verify a passwordless login token (from email or SMS) and issue JWT tokens
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Verify Passwordless Login */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["request.VerifyPasswordlessLogin"];
                 };
             };
             responses: {
@@ -3230,6 +3548,434 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/webauthn/credentials": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List WebAuthn credentials
+         * @description Get all registered passkeys for the authenticated user
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.WebAuthnCredential"][];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/webauthn/credentials/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete WebAuthn credential
+         * @description Remove a registered passkey
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Credential ID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "*/*": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "*/*": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "*/*": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/webauthn/register/begin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Begin WebAuthn registration
+         * @description Start the WebAuthn credential registration flow for the authenticated user
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/webauthn/register/finish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Finish WebAuthn registration
+         * @description Complete the WebAuthn credential registration flow
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Registration response */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["request.FinishWebAuthnRegistration"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.WebAuthnCredential"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/batches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add batch
+         * @description Add a new stock batch (receive stock)
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Batch data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["request.CreateBatchRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.BatchResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/batches/expiring": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List expiring batches
+         * @description Get batches approaching expiration
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Days ahead to check */
+                    days_ahead?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.ExpiringBatchListResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/batches/{id}/quality-status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Update batch quality status
+         * @description Update the quality status of a batch
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Batch ID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            /** @description Quality status */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["request.UpdateQualityStatusRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/blocks": {
         parameters: {
             query?: never;
@@ -3296,64 +4042,6 @@ export interface paths {
             };
         };
         delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/blocks/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Unblock entity
-         * @description Removes a block by ID
-         */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Block ID */
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description No Content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-                /** @description Internal Server Error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-            };
-        };
         options?: never;
         head?: never;
         patch?: never;
@@ -3486,6 +4174,64 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/blocks/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Unblock entity
+         * @description Removes a block by ID
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Block ID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
         options?: never;
         head?: never;
         patch?: never;
@@ -5778,6 +6524,358 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/events/blocks/{blockId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Event Block
+         * @description Retrieve a block by ID
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Block ID */
+                    blockId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.EventBlock"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        /**
+         * Delete Event Block
+         * @description Delete a block
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Block ID */
+                    blockId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Success"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        /**
+         * Update Event Block
+         * @description Update an existing block
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Block ID */
+                    blockId: string;
+                };
+                cookie?: never;
+            };
+            /** @description Update details */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["request.UpdateEventBlock"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.EventBlock"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/events/by-customer/{customerId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Events By Customer
+         * @description List all events for a customer
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Limit */
+                    limit?: number;
+                    /** @description Offset */
+                    offset?: number;
+                };
+                header?: never;
+                path: {
+                    /** @description Customer ID */
+                    customerId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.EventList"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/events/by-request/{requestId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Event By Request ID
+         * @description Retrieve an event by its request ID
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Request ID */
+                    requestId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Event"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/events/by-status/{status}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Events By Status
+         * @description List all events with a specific status
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Limit */
+                    limit?: number;
+                    /** @description Offset */
+                    offset?: number;
+                };
+                header?: never;
+                path: {
+                    /** @description Event Status */
+                    status: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.EventList"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/events/{id}": {
         parameters: {
             query?: never;
@@ -6298,358 +7396,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/events/blocks/{blockId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Event Block
-         * @description Retrieve a block by ID
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Block ID */
-                    blockId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.EventBlock"];
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        /**
-         * Delete Event Block
-         * @description Delete a block
-         */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Block ID */
-                    blockId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Success"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        /**
-         * Update Event Block
-         * @description Update an existing block
-         */
-        patch: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Block ID */
-                    blockId: string;
-                };
-                cookie?: never;
-            };
-            /** @description Update details */
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["request.UpdateEventBlock"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.EventBlock"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-            };
-        };
-        trace?: never;
-    };
-    "/events/by-customer/{customerId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Events By Customer
-         * @description List all events for a customer
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Limit */
-                    limit?: number;
-                    /** @description Offset */
-                    offset?: number;
-                };
-                header?: never;
-                path: {
-                    /** @description Customer ID */
-                    customerId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.EventList"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/events/by-request/{requestId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Event By Request ID
-         * @description Retrieve an event by its request ID
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Request ID */
-                    requestId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Event"];
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/events/by-status/{status}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Events By Status
-         * @description List all events with a specific status
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Limit */
-                    limit?: number;
-                    /** @description Offset */
-                    offset?: number;
-                };
-                header?: never;
-                path: {
-                    /** @description Event Status */
-                    status: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.EventList"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/favorites": {
         parameters: {
             query?: never;
@@ -6716,64 +7462,6 @@ export interface paths {
             };
         };
         delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/favorites/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Remove favorite
-         * @description Removes a favorite by ID
-         */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Favorite ID */
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description No Content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-                /** @description Internal Server Error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-            };
-        };
         options?: never;
         head?: never;
         patch?: never;
@@ -6906,6 +7594,64 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/favorites/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Remove favorite
+         * @description Removes a favorite by ID
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Favorite ID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
         options?: never;
         head?: never;
         patch?: never;
@@ -7137,6 +7883,579 @@ export interface paths {
                 };
             };
         };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ingredients": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List ingredients
+         * @description Get paginated list of ingredients with filters
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Location ID */
+                    location_id?: string;
+                    /** @description Status filter */
+                    status?: "active" | "inactive" | "low_stock";
+                    /** @description Category filter */
+                    category?: string;
+                    /** @description Search in name, supplier */
+                    search?: string;
+                    /** @description Sort column */
+                    sort_by?: "name" | "category" | "cost" | "stock" | "created_at";
+                    /** @description Sort order */
+                    sort_order?: "asc" | "desc";
+                    /** @description Page number */
+                    page?: number;
+                    /** @description Items per page */
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.IngredientListResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /**
+         * Create ingredient
+         * @description Create a new ingredient
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Ingredient data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["request.CreateIngredientRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.IngredientResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ingredients/bulk-import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Bulk import ingredients
+         * @description Import multiple ingredients from CSV
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Ingredients to import */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["request.BulkImportIngredientsRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.BulkImportResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ingredients/low-stock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List low stock ingredients
+         * @description Get ingredients with low stock for a caterer
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.StockListResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ingredients/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get ingredient
+         * @description Get ingredient by ID
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Ingredient ID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.IngredientResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        /**
+         * Update ingredient
+         * @description Update an existing ingredient (for inline editing)
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Ingredient ID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            /** @description Updated data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["request.UpdateIngredientRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.IngredientResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        /**
+         * Delete ingredient
+         * @description Delete an ingredient
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Ingredient ID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ingredients/{id}/batches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List batches for ingredient
+         * @description Get all batches for an ingredient
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Ingredient ID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.BatchListResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ingredients/{id}/consume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Consume stock
+         * @description Consume stock using FIFO method
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Ingredient ID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            /** @description Consumption data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["request.ConsumeStockRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ingredients/{id}/stocks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List ingredient stocks by location
+         * @description Get stock levels for an ingredient across all locations
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Ingredient ID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.StockListResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -7400,73 +8719,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/media/{key}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Delete media file
-         * @description Delete a media file from S3 storage
-         */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description S3 object key */
-                    key: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description No Content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-                /** @description Internal Server Error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/media/signed-url/{key}": {
         parameters: {
             query?: never;
@@ -7611,6 +8863,73 @@ export interface paths {
             };
         };
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/media/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete media file
+         * @description Delete a media file from S3 storage
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description S3 object key */
+                    key: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
         options?: never;
         head?: never;
         patch?: never;
@@ -8032,6 +9351,68 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/menu-items/{id}/media/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Update media display order
+         * @description Updates the display order of a media association for menu item
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Menu Item ID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["request.ReorderMedia"];
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/menu-items/{id}/media/{mediaId}": {
         parameters: {
             query?: never;
@@ -8131,68 +9512,6 @@ export interface paths {
                 };
                 /** @description Not Found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-                /** @description Internal Server Error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/menu-items/{id}/media/reorder": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Update media display order
-         * @description Updates the display order of a media association for menu item
-         */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Menu Item ID */
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody: components["requestBodies"]["request.ReorderMedia"];
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Bad Request */
-                400: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -8477,6 +9796,135 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["response.Menu"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/menus/courses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create menu course
+         * @description Creates a new course in a menu
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Course creation request */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["request.CreateMenuCourse"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.MenuCourse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/menus/courses/{courseId}/items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Assign item to course
+         * @description Assigns a menu item to a menu course
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Course ID */
+                    courseId: string;
+                };
+                cookie?: never;
+            };
+            /** @description Assignment request */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["request.AssignItemToCourse"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
                     };
                 };
                 /** @description Bad Request */
@@ -8854,6 +10302,68 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/menus/{id}/media/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Update media display order
+         * @description Updates the display order of a media association
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Menu ID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["request.ReorderMedia"];
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/menus/{id}/media/{mediaId}": {
         parameters: {
             query?: never;
@@ -8972,197 +10482,6 @@ export interface paths {
             };
         };
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/menus/{id}/media/reorder": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Update media display order
-         * @description Updates the display order of a media association
-         */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Menu ID */
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody: components["requestBodies"]["request.ReorderMedia"];
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-                /** @description Internal Server Error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/menus/courses": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Create menu course
-         * @description Creates a new course in a menu
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            /** @description Course creation request */
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["request.CreateMenuCourse"];
-                };
-            };
-            responses: {
-                /** @description Created */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.MenuCourse"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-                /** @description Internal Server Error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/menus/courses/{courseId}/items": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Assign item to course
-         * @description Assigns a menu item to a menu course
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Course ID */
-                    courseId: string;
-                };
-                cookie?: never;
-            };
-            /** @description Assignment request */
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["request.AssignItemToCourse"];
-                };
-            };
-            responses: {
-                /** @description Created */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-                /** @description Internal Server Error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-            };
-        };
         delete?: never;
         options?: never;
         head?: never;
@@ -10534,6 +11853,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/payments/intents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create payment intent
+         * @description Creates a Stripe payment intent for an order
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Payment intent creation request */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["request.CreatePaymentIntent"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.PaymentIntent"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/payments/{id}": {
         parameters: {
             query?: never;
@@ -10635,86 +12034,6 @@ export interface paths {
                 };
                 /** @description Bad Request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-                /** @description Forbidden */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-                /** @description Internal Server Error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/payments/intents": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Create payment intent
-         * @description Creates a Stripe payment intent for an order
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            /** @description Payment intent creation request */
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["request.CreatePaymentIntent"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.PaymentIntent"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -11137,6 +12456,71 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/requests/orders/{orderId}/clone": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Clone From Order
+         * @description Create a new request from a previous order
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Source Order ID */
+                    orderId: string;
+                };
+                cookie?: never;
+            };
+            /** @description Clone details */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["request.CloneFromOrder"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Request"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/requests/{id}": {
         parameters: {
             query?: never;
@@ -11430,71 +12814,6 @@ export interface paths {
                 };
                 /** @description Unauthorized */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/requests/orders/{orderId}/clone": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Clone From Order
-         * @description Create a new request from a previous order
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Source Order ID */
-                    orderId: string;
-                };
-                cookie?: never;
-            };
-            /** @description Clone details */
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["request.CloneFromOrder"];
-                };
-            };
-            responses: {
-                /** @description Created */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Request"];
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -12494,6 +13813,63 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/users/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get current user
+         * @description Get the authenticated user's information
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.User"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/users/{id}": {
         parameters: {
             query?: never;
@@ -12994,63 +14370,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/users/me": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get current user
-         * @description Get the authenticated user's information
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.User"];
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-                /** @description Internal Server Error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/wallets": {
         parameters: {
             query?: never;
@@ -13098,6 +14417,77 @@ export interface paths {
                 };
                 /** @description Unauthorized */
                 401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/wallets/transfer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Transfer between wallets
+         * @description Transfers funds from one wallet to another
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Transfer request */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["request.TransferBetweenWallets"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.TransferResult"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -13686,77 +15076,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/wallets/transfer": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Transfer between wallets
-         * @description Transfers funds from one wallet to another
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            /** @description Transfer request */
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["request.TransferBetweenWallets"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.TransferResult"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-                /** @description Forbidden */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-                /** @description Internal Server Error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response.Error"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/webhooks/stripe": {
         parameters: {
             query?: never;
@@ -13844,6 +15163,10 @@ export interface components {
         "entity.DiscountType": "percentage" | "fixed";
         /** @enum {string} */
         "entity.EventStatus": "planning" | "published" | "in_progress" | "confirmed" | "completed" | "cancelled";
+        /** @enum {string} */
+        "entity.IngredientCategory": "vegetables" | "fruits" | "meat" | "seafood" | "dairy" | "grains" | "bakery" | "spices" | "oils" | "condiments" | "beverages" | "canned" | "frozen" | "supplies" | "other";
+        /** @enum {string} */
+        "entity.IngredientUnit": "kg" | "g" | "l" | "ml" | "piece";
         "entity.LoginAttempt": {
             createdAt?: string;
             deviceInfo?: string;
@@ -13871,6 +15194,8 @@ export interface components {
         "entity.OrderStatus": "pending" | "confirmed" | "in_preparation" | "delivered" | "cancelled";
         /** @enum {string} */
         "entity.Priority": "low" | "medium" | "high" | "urgent";
+        /** @enum {string} */
+        "entity.QualityStatus": "good" | "near_expiry" | "expired" | "damaged" | "recalled";
         /** @enum {string} */
         "entity.RequestStatus": "submitted" | "qualified" | "open" | "in_progress" | "converted" | "cancelled" | "closed";
         /** @enum {string} */
@@ -13980,6 +15305,9 @@ export interface components {
             owner_type: "user" | "account";
             reason?: string;
         };
+        "request.BulkImportIngredientsRequest": {
+            ingredients: components["schemas"]["request.CreateIngredientRequest"][];
+        };
         "request.CancelDelivery": {
             reason: string;
         };
@@ -14007,6 +15335,14 @@ export interface components {
             /** @example Payment confirmed */
             notes?: string;
         };
+        "request.ConsumeStockRequest": {
+            locationId: string;
+            /** @enum {string} */
+            movementType: "consume_production" | "waste_adjustment" | "manual_adjustment";
+            quantity: number;
+            referenceId?: string;
+            referenceType?: string;
+        };
         "request.ConvertCartToOrder": {
             costCenterId?: string;
             deliveryAddressId?: string;
@@ -14027,6 +15363,22 @@ export interface components {
             line1: string;
             line2?: string;
             postalCode?: string;
+        };
+        "request.CreateBatchRequest": {
+            batchNumber?: string;
+            currency?: string;
+            currentQuantity: number;
+            /** @description YYYY-MM-DD */
+            expirationDate?: string;
+            ingredientId: string;
+            locationId: string;
+            notes?: string;
+            purchaseOrderId?: string;
+            /** @description YYYY-MM-DD */
+            receivedDate: string;
+            receivedQuantity: number;
+            supplierName?: string;
+            unitCostCents?: number;
         };
         "request.CreateChangeRequest": {
             assignedTo?: string;
@@ -14077,6 +15429,20 @@ export interface components {
             rating?: number;
             tags?: string[];
             user_id: string;
+        };
+        "request.CreateIngredientRequest": {
+            /** @enum {string} */
+            category: "vegetables" | "fruits" | "meat" | "seafood" | "dairy" | "grains" | "bakery" | "spices" | "oils" | "condiments" | "beverages" | "canned" | "frozen" | "supplies" | "other";
+            costPerUnitCents?: number;
+            currency?: string;
+            currentStock?: number;
+            description?: string;
+            isActive?: boolean;
+            name: string;
+            reorderLevel?: number;
+            supplier?: string;
+            /** @enum {string} */
+            unit: "kg" | "g" | "l" | "ml" | "piece";
         };
         "request.CreateMenu": {
             catererId: string;
@@ -14245,6 +15611,13 @@ export interface components {
         "request.ExchangeOTT": {
             token: string;
         };
+        "request.FinishWebAuthnLogin": {
+            response: unknown;
+        };
+        "request.FinishWebAuthnRegistration": {
+            name: string;
+            response: unknown;
+        };
         "request.ForgotPassword": {
             email: string;
         };
@@ -14281,6 +15654,12 @@ export interface components {
             recipientName?: string;
             /** @example base64-encoded-signature */
             signature?: string;
+        };
+        "request.PasswordlessLoginByEmail": {
+            email: string;
+        };
+        "request.PasswordlessLoginByPhone": {
+            phone: string;
         };
         "request.PlaceHold": {
             amount_cents: number;
@@ -14405,6 +15784,19 @@ export interface components {
             rating?: number;
             tags?: string[];
         };
+        "request.UpdateIngredientRequest": {
+            category?: string;
+            costPerUnitCents?: number;
+            currency?: string;
+            currentStock?: number;
+            description?: string;
+            isActive?: boolean;
+            name?: string;
+            reorderLevel?: number;
+            supplier?: string;
+            /** @enum {string} */
+            unit?: "kg" | "g" | "l" | "ml" | "piece";
+        };
         "request.UpdateLocation": {
             accuracyMeters?: number;
             batteryLevel?: number;
@@ -14463,6 +15855,10 @@ export interface components {
             visibleUntil?: string;
             weightG?: number;
         };
+        "request.UpdateQualityStatusRequest": {
+            /** @enum {string} */
+            qualityStatus: "good" | "near_expiry" | "expired" | "damaged" | "recalled";
+        };
         "request.UpdateRequest": {
             budgetCents?: number;
             city?: string;
@@ -14493,6 +15889,9 @@ export interface components {
         "request.VerifyCode": {
             code: string;
             phoneNumber: string;
+        };
+        "request.VerifyPasswordlessLogin": {
+            token: string;
         };
         "request.VerifySMSRecovery": {
             code: string;
@@ -14534,6 +15933,28 @@ export interface components {
         "response.BackupCodes": {
             codes?: string[];
         };
+        "response.BatchListResponse": {
+            data?: components["schemas"]["response.BatchResponse"][];
+        };
+        "response.BatchResponse": {
+            batchNumber?: string;
+            createdAt?: string;
+            currency?: string;
+            currentQuantity?: number;
+            expirationDate?: string;
+            id?: string;
+            ingredientId?: string;
+            locationId?: string;
+            notes?: string;
+            purchaseOrderId?: string;
+            qualityStatus?: components["schemas"]["entity.QualityStatus"];
+            receivedDate?: string;
+            receivedQuantity?: number;
+            reservedQuantity?: number;
+            supplierName?: string;
+            unitCostCents?: number;
+            updatedAt?: string;
+        };
         "response.Block": {
             created_at?: string;
             entity_id?: string;
@@ -14542,6 +15963,11 @@ export interface components {
             owner_id?: string;
             owner_type?: string;
             reason?: string;
+        };
+        "response.BulkImportResponse": {
+            errors?: string[];
+            imported?: number;
+            skipped?: number;
         };
         "response.Cart": {
             accountId?: string;
@@ -14793,6 +16219,26 @@ export interface components {
             blocks?: components["schemas"]["response.EventBlock"][];
             event?: components["schemas"]["response.Event"];
         };
+        "response.ExpiringBatchListResponse": {
+            data?: components["schemas"]["response.ExpiringBatchResponse"][];
+        };
+        "response.ExpiringBatchResponse": {
+            batchId?: string;
+            batchNumber?: string;
+            category?: string;
+            currency?: string;
+            currentQuantity?: number;
+            daysUntilExpiry?: number;
+            expirationDate?: string;
+            expiryAlertLevel?: string;
+            ingredientId?: string;
+            ingredientName?: string;
+            locationId?: string;
+            locationName?: string;
+            qualityStatus?: components["schemas"]["entity.QualityStatus"];
+            supplierName?: string;
+            unitCostCents?: number;
+        };
         "response.Favorite": {
             created_at?: string;
             entity_id?: string;
@@ -14812,6 +16258,26 @@ export interface components {
             rating?: number;
             tags?: string[];
             user_id?: string;
+        };
+        "response.IngredientListResponse": {
+            data?: components["schemas"]["response.IngredientResponse"][];
+            meta?: components["schemas"]["response.PaginationMeta"];
+        };
+        "response.IngredientResponse": {
+            category?: components["schemas"]["entity.IngredientCategory"];
+            catererId?: string;
+            costPerUnitCents?: number;
+            createdAt?: string;
+            currency?: string;
+            currentStock?: number;
+            description?: string;
+            id?: string;
+            isActive?: boolean;
+            name?: string;
+            reorderLevel?: number;
+            supplier?: string;
+            unit?: components["schemas"]["entity.IngredientUnit"];
+            updatedAt?: string;
         };
         "response.InvitationCreated": {
             email?: string;
@@ -15081,6 +16547,14 @@ export interface components {
             offer?: components["schemas"]["response.CateringOffer"];
             order?: components["schemas"]["response.Order"];
         };
+        "response.PaginationMeta": {
+            hasNextPage?: boolean;
+            hasPreviousPage?: boolean;
+            limit?: number;
+            page?: number;
+            total?: number;
+            totalPages?: number;
+        };
         "response.Payment": {
             accountId?: string;
             amountCents?: number;
@@ -15169,6 +16643,19 @@ export interface components {
             roleName?: string;
             userId?: string;
         };
+        "response.StockListResponse": {
+            data?: components["schemas"]["response.StockResponse"][];
+        };
+        "response.StockResponse": {
+            id?: string;
+            ingredientId?: string;
+            locationId?: string;
+            onHand?: number;
+            parLevel?: number;
+            reorderLevel?: number;
+            reserved?: number;
+            updatedAt?: string;
+        };
         "response.Success": {
             message?: string;
         };
@@ -15224,6 +16711,7 @@ export interface components {
         "response.User": {
             createdAt?: string;
             email?: string;
+            emailVerified?: boolean;
             firstName?: string;
             id?: string;
             lastName?: string;
@@ -15270,6 +16758,16 @@ export interface components {
             transfer_group?: string;
             tx_type?: string;
             wallet_id?: string;
+        };
+        "response.WebAuthnCredential": {
+            attestationType?: string;
+            createdAt?: string;
+            id?: string;
+            lastUsedAt?: string;
+            name?: string;
+            signCount?: number;
+            transports?: string[];
+            userId?: string;
         };
         "v1.signedURLResponse": {
             expires_in?: string;

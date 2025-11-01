@@ -617,6 +617,8 @@ WHERE skills LIKE '%JavaScript%'
 
 ### Row Selection with Bulk Actions
 
+Enable row selection and define actions that can be performed on multiple rows:
+
 ```tsx
 const columns: ColumnDef<User>[] = [
   {
@@ -663,6 +665,634 @@ const columns: ColumnDef<User>[] = [
   ]}
 />
 ```
+
+### Bulk Actions - Complete Examples
+
+#### Bulk Delete with Confirmation
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { AdvancedTableEnhanced } from '@/components/shared/tables/AdvancedTable/AdvancedTableEnhanced'
+import { TrashIcon } from '@/icons'
+import { toast } from 'sonner'
+
+interface Employee {
+  id: string
+  name: string
+  email: string
+  department: string
+}
+
+export function EmployeesTableWithBulkDelete() {
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [selectedForDeletion, setSelectedForDeletion] = useState<Employee[]>([])
+  const queryClient = useQueryClient()
+
+  const deleteMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const response = await fetch('/api/employees/bulk-delete', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids }),
+      })
+
+      if (!response.ok) throw new Error('Failed to delete employees')
+      return response.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['employees'])
+      toast.success(`Successfully deleted ${selectedForDeletion.length} employees`)
+      setShowDeleteModal(false)
+      setSelectedForDeletion([])
+    },
+    onError: (error) => {
+      toast.error('Failed to delete employees')
+      console.error(error)
+    },
+  })
+
+  const handleBulkDelete = (selectedRows: Employee[]) => {
+    setSelectedForDeletion(selectedRows)
+    setShowDeleteModal(true)
+  }
+
+  const confirmDelete = () => {
+    const ids = selectedForDeletion.map(row => row.id)
+    deleteMutation.mutate(ids)
+  }
+
+  return (
+    <>
+      <AdvancedTableEnhanced
+        columns={columns}
+        data={employees}
+        enableRowSelection
+        enableMultiRowSelection
+        bulkActions={[
+          {
+            label: 'Delete Selected',
+            variant: 'destructive',
+            icon: <TrashIcon className="w-4 h-4" />,
+            onClick: handleBulkDelete,
+          },
+        ]}
+      />
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-900 rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              Delete {selectedForDeletion.length} Employees?
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              This action cannot be undone. The following employees will be permanently deleted:
+            </p>
+            <div className="max-h-48 overflow-y-auto mb-6 bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+              {selectedForDeletion.map(emp => (
+                <div key={emp.id} className="text-sm text-gray-800 dark:text-white py-1">
+                  • {emp.name} ({emp.email})
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                disabled={deleteMutation.isLoading}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50"
+                disabled={deleteMutation.isLoading}
+              >
+                {deleteMutation.isLoading ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+```
+
+**Backend API for Bulk Delete (Node.js/Express):**
+
+```typescript
+// DELETE /api/employees/bulk-delete
+app.delete('/api/employees/bulk-delete', async (req, res) => {
+  try {
+    const { ids } = req.body
+
+    // Validate input
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: 'Invalid or empty ids array' })
+    }
+
+    // Delete from database
+    const result = await db('employees')
+      .whereIn('id', ids)
+      .delete()
+
+    // Optional: Log the deletion for audit trail
+    await db('audit_log').insert({
+      action: 'BULK_DELETE',
+      resource: 'employees',
+      resource_ids: ids,
+      user_id: req.user.id,
+      timestamp: new Date(),
+    })
+
+    res.json({
+      success: true,
+      deletedCount: result,
+      message: `Successfully deleted ${result} employees`,
+    })
+  } catch (error) {
+    console.error('Bulk delete error:', error)
+    res.status(500).json({ error: 'Failed to delete employees' })
+  }
+})
+```
+
+#### Bulk Edit - Update Status
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { AdvancedTableEnhanced } from '@/components/shared/tables/AdvancedTable/AdvancedTableEnhanced'
+import { EditIcon } from '@/icons'
+import { toast } from 'sonner'
+import Select from '@/components/shared/form/Select'
+
+interface Employee {
+  id: string
+  name: string
+  status: 'active' | 'inactive' | 'pending'
+  department: string
+}
+
+export function EmployeesTableWithBulkEdit() {
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [selectedForEdit, setSelectedForEdit] = useState<Employee[]>([])
+  const [newStatus, setNewStatus] = useState<'active' | 'inactive' | 'pending'>('active')
+  const queryClient = useQueryClient()
+
+  const editMutation = useMutation({
+    mutationFn: async ({ ids, status }: { ids: string[]; status: string }) => {
+      const response = await fetch('/api/employees/bulk-update', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids, updates: { status } }),
+      })
+
+      if (!response.ok) throw new Error('Failed to update employees')
+      return response.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['employees'])
+      toast.success(`Successfully updated ${selectedForEdit.length} employees`)
+      setShowEditModal(false)
+      setSelectedForEdit([])
+    },
+    onError: (error) => {
+      toast.error('Failed to update employees')
+      console.error(error)
+    },
+  })
+
+  const handleBulkEdit = (selectedRows: Employee[]) => {
+    setSelectedForEdit(selectedRows)
+    setShowEditModal(true)
+  }
+
+  const confirmEdit = () => {
+    const ids = selectedForEdit.map(row => row.id)
+    editMutation.mutate({ ids, status: newStatus })
+  }
+
+  return (
+    <>
+      <AdvancedTableEnhanced
+        columns={columns}
+        data={employees}
+        enableRowSelection
+        enableMultiRowSelection
+        bulkActions={[
+          {
+            label: 'Change Status',
+            variant: 'outline',
+            icon: <EditIcon className="w-4 h-4" />,
+            onClick: handleBulkEdit,
+          },
+        ]}
+      />
+
+      {/* Edit Status Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-900 rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              Update Status for {selectedForEdit.length} Employees
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Select a new status to apply to all selected employees:
+            </p>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                New Status
+              </label>
+              <Select
+                options={[
+                  { label: 'Active', value: 'active' },
+                  { label: 'Inactive', value: 'inactive' },
+                  { label: 'Pending', value: 'pending' },
+                ]}
+                defaultValue={newStatus}
+                onChange={(value) => setNewStatus(value as any)}
+                placeholder="Select status"
+              />
+            </div>
+
+            <div className="max-h-32 overflow-y-auto mb-6 bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+              <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">Selected employees:</p>
+              {selectedForEdit.map(emp => (
+                <div key={emp.id} className="text-sm text-gray-800 dark:text-white py-1">
+                  • {emp.name} <span className="text-gray-500">({emp.status} → {newStatus})</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                disabled={editMutation.isLoading}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmEdit}
+                className="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-700 disabled:opacity-50"
+                disabled={editMutation.isLoading}
+              >
+                {editMutation.isLoading ? 'Updating...' : 'Update Status'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+```
+
+**Backend API for Bulk Update (Node.js/Express):**
+
+```typescript
+// PATCH /api/employees/bulk-update
+app.patch('/api/employees/bulk-update', async (req, res) => {
+  try {
+    const { ids, updates } = req.body
+
+    // Validate input
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: 'Invalid or empty ids array' })
+    }
+
+    if (!updates || typeof updates !== 'object') {
+      return res.status(400).json({ error: 'Invalid updates object' })
+    }
+
+    // Validate allowed fields (whitelist approach)
+    const allowedFields = ['status', 'department', 'role', 'salary']
+    const updateFields = Object.keys(updates).filter(key => allowedFields.includes(key))
+
+    if (updateFields.length === 0) {
+      return res.status(400).json({ error: 'No valid fields to update' })
+    }
+
+    const safeUpdates = {}
+    updateFields.forEach(field => {
+      safeUpdates[field] = updates[field]
+    })
+
+    // Add updated_at timestamp
+    safeUpdates.updated_at = new Date()
+
+    // Update database
+    const result = await db('employees')
+      .whereIn('id', ids)
+      .update(safeUpdates)
+
+    // Optional: Log the update for audit trail
+    await db('audit_log').insert({
+      action: 'BULK_UPDATE',
+      resource: 'employees',
+      resource_ids: ids,
+      changes: safeUpdates,
+      user_id: req.user.id,
+      timestamp: new Date(),
+    })
+
+    res.json({
+      success: true,
+      updatedCount: result,
+      updates: safeUpdates,
+      message: `Successfully updated ${result} employees`,
+    })
+  } catch (error) {
+    console.error('Bulk update error:', error)
+    res.status(500).json({ error: 'Failed to update employees' })
+  }
+})
+```
+
+#### Bulk Edit - Multiple Fields
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { AdvancedTableEnhanced } from '@/components/shared/tables/AdvancedTable/AdvancedTableEnhanced'
+import { EditIcon } from '@/icons'
+import { toast } from 'sonner'
+import Select from '@/components/shared/form/Select'
+import Input from '@/components/shared/form/input/InputField'
+
+interface Employee {
+  id: string
+  name: string
+  status: 'active' | 'inactive' | 'pending'
+  department: string
+  salary: number
+}
+
+export function EmployeesTableWithAdvancedBulkEdit() {
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [selectedForEdit, setSelectedForEdit] = useState<Employee[]>([])
+  const [updates, setUpdates] = useState<Partial<Employee>>({})
+  const queryClient = useQueryClient()
+
+  const editMutation = useMutation({
+    mutationFn: async ({ ids, updates }: { ids: string[]; updates: Partial<Employee> }) => {
+      const response = await fetch('/api/employees/bulk-update', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids, updates }),
+      })
+
+      if (!response.ok) throw new Error('Failed to update employees')
+      return response.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['employees'])
+      toast.success(`Successfully updated ${selectedForEdit.length} employees`)
+      setShowEditModal(false)
+      setSelectedForEdit([])
+      setUpdates({})
+    },
+    onError: (error) => {
+      toast.error('Failed to update employees')
+      console.error(error)
+    },
+  })
+
+  const handleBulkEdit = (selectedRows: Employee[]) => {
+    setSelectedForEdit(selectedRows)
+    setShowEditModal(true)
+  }
+
+  const confirmEdit = () => {
+    const ids = selectedForEdit.map(row => row.id)
+    editMutation.mutate({ ids, updates })
+  }
+
+  const hasChanges = Object.keys(updates).length > 0
+
+  return (
+    <>
+      <AdvancedTableEnhanced
+        columns={columns}
+        data={employees}
+        enableRowSelection
+        enableMultiRowSelection
+        bulkActions={[
+          {
+            label: 'Edit Selected',
+            variant: 'outline',
+            icon: <EditIcon className="w-4 h-4" />,
+            onClick: handleBulkEdit,
+          },
+        ]}
+      />
+
+      {/* Multi-Field Edit Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-900 rounded-lg p-6 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              Edit {selectedForEdit.length} Employees
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+              Only fill in the fields you want to update. Empty fields will not be changed.
+            </p>
+
+            <div className="space-y-4 mb-6">
+              {/* Status */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Status (Optional)
+                </label>
+                <Select
+                  options={[
+                    { label: 'Active', value: 'active' },
+                    { label: 'Inactive', value: 'inactive' },
+                    { label: 'Pending', value: 'pending' },
+                  ]}
+                  value={updates.status}
+                  onChange={(value) => setUpdates({ ...updates, status: value as any })}
+                  placeholder="Leave unchanged"
+                />
+              </div>
+
+              {/* Department */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Department (Optional)
+                </label>
+                <Select
+                  options={[
+                    { label: 'Engineering', value: 'Engineering' },
+                    { label: 'Product', value: 'Product' },
+                    { label: 'Design', value: 'Design' },
+                    { label: 'Sales', value: 'Sales' },
+                  ]}
+                  value={updates.department}
+                  onChange={(value) => setUpdates({ ...updates, department: value })}
+                  placeholder="Leave unchanged"
+                />
+              </div>
+
+              {/* Salary */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Salary (Optional)
+                </label>
+                <Input
+                  type="number"
+                  value={updates.salary || ''}
+                  onChange={(e) => setUpdates({ ...updates, salary: Number(e.target.value) })}
+                  placeholder="Leave unchanged"
+                />
+              </div>
+            </div>
+
+            <div className="mb-6 bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+              <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {selectedForEdit.length} employees selected:
+              </p>
+              <div className="max-h-32 overflow-y-auto">
+                {selectedForEdit.map(emp => (
+                  <div key={emp.id} className="text-sm text-gray-800 dark:text-white py-1">
+                    • {emp.name}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => {
+                  setShowEditModal(false)
+                  setUpdates({})
+                }}
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                disabled={editMutation.isLoading}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmEdit}
+                className="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-700 disabled:opacity-50"
+                disabled={editMutation.isLoading || !hasChanges}
+              >
+                {editMutation.isLoading ? 'Updating...' : `Update ${selectedForEdit.length} Employees`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+```
+
+#### Multiple Bulk Actions
+
+```tsx
+<AdvancedTableEnhanced
+  columns={columns}
+  data={employees}
+  enableRowSelection
+  enableMultiRowSelection
+  bulkActions={[
+    {
+      label: 'Delete',
+      variant: 'destructive',
+      icon: <TrashIcon className="w-4 h-4" />,
+      onClick: handleBulkDelete,
+    },
+    {
+      label: 'Change Status',
+      variant: 'outline',
+      icon: <EditIcon className="w-4 h-4" />,
+      onClick: handleBulkEdit,
+    },
+    {
+      label: 'Export Selected',
+      variant: 'outline',
+      icon: <DownloadIcon className="w-4 h-4" />,
+      onClick: (selectedRows) => {
+        const csv = convertToCSV(selectedRows)
+        downloadFile(csv, 'employees.csv')
+      },
+    },
+    {
+      label: 'Send Email',
+      variant: 'default',
+      icon: <MailIcon className="w-4 h-4" />,
+      onClick: async (selectedRows) => {
+        const emails = selectedRows.map(row => row.email)
+        await sendBulkEmail(emails)
+      },
+    },
+  ]}
+/>
+```
+
+#### Complete Request Examples
+
+**Bulk Delete Request:**
+```
+DELETE /api/employees/bulk-delete
+Content-Type: application/json
+
+{
+  "ids": ["emp-1", "emp-2", "emp-3"]
+}
+```
+
+**Bulk Update Request (Single Field):**
+```
+PATCH /api/employees/bulk-update
+Content-Type: application/json
+
+{
+  "ids": ["emp-1", "emp-2", "emp-3"],
+  "updates": {
+    "status": "active"
+  }
+}
+```
+
+**Bulk Update Request (Multiple Fields):**
+```
+PATCH /api/employees/bulk-update
+Content-Type: application/json
+
+{
+  "ids": ["emp-1", "emp-2", "emp-3"],
+  "updates": {
+    "status": "active",
+    "department": "Engineering",
+    "salary": 120000
+  }
+}
+```
+
+#### Best Practices for Bulk Actions
+
+1. **Always Confirm Destructive Actions** - Show a confirmation modal for delete operations
+2. **Show Preview of Changes** - Display what will be changed before applying
+3. **Use Optimistic Updates** - Update UI immediately, rollback on error
+4. **Provide Feedback** - Use toast notifications for success/error states
+5. **Handle Partial Failures** - If some operations fail, inform the user which ones
+6. **Audit Trail** - Log bulk operations for compliance and debugging
+7. **Validate on Backend** - Never trust client-side validation alone
+8. **Use Transactions** - Ensure all-or-nothing updates when possible
+9. **Rate Limiting** - Limit bulk operation sizes to prevent abuse
+10. **Permission Checks** - Verify user has permission for each affected resource
 
 ### Custom Cell Rendering
 
@@ -1025,6 +1655,329 @@ AdvancedTable/
 ### Export not working
 - Ensure data is an array of objects
 - Check browser console for errors
+
+## Working with Auto-Generated API Types
+
+The project uses `openapi-typescript` to automatically generate TypeScript types from your Swagger/OpenAPI documentation. This ensures your table components are always type-safe and in sync with your backend API.
+
+### Updating API Types
+
+Whenever your API changes, run this command to regenerate types:
+
+```bash
+# Make sure your API is running on localhost:8080
+npm run api:update:local
+```
+
+This will:
+1. Fetch the latest Swagger JSON from `http://localhost:8080/swagger/doc.json`
+2. Convert it to OpenAPI 3.0 format
+3. Generate TypeScript types in `src/lib/api/generated/schema.ts`
+
+### Using Generated Types with Tables
+
+The generated types work seamlessly with the AdvancedTable component:
+
+```tsx
+'use client'
+
+import { useMemo, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { ColumnDef, SortingState, ColumnFiltersState } from '@tanstack/react-table'
+import { AdvancedTableEnhanced } from '@/components/shared/tables/AdvancedTable/AdvancedTableEnhanced'
+import { api, type components } from '@/lib/api'
+
+// Extract the response type from your API schema
+type Account = components['schemas']['response.Account']
+
+// Create a list response type
+interface AccountsResponse {
+  data: Account[]
+  total: number
+  page: number
+  pageSize: number
+}
+
+export function AccountsTable() {
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 20 })
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [globalFilter, setGlobalFilter] = useState('')
+
+  // Type-safe API call using generated types
+  const { data, isLoading, isFetching } = useQuery({
+    queryKey: ['accounts', pagination, sorting, columnFilters, globalFilter],
+    queryFn: async () => {
+      const { data, error } = await api.GET('/accounts', {
+        params: {
+          query: {
+            limit: pagination.pageSize,
+            offset: pagination.pageIndex * pagination.pageSize,
+          },
+        },
+      })
+
+      if (error) throw error
+
+      // Transform to expected format
+      return {
+        data: data || [],
+        total: data?.length || 0,
+        page: pagination.pageIndex + 1,
+        pageSize: pagination.pageSize,
+      } as AccountsResponse
+    },
+    keepPreviousData: true,
+  })
+
+  // Type-safe column definitions
+  const columns = useMemo<ColumnDef<Account>[]>(
+    () => [
+      {
+        accessorKey: 'id',
+        header: 'ID',
+      },
+      {
+        accessorKey: 'name',
+        header: 'Account Name',
+        meta: {
+          filterType: 'text',
+        },
+      },
+      {
+        accessorKey: 'type',
+        header: 'Type',
+        meta: {
+          filterType: 'select',
+          filterOptions: [
+            { label: 'Caterer', value: 'caterer' },
+            { label: 'Customer', value: 'customer' },
+          ],
+        },
+      },
+      {
+        accessorKey: 'status',
+        header: 'Status',
+        cell: ({ row }) => {
+          const status = row.original.status
+          return (
+            <span
+              className={`px-2 py-1 text-xs rounded-full ${
+                status === 'active'
+                  ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                  : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400'
+              }`}
+            >
+              {status}
+            </span>
+          )
+        },
+        meta: {
+          filterType: 'select',
+          filterOptions: [
+            { label: 'Active', value: 'active' },
+            { label: 'Inactive', value: 'inactive' },
+          ],
+        },
+      },
+    ],
+    []
+  )
+
+  return (
+    <AdvancedTableEnhanced
+      columns={columns}
+      data={data?.data || []}
+      enableSorting
+      enableFiltering
+      enableGlobalFilter
+      enablePagination
+      serverSide={{
+        enabled: true,
+        isLoading,
+        isFetching,
+        totalPages: Math.ceil((data?.total || 0) / pagination.pageSize),
+      }}
+      onStateChange={(state) => {
+        if (state.sorting) setSorting(state.sorting)
+        if (state.columnFilters) setColumnFilters(state.columnFilters)
+        if (state.pagination) setPagination(state.pagination)
+        if (state.globalFilter !== undefined) setGlobalFilter(state.globalFilter)
+      }}
+      initialState={{
+        sorting,
+        columnFilters,
+        pagination,
+      }}
+    />
+  )
+}
+```
+
+### Type-Safe Bulk Actions with Generated Types
+
+```tsx
+import { api, type components } from '@/lib/api'
+
+type Invoice = components['schemas']['response.Invoice']
+
+export function InvoicesTableWithBulkActions() {
+  const queryClient = useQueryClient()
+
+  // Type-safe bulk delete
+  const deleteMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { data, error } = await api.DELETE('/invoices/bulk', {
+        body: { ids }, // TypeScript knows the exact shape of the request body
+      })
+
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['invoices'])
+      toast.success('Invoices deleted successfully')
+    },
+  })
+
+  // Type-safe bulk update
+  const updateMutation = useMutation({
+    mutationFn: async ({ ids, status }: { ids: string[]; status: string }) => {
+      const { data, error } = await api.PATCH('/invoices/bulk', {
+        body: { ids, updates: { status } }, // Fully typed
+      })
+
+      if (error) throw error
+      return data
+    },
+  })
+
+  return (
+    <AdvancedTableEnhanced
+      columns={columns}
+      data={invoices}
+      enableRowSelection
+      bulkActions={[
+        {
+          label: 'Delete',
+          variant: 'destructive',
+          onClick: (rows: Invoice[]) => {
+            deleteMutation.mutate(rows.map(r => r.id))
+          },
+        },
+        {
+          label: 'Mark as Paid',
+          variant: 'default',
+          onClick: (rows: Invoice[]) => {
+            updateMutation.mutate({
+              ids: rows.map(r => r.id),
+              status: 'paid',
+            })
+          },
+        },
+      ]}
+    />
+  )
+}
+```
+
+### Extracting Types from API Schema
+
+The generated schema file exports two main interfaces:
+
+```tsx
+import type { paths, components } from '@/lib/api/generated/schema'
+
+// Extract request/response types from paths
+type AccountListResponse = paths['/accounts']['get']['responses']['200']['content']['application/json']
+type CreateAccountRequest = paths['/accounts']['post']['requestBody']['content']['application/json']
+
+// Extract schema types directly
+type Account = components['schemas']['response.Account']
+type Invoice = components['schemas']['response.Invoice']
+type PaymentMethod = components['schemas']['response.PaymentMethod']
+
+// Use in your components
+const columns: ColumnDef<Account>[] = [
+  // TypeScript knows all properties of Account
+  { accessorKey: 'id', header: 'ID' },
+  { accessorKey: 'name', header: 'Name' },
+  { accessorKey: 'type', header: 'Type' },
+]
+```
+
+### Best Practices with Generated Types
+
+1. **Always regenerate after API changes**
+   ```bash
+   npm run api:update:local
+   ```
+
+2. **Use type extraction instead of manual types**
+   ```tsx
+   // ✅ Good - Always in sync with API
+   type User = components['schemas']['response.User']
+
+   // ❌ Bad - Can get out of sync
+   interface User {
+     id: string
+     name: string
+   }
+   ```
+
+3. **Use the type-safe API client**
+   ```tsx
+   // ✅ Good - Full type safety
+   const { data, error } = await api.GET('/accounts')
+
+   // ❌ Bad - No type safety
+   const response = await fetch('/api/accounts')
+   ```
+
+4. **Let TypeScript infer query parameters**
+   ```tsx
+   // TypeScript knows exactly what params are valid
+   const { data } = await api.GET('/accounts', {
+     params: {
+       query: {
+         limit: 10,    // ✅ Valid
+         offset: 0,    // ✅ Valid
+         invalid: 123, // ❌ TypeScript error
+       },
+     },
+   })
+   ```
+
+5. **Add to your workflow**
+   ```bash
+   # Before starting development
+   npm run api:update:local
+
+   # Start dev server
+   npm run dev
+   ```
+
+### Troubleshooting
+
+**API not running:**
+```bash
+Error: connect ECONNREFUSED 127.0.0.1:8080
+```
+Make sure your API server is running on `http://localhost:8080` before running `npm run api:update:local`.
+
+**Types out of sync:**
+If you see TypeScript errors after API changes, regenerate types:
+```bash
+npm run api:update:local
+```
+
+**Can't find schema types:**
+Ensure the import path is correct:
+```tsx
+import type { components } from '@/lib/api/generated/schema'
+// or
+import type { components } from '@/lib/api'
+```
 
 ## Support
 

@@ -6,7 +6,25 @@
 
 import React from 'react'
 import type { ColumnDef } from '@tanstack/react-table'
-import type { ParsedSchema, ColumnSchema } from './types'
+import type { ParsedSchema, ColumnSchema, SelectOption } from './types'
+
+/**
+ * Helper function to get display label from value using schema options
+ */
+function getDisplayLabel(value: any, options?: SelectOption[]): string {
+  if (!options || options.length === 0) return String(value)
+  const option = options.find(opt => opt.value === value)
+  return option?.label || String(value)
+}
+
+/**
+ * Helper function to get value from display label (reverse lookup)
+ */
+function getValueFromLabel(label: string, options?: SelectOption[]): string {
+  if (!options || options.length === 0) return label
+  const option = options.find(opt => opt.label === label)
+  return option?.value || label
+}
 
 /**
  * Build table columns from schema
@@ -154,17 +172,27 @@ export function buildColumnsFromSchema<TData = any>(
         meta: {
           // Edit configuration
           editType: column.editable ? mapColumnTypeToEditType(column.type) : undefined,
-          editOptions: column.options?.map(opt => ({
-            label: opt.label || opt.value || '',
-            value: opt.value || '',
-          })),
+          editOptions: column.type === 'boolean'
+            ? [
+                { label: 'Yes', value: 'true' },
+                { label: 'No', value: 'false' },
+              ]
+            : column.options?.map(opt => ({
+                label: opt.label || opt.value || '',
+                value: opt.value || '',
+              })),
 
           // Filter configuration
           filterType: column.filterable ? mapColumnTypeToFilterType(column.type) : undefined,
-          filterOptions: column.options?.map(opt => ({
-            label: opt.label || opt.value || '',
-            value: opt.value || '',
-          })),
+          filterOptions: column.type === 'boolean'
+            ? [
+                { label: 'Active', value: 'true' },
+                { label: 'Inactive', value: 'false' },
+              ]
+            : column.options?.map(opt => ({
+                label: opt.label || opt.value || '',
+                value: opt.value || '',
+              })),
 
           // Validation
           validation: column.validation,

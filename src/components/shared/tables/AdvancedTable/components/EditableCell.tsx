@@ -43,15 +43,32 @@ export function EditableCell({
     }
   }, [editing])
 
-  const handleSave = async () => {
-    if (value === initialValue) {
+  const handleSave = async (valueToSave?: any) => {
+    const finalValue = valueToSave !== undefined ? valueToSave : value
+
+    if (finalValue === initialValue) {
       setEditing(false)
       return
     }
 
+    console.log('💾 EditableCell handleSave:', {
+      valueToSave,
+      finalValue,
+      initialValue,
+      valueType: typeof finalValue
+    })
+
+    let cleanValue = finalValue
+    if (typeof finalValue === 'object' && finalValue !== null && !Array.isArray(finalValue)) {
+      if ('target' in finalValue) {
+        console.error('❌ Attempted to save React event object:', finalValue)
+        cleanValue = finalValue.target?.value || finalValue
+      }
+    }
+
     setSaving(true)
     try {
-      await onSave(value)
+      await onSave(cleanValue)
       setEditing(false)
     } catch (error) {
       console.error('Failed to save:', error)
@@ -128,13 +145,13 @@ export function EditableCell({
     // Single Select
     if (type === 'select') {
       return (
-        <div onBlur={handleSave} onKeyDown={handleKeyDown}>
+        <div onKeyDown={handleKeyDown}>
           <Select
             options={options}
             placeholder="Select an option"
             onChange={(newValue) => {
               setValue(newValue)
-              setTimeout(() => handleSave(), 100)
+              handleSave(newValue)
             }}
             defaultValue={value}
             className={className}

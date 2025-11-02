@@ -7,7 +7,7 @@
 
 import type { TableConfig } from './types'
 import type { AdvancedTableProps as LegacyProps } from './types.old'
-import { parseSchema, buildColumnsFromSchema } from '@/lib/tables/schema'
+import { parseSchema, buildColumnsFromSchema, getApiValue } from '@/lib/tables/schema'
 
 export function adaptTableConfig<TData>(
   config: TableConfig<TData>
@@ -82,7 +82,17 @@ export function adaptTableConfig<TData>(
         : parsedSchema?.editableFields || [])
     : []
 
-  const onCellEdit = editing.onEdit
+  // Auto-translation wrapper for onCellEdit
+  const autoTranslate = schemaOptions.autoTranslate ?? true
+  const onCellEdit = editing.onEdit && autoTranslate && parsedSchema
+    ? (rowId: string, columnId: string, value: unknown) => {
+        const column = parsedSchema.columns.find(col => col.key === columnId)
+        const apiValue = column?.type === 'select' && column.options
+          ? getApiValue(value, column.options)
+          : value
+        editing.onEdit!(rowId, columnId, apiValue)
+      }
+    : editing.onEdit
 
   const showBulkSave = editing.bulk?.enabled ?? false
   const onSaveAll = editing.bulk?.onSaveAll

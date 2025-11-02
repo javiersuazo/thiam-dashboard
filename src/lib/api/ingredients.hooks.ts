@@ -344,7 +344,10 @@ export function useCreateIngredient(
       return data as Ingredient
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ingredients', accountId] })
+      queryClient.invalidateQueries({
+        queryKey: ['ingredients', accountId],
+        refetchType: 'active'
+      })
     },
     ...options,
   })
@@ -371,8 +374,14 @@ export function useUpdateIngredient(
       return data as Ingredient
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['ingredients', accountId] })
-      queryClient.invalidateQueries({ queryKey: ['ingredients', accountId, variables.ingredientId] })
+      queryClient.invalidateQueries({
+        queryKey: ['ingredients', accountId],
+        refetchType: 'active'
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['ingredients', accountId, variables.ingredientId],
+        refetchType: 'active'
+      })
     },
     ...options,
   })
@@ -423,8 +432,14 @@ export function useAddBatch(
       return data as IngredientBatch
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['ingredient-batches', accountId, data.ingredientId] })
-      queryClient.invalidateQueries({ queryKey: ['ingredients', accountId] })
+      queryClient.invalidateQueries({
+        queryKey: ['ingredient-batches', accountId, data.ingredientId],
+        refetchType: 'active'
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['ingredients', accountId],
+        refetchType: 'active'
+      })
     },
     ...options,
   })
@@ -450,8 +465,14 @@ export function useConsumeStock(
       if (error) throw error
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['ingredients', accountId] })
-      queryClient.invalidateQueries({ queryKey: ['ingredient-batches', accountId, variables.ingredientId] })
+      queryClient.invalidateQueries({
+        queryKey: ['ingredients', accountId],
+        refetchType: 'active'
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['ingredient-batches', accountId, variables.ingredientId],
+        refetchType: 'active'
+      })
     },
     ...options,
   })
@@ -476,7 +497,10 @@ export function useBulkImportIngredients(
       return data as { imported: number; skipped: number; errors?: string[] }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ingredients', accountId] })
+      queryClient.invalidateQueries({
+        queryKey: ['ingredients', accountId],
+        refetchType: 'active'
+      })
     },
     ...options,
   })
@@ -502,8 +526,10 @@ export function useBulkDeleteIngredients(
     },
     ...options,
     onSuccess: (data, variables, context) => {
-      queryClient.invalidateQueries({ queryKey: ['ingredients', accountId] })
-      queryClient.refetchQueries({ queryKey: ['ingredients', accountId] })
+      queryClient.invalidateQueries({
+        queryKey: ['ingredients', accountId],
+        refetchType: 'active'
+      })
       options?.onSuccess?.(data, variables, context)
     },
   })
@@ -530,8 +556,10 @@ export function useBatchUpdateIngredients(
     },
     ...options,
     onSuccess: (data, variables, context) => {
-      queryClient.invalidateQueries({ queryKey: ['ingredients', accountId] })
-      queryClient.refetchQueries({ queryKey: ['ingredients', accountId] })
+      queryClient.invalidateQueries({
+        queryKey: ['ingredients', accountId],
+        refetchType: 'active'
+      })
       options?.onSuccess?.(data, variables, context)
     },
   })

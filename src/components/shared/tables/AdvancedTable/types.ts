@@ -43,6 +43,14 @@ export interface TableConfig<TData> {
     t?: (key: string) => string
     customCells?: Record<string, ColumnDef<TData>['cell']>
     columnOverrides?: Record<string, Partial<ColumnDef<TData>>>
+    enableRowSelection?: boolean
+    /**
+     * Enable automatic translation for select fields
+     * When enabled, table automatically converts display labels to API keys during edits
+     * Detects translatable fields from schema (type: "select" with options)
+     * @default true
+     */
+    autoTranslate?: boolean
   }
 
   // Optional feature groups

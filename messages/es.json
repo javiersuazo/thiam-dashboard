@@ -741,6 +741,20 @@
         "confirmDelete": "¿Estás seguro de que quieres eliminar \"{name}\"?",
         "confirmDeleteDescription": "Esta acción no se puede deshacer."
       },
+      "searchPlaceholder": "Buscar ingredientes...",
+      "saveChanges": "Guardar Cambios",
+      "cancelChanges": "Cancelar Cambios",
+      "bulkSaveSuccess": "Todos los cambios guardados exitosamente",
+      "bulkSaveFailed": "Error al guardar los cambios. Por favor intenta de nuevo.",
+      "changesDiscarded": "Cambios descartados",
+      "confirmDelete": "¿Estás seguro de que quieres eliminar este ingrediente?",
+      "confirmBulkDelete": "¿Estás seguro de que quieres eliminar {count} ingrediente(s)?",
+      "confirmDeleteDescription": "Esta acción no se puede deshacer. El ingrediente será eliminado permanentemente.",
+      "confirmBulkDeleteDescription": "Esta acción no se puede deshacer. Los {count} ingredientes serán eliminados permanentemente.",
+      "delete": "Eliminar",
+      "cancel": "Cancelar",
+      "deleteSuccess": "Ingrediente(s) eliminado(s) exitosamente",
+      "deleteFailed": "Error al eliminar ingrediente(s)",
       "inlineEdit": {
         "doubleClickHint": "Haz doble clic en una fila para editar",
         "validation": {

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { MenuItem, MenuBuilder, WizardStep, PricingStrategy } from './types'
 import { WizardProgress } from './WizardProgress'
-import { MenuSetupStep } from './MenuSetupStep'
+import { MenuSetupStepMinimal } from './MenuSetupStepMinimal'
 import { MenuBuilderCanvas } from './MenuBuilderCanvas'
 
 interface MenuBuilderWizardProps {
@@ -112,7 +112,7 @@ export function MenuBuilderWizard({
 
       <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900">
         {currentStep === 'setup' && (
-          <MenuSetupStep
+          <MenuSetupStepMinimal
             initialData={{
               name: wizardData.name,
               description: wizardData.description,

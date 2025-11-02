@@ -14,6 +14,7 @@ export function adaptTableConfig<TData>(
   const {
     columns,
     data,
+    getRowId,
     features = {},
     server,
     ui = {},
@@ -86,6 +87,7 @@ export function adaptTableConfig<TData>(
   const controlledSorting = state.controlled?.sorting
   const controlledFilters = state.controlled?.filters
   const controlledSearch = state.controlled?.search
+  const controlledSelection = state.controlled?.selection
 
   // Map styling
   const className = styling.table?.className ?? ''
@@ -99,6 +101,7 @@ export function adaptTableConfig<TData>(
   return {
     columns,
     data,
+    getRowId,
     enableSorting,
     enableFiltering,
     enableGlobalFilter,
@@ -138,6 +141,7 @@ export function adaptTableConfig<TData>(
     controlledSorting,
     controlledFilters,
     controlledSearch,
+    controlledSelection,
   }
 }
 
@@ -150,6 +154,7 @@ export function applyDefaults<TData>(
   return {
     columns: config.columns ?? [],
     data: config.data ?? [],
+    getRowId: config.getRowId,
     features: {
       sorting: true,
       filtering: true,

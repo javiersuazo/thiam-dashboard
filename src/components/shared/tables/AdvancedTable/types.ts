@@ -39,6 +39,9 @@ export interface TableConfig<TData> {
   editing?: EditingConfig<TData>
   state?: StateConfig
   styling?: StylingConfig<TData>
+
+  // Row identification
+  getRowId?: (row: TData) => string
 }
 
 // =============================================================================

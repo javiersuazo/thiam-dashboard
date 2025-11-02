@@ -31,6 +31,7 @@ import { debounce } from './utils'
 export function AdvancedTableEnhanced<TData, TValue = unknown>({
   columns,
   data,
+  getRowId,
   enableSorting = true,
   enableFiltering = true,
   enableGlobalFilter = true,
@@ -74,11 +75,13 @@ export function AdvancedTableEnhanced<TData, TValue = unknown>({
   controlledSorting,
   controlledFilters,
   controlledSearch,
+  controlledSelection,
 }: AdvancedTableProps<TData, TValue>) {
   const [internalSorting, setInternalSorting] = useState(initialState?.sorting ?? [])
   const [internalColumnFilters, setInternalColumnFilters] = useState(initialState?.columnFilters ?? [])
   const [columnVisibility, setColumnVisibility] = useState(initialState?.columnVisibility ?? {})
-  const [rowSelection, setRowSelection] = useState(initialState?.rowSelection ?? {})
+  const [internalRowSelection, setInternalRowSelection] = useState(initialState?.rowSelection ?? {})
+  const [rowSelection, setRowSelection] = controlledSelection || [internalRowSelection, setInternalRowSelection]
   const [internalGlobalFilter, setInternalGlobalFilter] = useState(initialState?.globalFilter ?? '')
   const [searchInput, setSearchInput] = useState('')
   const [expanded, setExpanded] = useState({})
@@ -130,9 +133,16 @@ export function AdvancedTableEnhanced<TData, TValue = unknown>({
     }
   }, [sorting, columnFilters, columnVisibility, rowSelection, globalFilter])
 
+  console.log('🔍 AdvancedTableEnhanced - getRowId:', {
+    isDefined: !!getRowId,
+    type: typeof getRowId,
+    firstRow: data[0]
+  })
+
   const table = useReactTable({
     data,
     columns,
+    getRowId,
     state: {
       sorting,
       columnFilters,

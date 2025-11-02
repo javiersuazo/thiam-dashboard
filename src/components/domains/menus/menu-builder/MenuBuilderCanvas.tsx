@@ -185,9 +185,9 @@ export function MenuBuilderCanvas({
   const totalPriceCents = calculateTotalPrice()
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full relative">
       {/* Simplified Header */}
-      <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
         <div className="flex-1 flex items-center gap-4">
           {isEditingName ? (
             <input
@@ -226,11 +226,11 @@ export function MenuBuilderCanvas({
 
         <div className="flex items-center gap-4">
           <div className="text-right">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {totalItems} item{totalItems !== 1 ? 's' : ''} · {courses.filter(c => c.items.length > 0).length} course{courses.filter(c => c.items.length > 0).length !== 1 ? 's' : ''}
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {totalItems} items · {courses.filter(c => c.items.length > 0).length} courses
             </p>
             {wizardMode && totalItems > 0 && (
-              <p className="text-lg font-semibold text-gray-900 dark:text-white mt-1">
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">
                 ${(totalPriceCents / 100).toFixed(2)}
                 {wizardMode.pricingStrategy === 'fixed' && (
                   <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">
@@ -240,30 +240,13 @@ export function MenuBuilderCanvas({
               </p>
             )}
           </div>
-
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => window.history.back()}
-            >
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleSave}
-              disabled={isSaving || totalItems === 0 || !metadata.name.trim()}
-            >
-              {isSaving ? 'Saving...' : 'Save Menu'}
-            </Button>
-          </div>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Item Library - Left Side */}
-        <div className="w-80 flex-shrink-0 bg-gray-50 dark:bg-gray-900">
+        <div className="w-80 flex-shrink-0 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800">
           <MenuItemLibrary
             items={availableItems}
             onDragStart={handleDragStartFromLibrary}
@@ -271,9 +254,8 @@ export function MenuBuilderCanvas({
         </div>
 
         {/* Course Builder - Right Side */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
-          <div className="max-w-4xl mx-auto space-y-4">
-            {/* Course Sections */}
+        <div className="flex-1 overflow-y-auto p-6 pb-24 space-y-3 custom-scrollbar">
+          <div className="max-w-4xl mx-auto space-y-3">
             {courses.map(course => (
               <CourseSection
                 key={course.id}
@@ -286,6 +268,35 @@ export function MenuBuilderCanvas({
                 onToggleCollapse={handleToggleCollapse}
               />
             ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Sticky Footer */}
+      <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 px-6 py-4 shadow-lg">
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-lg transition-colors">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              AI Suggestions
+            </button>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              onClick={() => window.history.back()}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={isSaving || totalItems === 0 || !metadata.name.trim()}
+            >
+              {isSaving ? 'Saving...' : 'Save Menu'}
+            </Button>
           </div>
         </div>
       </div>

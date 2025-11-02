@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { ColumnDef, SortingState, ColumnFiltersState } from '@tanstack/react-table'
+import { ColumnDef, SortingState, ColumnFiltersState, RowSelectionState } from '@tanstack/react-table'
 import { AdvancedTable } from '@/components/shared/tables/AdvancedTable'
 import { api, type components } from '@/lib/api'
 import { useBulkDeleteIngredients, useBatchUpdateIngredients } from '@/lib/api/ingredients.hooks'
@@ -24,6 +24,7 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
   const [sorting, setSorting] = useState<SortingState>([{ id: 'name', desc: false }])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState('')
+  const [rowSelection, setRowSelection] = useState({})
   const [editedRows, setEditedRows] = useState<Record<string, Partial<Ingredient>>>({})
 
   const { data, isLoading, isFetching } = useQuery({
@@ -60,6 +61,8 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
       console.log('✅ Ingredients fetched:', {
         count: data?.data?.length || 0,
         total: data?.meta?.total || 0,
+        firstItemId: data?.data?.[0]?.id,
+        sampleItem: data?.data?.[0]
       })
 
       return {
@@ -92,6 +95,7 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
   const bulkDeleteMutation = useBulkDeleteIngredients(accountId, {
     onSuccess: (data) => {
       console.log(`✅ Bulk Delete - Success: ${data.deleted} items deleted`)
+      setRowSelection({})
       toast.success(t('deleteSuccess'))
     },
     onError: (error) => {
@@ -130,7 +134,12 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
   })
 
   const handleCellEdit = (rowId: string, columnId: string, value: any) => {
-    console.log('✏️ Cell Edit:', { rowId, columnId, value })
+    console.log('✏️ Cell Edit:', {
+      rowId,
+      columnId,
+      value,
+      isUUID: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rowId)
+    })
     setEditedRows(prev => {
       const updated = {
         ...prev,
@@ -140,6 +149,7 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
         },
       }
       console.log('📊 Updated editedRows state:', updated)
+      console.log('📊 Keys in editedRows:', Object.keys(updated))
       return updated
     })
   }
@@ -397,7 +407,11 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
     <AdvancedTable
       columns={columns}
       data={data?.data || []}
-      getRowId={(row) => row.id!}
+      getRowId={(row) => {
+        const id = row.id!
+        console.log('🔑 getRowId called:', { id, rowName: row.name })
+        return id
+      }}
 
       features={{
         sorting: true,
@@ -421,6 +435,7 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
           sorting: [sorting, setSorting],
           filters: [columnFilters, setColumnFilters],
           search: [globalFilter, setGlobalFilter],
+          selection: [rowSelection, setRowSelection],
         },
       }}
 

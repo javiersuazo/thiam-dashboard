@@ -502,6 +502,7 @@ export function useBulkDeleteIngredients(
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ingredients', accountId] })
+      queryClient.refetchQueries({ queryKey: ['ingredients', accountId] })
     },
     ...options,
   })
@@ -528,6 +529,7 @@ export function useBatchUpdateIngredients(
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ingredients', accountId] })
+      queryClient.refetchQueries({ queryKey: ['ingredients', accountId] })
     },
     ...options,
   })

@@ -43,6 +43,7 @@ export interface BulkAction<TData> {
 export interface AdvancedTableProps<TData, TValue = unknown> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  getRowId?: (row: TData) => string
 
   enableSorting?: boolean
   enableFiltering?: boolean
@@ -110,6 +111,7 @@ export interface AdvancedTableProps<TData, TValue = unknown> {
   controlledPagination?: [PaginationState, (updater: PaginationState | ((old: PaginationState) => PaginationState)) => void]
   controlledSorting?: [SortingState, (updater: SortingState | ((old: SortingState) => SortingState)) => void]
   controlledFilters?: [ColumnFiltersState, (updater: ColumnFiltersState | ((old: ColumnFiltersState) => ColumnFiltersState)) => void]
+  controlledSelection?: [RowSelectionState, (updater: RowSelectionState | ((old: RowSelectionState) => RowSelectionState)) => void]
   controlledSearch?: [string, (updater: string | ((old: string) => string)) => void]
 }
 

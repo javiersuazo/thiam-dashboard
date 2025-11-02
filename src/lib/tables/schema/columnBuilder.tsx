@@ -61,6 +61,12 @@ export function buildColumnsFromSchema<TData = any>(
      * Enable row selection checkbox column
      */
     enableRowSelection?: boolean
+
+    /**
+     * User's locale for translating option labels
+     * @default 'en'
+     */
+    locale?: string
   }
 ): ColumnDef<TData>[] {
   const {
@@ -70,7 +76,14 @@ export function buildColumnsFromSchema<TData = any>(
     formatDate,
     t = (key) => key,
     enableRowSelection = false,
+    locale = 'en',
   } = options || {}
+
+  console.log('🏗️ buildColumnsFromSchema called:', {
+    locale,
+    columnCount: parsedSchema.columns.length,
+    selectColumns: parsedSchema.columns.filter(c => c.type === 'select').map(c => c.key),
+  })
 
   const columns: ColumnDef<TData>[] = []
 
@@ -178,7 +191,7 @@ export function buildColumnsFromSchema<TData = any>(
                 { label: 'No', value: 'false' },
               ]
             : column.options?.map(opt => ({
-                label: opt.label || opt.value || '',
+                label: opt.translations?.[locale] || opt.label || opt.value || '',
                 value: opt.value || '',
               })),
 
@@ -190,7 +203,7 @@ export function buildColumnsFromSchema<TData = any>(
                 { label: 'Inactive', value: 'false' },
               ]
             : column.options?.map(opt => ({
-                label: opt.label || opt.value || '',
+                label: opt.translations?.[locale] || opt.label || opt.value || '',
                 value: opt.value || '',
               })),
 
@@ -205,10 +218,12 @@ export function buildColumnsFromSchema<TData = any>(
 
       // Custom cell renderer if provided
       if (customCells[column.key!]) {
+        console.log('✏️ Using custom cell for:', column.key)
         columnDef.cell = customCells[column.key!]
       } else {
+        console.log('🤖 Using auto-generated cell for:', column.key, 'type:', column.type)
         // Auto-generate cell renderer based on type
-        columnDef.cell = createCellRenderer(column, { formatCurrency, formatDate })
+        columnDef.cell = createCellRenderer(column, { formatCurrency, formatDate, locale })
       }
 
       // Apply column overrides
@@ -271,14 +286,37 @@ function createCellRenderer<TData>(
   formatters?: {
     formatCurrency?: (cents: number, currency?: string) => string
     formatDate?: (date: string, format?: string) => string
+    locale?: string
   }
 ): ColumnDef<TData>['cell'] {
   return ({ row, getValue }) => {
     const value = getValue()
 
+    // ONLY log select fields
+    if (column.type === 'select') {
+      console.log('🔴🔴🔴 SELECT CELL RENDER:', {
+        key: column.key,
+        type: column.type,
+        value,
+        hasOptions: !!column.options,
+        optionsCount: column.options?.length,
+      })
+    }
+
     // Handle null/undefined
     if (value === null || value === undefined) {
       return <span className="text-gray-400">—</span>
+    }
+
+    // Debug: Log column type for category and unit
+    if (column.key === 'category' || column.key === 'unit') {
+      console.log('📊 Column renderer check:', {
+        key: column.key,
+        type: column.type,
+        value,
+        hasOptions: !!column.options,
+        optionsCount: column.options?.length,
+      })
     }
 
     // Type-specific rendering
@@ -344,10 +382,31 @@ function createCellRenderer<TData>(
         )
 
       case 'select':
+        // Debug logging - always log for select fields
+        console.log('🔍 Select field render:', {
+          columnKey: column.key,
+          value,
+          hasOptions: !!column.options,
+          optionsCount: column.options?.length,
+          firstOptionSample: column.options?.[0],
+          locale: formatters?.locale,
+        })
+
         const option = column.options?.find(opt => opt.value === value)
+        const displayLabel = option?.translations?.[formatters?.locale || 'en'] || option?.label || value
+
+        console.log('🎯 Translation result:', {
+          columnKey: column.key,
+          foundOption: !!option,
+          hasTranslations: !!option?.translations,
+          translation: option?.translations?.[formatters?.locale || 'en'],
+          fallbackLabel: option?.label,
+          finalDisplay: displayLabel,
+        })
+
         return (
           <span className="text-sm text-gray-700 dark:text-gray-400 capitalize">
-            {option?.label || value}
+            {displayLabel}
           </span>
         )
 
@@ -360,6 +419,15 @@ function createCellRenderer<TData>(
         )
 
       default:
+        // Debug: Log when hitting default case for select fields
+        if (column.key === 'category' || column.key === 'unit') {
+          console.log('⚠️ Default case hit for select field:', {
+            key: column.key,
+            type: column.type,
+            value,
+          })
+        }
+
         return (
           <span className="text-sm text-gray-700 dark:text-gray-400">
             {String(value)}

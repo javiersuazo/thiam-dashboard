@@ -294,6 +294,11 @@ export function EditableCell({
     )
   }
 
+  // For select fields, display the label instead of the value (key)
+  const displayValue = type === 'select' && options.length > 0
+    ? options.find(opt => opt.value === value)?.label || value
+    : value
+
   return (
     <div
       onDoubleClick={() => setEditing(true)}
@@ -301,7 +306,7 @@ export function EditableCell({
       title="Double-click to edit"
     >
       <span className="text-gray-900 dark:text-white">
-        {value ?? <span className="text-gray-400 dark:text-gray-500">-</span>}
+        {displayValue ?? <span className="text-gray-400 dark:text-gray-500">-</span>}
       </span>
     </div>
   )

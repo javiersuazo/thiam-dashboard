@@ -33,10 +33,10 @@ export function MenuBuilderContainer({ accountId, menuId, onSuccess, onCancel }:
         menuId,
         menu: { ...menu, id: menuId },
       })
-      onSuccess?.(result.id)
+      onSuccess?.(result.id!)
     } else {
       const result = await createMutation.mutateAsync(menu)
-      onSuccess?.(result.id)
+      onSuccess?.(result.id!)
     }
   }
 

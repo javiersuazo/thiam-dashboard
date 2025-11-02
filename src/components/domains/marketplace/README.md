@@ -1,346 +1,661 @@
-# Marketplace Domain
+# Marketplace Domain - Developer Guide
 
-A comprehensive online marketplace/store implementation following **DDD (Domain-Driven Design)** and **SOLID principles**, featuring a Lego-style approach to form building with JSON configuration.
+A fully-featured marketplace implementation following **Domain-Driven Design (DDD)** principles with a clean, layered architecture and **plugin pattern** for seamless backend integration.
+
+## Quick Start
+
+### Setup with Mock Data (Development)
+
+```tsx
+import {
+  MarketplaceProvider,
+  MockProductRepository,
+  MockCatererRepository,
+  LocalStorageCartRepository,
+} from '@/components/domains/marketplace'
+
+export default function App() {
+  return (
+    <MarketplaceProvider
+      productRepository={new MockProductRepository()}
+      catererRepository={new MockCatererRepository()}
+      cartRepository={new LocalStorageCartRepository()}
+    >
+      {/* Your marketplace components */}
+    </MarketplaceProvider>
+  )
+}
+```
+
+### Setup with Real API (Production)
+
+```tsx
+import {
+  MarketplaceProvider,
+  LocalStorageCartRepository,
+} from '@/components/domains/marketplace'
+import { ApiProductRepository } from '@/lib/api/marketplace/products'
+import { ApiCatererRepository } from '@/lib/api/marketplace/caterers'
+
+export default function App() {
+  return (
+    <MarketplaceProvider
+      productRepository={new ApiProductRepository()}
+      catererRepository={new ApiCatererRepository()}
+      cartRepository={new LocalStorageCartRepository()}
+    >
+      {/* Your marketplace components */}
+    </MarketplaceProvider>
+  )
+}
+```
 
 ## Architecture Overview
 
-This domain implements a complete e-commerce experience inspired by platforms like HEYCater, with enhanced UX and modern architecture patterns.
-
-### Domain Structure
+The marketplace follows a **three-layer architecture**:
 
 ```
-marketplace/
-├── types/                  # Domain types and interfaces
-├── validation/             # Zod schemas for validation
-├── components/
-│   ├── store/             # Product browsing and filtering
-│   │   ├── ProductCard.tsx
-│   │   ├── ProductGrid.tsx
-│   │   └── StoreFilters.tsx
-│   ├── cart/              # Shopping cart functionality
-│   │   ├── CartItem.tsx
-│   │   ├── CartSummary.tsx
-│   │   └── ShoppingCart.tsx
-│   ├── checkout/          # Checkout flow
-│   │   └── CheckoutFlow.tsx
-│   └── forms/             # Lego-style form components
-│       ├── fields/        # Atomic field components
-│       │   ├── TextField.tsx
-│       │   ├── SelectField.tsx
-│       │   ├── AddressField.tsx
-│       │   └── ... (more atomic fields)
-│       ├── DynamicField.tsx        # Field factory
-│       └── CheckoutFormBuilder.tsx  # JSON-configurable form
-├── stores/                # Zustand state management
-│   └── useMarketplaceStore.ts
-├── hooks/                 # Domain-specific hooks
-│   └── useFilteredProducts.ts
-└── mocks/                 # Mock data for testing
-    ├── products.ts
-    └── checkoutConfig.ts
+┌─────────────────────────────────────────────┐
+│       PRESENTATION LAYER                     │
+│  - React Components                          │
+│  - Custom Hooks                              │
+│  - UI State Management                       │
+└────────────────┬────────────────────────────┘
+                 │
+┌────────────────▼────────────────────────────┐
+│       BUSINESS LOGIC LAYER                   │
+│  - Services (Product, Cart, Caterer)        │
+│  - Domain Logic                              │
+│  - Use Cases                                 │
+└────────────────┬────────────────────────────┘
+                 │
+┌────────────────▼────────────────────────────┐
+│          DATA LAYER                          │
+│  - Repository Interfaces                     │
+│  - Adapters (Mock, API, LocalStorage)      │
+│  - Data Transformation                       │
+└─────────────────────────────────────────────┘
 ```
 
-## Key Features
+### Benefits
 
-### 1. **Product Catalog with Advanced Filtering**
-- Real-time search across name, description, caterer, and tags
-- Category and tag filtering
-- Price range filtering
-- Rating filtering
-- Availability filtering
-- Multiple sort options (price, rating, name, popularity)
+- ✅ **Plug & Play**: Swap data sources without changing business logic or UI
+- ✅ **Type Safe**: Full TypeScript support across all layers
+- ✅ **Testable**: Each layer can be tested independently
+- ✅ **Flexible**: Mix mock and real data sources
+- ✅ **DDD Compliant**: Domain models are the source of truth
+- ✅ **SOLID**: Follows all five SOLID principles
 
-### 2. **Shopping Cart**
-- Persistent cart state (localStorage via Zustand persist)
-- Quantity management with min/max order validation
-- Special instructions per item
-- Real-time price calculations (subtotal, tax, delivery fee, total)
+## Folder Structure
 
-### 3. **JSON-Configurable Checkout Forms (Lego Approach)**
+```
+src/components/domains/marketplace/
+├── types/
+│   ├── domain.ts              # Core domain models
+│   └── index.ts               # Legacy types
+│
+├── repositories/              # Data layer contracts
+│   ├── IProductRepository.ts
+│   ├── ICatererRepository.ts
+│   └── ICartRepository.ts
+│
+├── adapters/                  # Data layer implementations
+│   ├── MockProductRepository.ts
+│   ├── MockCatererRepository.ts
+│   ├── LocalStorageCartRepository.ts
+│   └── ApiProductRepository.ts         # Example
+│
+├── services/                  # Business logic layer
+│   ├── ProductService.ts
+│   ├── CartService.ts
+│   └── CatererService.ts
+│
+├── providers/
+│   └── MarketplaceProvider.tsx  # React Context + DI
+│
+├── hooks/                     # Presentation layer hooks
+│   ├── useProducts.ts
+│   ├── useCaterers.ts
+│   └── useProductSearch.ts
+│
+├── components/                # Presentation layer
+│   ├── enhanced/
+│   ├── store/
+│   └── forms/
+│
+└── index.ts                   # Public API
+```
 
-The checkout form is built using atomic, reusable components that can be assembled via JSON configuration:
+## Core Concepts
 
-#### Atomic Field Components (LEGO Blocks)
-- `TextField` - Text input (also handles email, password, tel, url)
-- `TextAreaField` - Multi-line text input
-- `SelectField` - Dropdown selection
-- `RadioField` - Radio button groups
-- `CheckboxField` - Single checkbox
-- `NumberField` - Numeric input with min/max
-- `DateTimeField` - Date and time pickers
-- `AddressField` - Composite address field (street, city, postal, country)
-- `PhoneField` - Phone number input
-- `FieldError` - Error message display
-- `FieldHint` - Hint/helper text display
+### 1. Domain Models
 
-#### Dynamic Form Builder
-The `CheckoutFormBuilder` component:
-- Renders multi-step forms from JSON configuration
-- Conditional field visibility based on other field values
-- Per-field validation with Zod schemas
-- Progress indicator
-- Grid layout support
-- Auto-saves progress
+Domain models represent your business entities:
 
-#### Example JSON Configuration
-```json
-{
-  "id": "checkout",
-  "title": "Complete Your Order",
-  "showProgressBar": true,
-  "steps": [
-    {
-      "id": "customer-info",
-      "title": "Customer Information",
-      "fields": [
-        {
-          "id": "firstName",
-          "type": "text",
-          "label": "First Name",
-          "required": true,
-          "grid": { "cols": 2, "span": 1 }
-        },
-        {
-          "id": "email",
-          "type": "email",
-          "label": "Email",
-          "required": true,
-          "hint": "We'll send confirmation here"
-        }
-      ]
-    }
-  ]
+```typescript
+// Product entity
+interface Product {
+  id: string
+  name: string
+  description: string
+  price: number
+  currency: string
+  category: string
+  tags: string[]
+  catererId: string
+  catererName: string
+  // ...
+}
+
+// Cart aggregate
+interface Cart {
+  items: CartItem[]
+  subtotal: number
+  tax: number
+  deliveryFee: number
+  total: number
+  itemCount: number
 }
 ```
 
-### 4. **Conditional Field Rendering**
-Fields can be shown/hidden based on other field values:
+### 2. Repository Pattern
+
+Repositories abstract data access:
 
 ```typescript
-{
-  id: 'dietaryDetails',
-  type: 'textarea',
-  label: 'Dietary Restrictions',
-  condition: {
-    field: 'hasDietaryRestrictions',
-    operator: 'equals',
-    value: true
+// Interface (contract)
+interface IProductRepository {
+  getAll(params?: PaginationParams): Promise<PaginatedResult<Product>>
+  getById(id: string): Promise<Product | null>
+  filter(filters: MarketplaceFilters): Promise<PaginatedResult<Product>>
+}
+
+// Mock implementation
+class MockProductRepository implements IProductRepository {
+  async getAll(params) {
+    return { items: mockProducts, total: mockProducts.length, ... }
+  }
+}
+
+// Real API implementation
+class ApiProductRepository implements IProductRepository {
+  async getAll(params) {
+    const { data } = await api.GET('/marketplace/products')
+    return this.transformApiResponse(data)
   }
 }
 ```
 
-Supported operators:
-- `equals` / `not-equals`
-- `contains`
-- `greater-than` / `less-than`
+### 3. Service Layer
 
-## SOLID Principles Applied
-
-### Single Responsibility Principle (SRP)
-- Each field component has ONE job (e.g., `TextField` only handles text input)
-- `FieldError` and `FieldHint` are separate components
-- `DynamicField` acts as a factory, delegating to specific field types
-- State management separated into `useMarketplaceStore`
-- Filtering logic separated into `useFilteredProducts` hook
-
-### Open/Closed Principle (OCP)
-- `DynamicField` is open for extension (add new field types) but closed for modification
-- Form configuration is external (JSON), no code changes needed for new forms
-- New field types can be added without changing existing code
-
-### Liskov Substitution Principle (LSP)
-- All field components implement the same interface
-- Any field component can be swapped for another without breaking the form
-
-### Interface Segregation Principle (ISP)
-- Field components receive only the props they need
-- Separate interfaces for each field type
-- No component is forced to depend on interfaces it doesn't use
-
-### Dependency Inversion Principle (DIP)
-- Components depend on abstractions (TypeScript interfaces), not concrete implementations
-- `CheckoutFormBuilder` depends on `CheckoutFormConfig` interface, not specific forms
-- `DynamicField` depends on field interfaces, not concrete field components
-
-## DDD Principles Applied
-
-### Bounded Context
-The marketplace domain is self-contained with clear boundaries. It doesn't depend on other domains.
-
-### Ubiquitous Language
-- `StoreProduct` - A product available in the store
-- `CartItem` - A product added to the cart with quantity
-- `Cart` - Shopping cart with items and totals
-- `Order` - Completed purchase
-- `CheckoutFormConfig` - Form definition
-- `StoreFilters` - Product filtering criteria
-
-### Aggregates
-- `Cart` is the aggregate root containing `CartItem` entities
-- `Order` is the aggregate root for completed purchases
-
-### Value Objects
-- `AddressValue` - Immutable address representation
-- `StoreFilters` - Filtering criteria
-
-### Domain Services
-- `useFilteredProducts` - Product filtering logic
-- `calculateCartTotals` - Cart calculation logic (in store)
-
-## State Management
-
-Uses **Zustand** with persistence:
+Services contain business logic:
 
 ```typescript
-const { cart, filters, addToCart, setFilters } = useMarketplaceStore()
+class CartService {
+  constructor(private readonly repository: ICartRepository) {}
+
+  async addToCart(product: Product, quantity: number): Promise<Cart> {
+    // Business rule: enforce minimum order
+    const validQuantity = Math.max(product.minOrder || 1, quantity)
+
+    const item: CartItem = {
+      product,
+      quantity: validQuantity,
+      subtotal: product.price * validQuantity,
+    }
+
+    return this.repository.add(item)
+  }
+}
 ```
 
-### Store Features
-- Cart persistence to localStorage
-- Filters state (ephemeral)
-- Automatic cart total calculations
-- Optimized updates
+### 4. Provider Pattern
+
+The provider injects dependencies via React Context:
+
+```tsx
+<MarketplaceProvider
+  productRepository={new MockProductRepository()}
+  catererRepository={new MockCatererRepository()}
+  cartRepository={new LocalStorageCartRepository()}
+>
+  {children}
+</MarketplaceProvider>
+```
 
 ## Usage Examples
 
-### Basic Store Page
+### Using the Context Hook
+
 ```tsx
-import {
-  ProductGrid,
-  StoreFilters,
-  useMarketplaceStore,
-  useFilteredProducts
-} from '@/components/domains/marketplace'
+import { useMarketplace } from '@/components/domains/marketplace'
 
-export default function StorePage() {
-  const { filters, addToCart, setFilters, resetFilters } = useMarketplaceStore()
-  const products = useFilteredProducts(allProducts, filters)
+function MyComponent() {
+  const {
+    productService,
+    cartService,
+    cart,
+    filters,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+  } = useMarketplace()
 
-  return (
-    <div className="grid grid-cols-4 gap-6">
-      <StoreFilters
-        filters={filters}
-        availableCategories={categories}
-        availableTags={tags}
-        onFiltersChange={setFilters}
-        onReset={resetFilters}
-      />
-      <ProductGrid
-        products={products}
-        onAddToCart={addToCart}
-      />
-    </div>
-  )
-}
-```
+  // Cart state is reactive
+  console.log(cart.items, cart.total)
 
-### Cart Page
-```tsx
-import { ShoppingCart, useMarketplaceStore } from '@/components/domains/marketplace'
+  // Add to cart (enforces min order)
+  const handleAdd = () => addToCart(product, 5)
 
-export default function CartPage() {
-  const { cart, updateQuantity, removeFromCart, updateNotes } = useMarketplaceStore()
-
-  return (
-    <ShoppingCart
-      cart={cart}
-      onUpdateQuantity={updateQuantity}
-      onRemoveItem={removeFromCart}
-      onUpdateNotes={updateNotes}
-      onCheckout={() => router.push('/checkout')}
-    />
-  )
-}
-```
-
-### Checkout Page with JSON Config
-```tsx
-import { CheckoutFlow } from '@/components/domains/marketplace'
-import checkoutConfig from './checkout-config.json'
-
-export default function CheckoutPage() {
-  const { cart, clearCart } = useMarketplaceStore()
-
-  const handleComplete = async (formData, cart) => {
-    const order = await api.createOrder({ formData, cart })
-    clearCart()
-    return order
+  // Use service methods directly
+  const loadProducts = async () => {
+    const result = await productService.filterProducts(filters)
+    console.log(result.items)
   }
-
-  return (
-    <CheckoutFlow
-      cart={cart}
-      formConfig={checkoutConfig}
-      onComplete={handleComplete}
-      onCancel={() => router.push('/cart')}
-    />
-  )
 }
 ```
 
-## Testing
+### Using Custom Hooks
 
-Visit `/marketplace-test` to see the complete flow in action with:
-- Mock product data
-- Full filtering and sorting
-- Shopping cart operations
-- Multi-step checkout with JSON-configured forms
-- Order confirmation
-
-## Extending the Domain
-
-### Adding a New Field Type
-
-1. Create the field component:
 ```tsx
-// components/forms/fields/MyCustomField.tsx
-export function MyCustomField({ id, label, value, onChange, ... }: MyCustomFieldProps) {
+import { useProducts } from '@/components/domains/marketplace'
+
+function ProductList() {
+  const { data, isLoading, error, refetch } = useProducts({
+    page: 1,
+    pageSize: 12,
+  })
+
+  if (isLoading) return <div>Loading...</div>
+  if (error) return <div>Error: {error.message}</div>
+
   return (
     <div>
-      <Label>{label}</Label>
-      <MyCustomInput value={value} onChange={onChange} />
+      {data?.items.map(product => (
+        <ProductCard key={product.id} product={product} />
+      ))}
     </div>
   )
 }
 ```
 
-2. Export from `fields/index.ts`:
-```typescript
-export { MyCustomField } from './MyCustomField'
-```
+### Grouping Products by Caterer
 
-3. Add to `DynamicField.tsx`:
 ```tsx
-case 'my-custom':
-  return <MyCustomField {...baseProps} />
-```
+import { useProducts, useCaterers } from '@/components/domains/marketplace'
 
-4. Use in JSON config:
-```json
-{
-  "id": "myField",
-  "type": "my-custom",
-  "label": "My Custom Field"
+function CatererView() {
+  const { data } = useProducts()
+  const caterers = useCaterers(data?.items || [])
+
+  return (
+    <div>
+      {caterers.map(caterer => (
+        <div key={caterer.catererId}>
+          <h2>{caterer.catererName}</h2>
+          <div>
+            {caterer.products.map(product => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
 }
 ```
 
-### Adding New Filters
-Update `StoreFilters` type and `useFilteredProducts` hook logic.
+## Creating Custom Adapters
 
-## Tech Stack
-- **React 19** - UI library
-- **TypeScript** - Type safety
-- **Zustand** - State management
-- **Zod** - Validation
-- **Tailwind CSS** - Styling
-- **shadcn/ui** - UI components
+### Step 1: Implement the Interface
+
+```typescript
+import { IProductRepository } from '../repositories/IProductRepository'
+import { Product, PaginatedResult } from '../types/domain'
+
+export class MyApiRepository implements IProductRepository {
+  constructor(private baseUrl: string, private apiKey: string) {}
+
+  async getAll(params) {
+    const response = await fetch(`${this.baseUrl}/products`, {
+      headers: { 'X-API-Key': this.apiKey },
+    })
+    const data = await response.json()
+
+    return {
+      items: data.products.map(this.transform),
+      total: data.total,
+      page: params?.page || 1,
+      pageSize: params?.pageSize || 12,
+      totalPages: Math.ceil(data.total / (params?.pageSize || 12)),
+    }
+  }
+
+  async getById(id: string) {
+    const response = await fetch(`${this.baseUrl}/products/${id}`)
+    const data = await response.json()
+    return this.transform(data)
+  }
+
+  private transform(apiProduct: any): Product {
+    return {
+      id: apiProduct.product_id,
+      name: apiProduct.title,
+      description: apiProduct.desc,
+      price: apiProduct.price_cents / 100,
+      currency: apiProduct.currency || 'EUR',
+      category: apiProduct.category_name,
+      tags: apiProduct.tags || [],
+      imageUrl: apiProduct.image_url,
+      availability: apiProduct.in_stock ? 'available' : 'out_of_stock',
+      stock: apiProduct.stock_quantity,
+      minOrder: apiProduct.minimum_order || 1,
+      preparationTime: apiProduct.prep_time || '2h',
+      leadTime: apiProduct.lead_time || '24h',
+      catererId: apiProduct.caterer_id,
+      catererName: apiProduct.caterer_name,
+      rating: apiProduct.avg_rating,
+      reviewCount: apiProduct.num_reviews,
+    }
+  }
+
+  // Implement other interface methods...
+}
+```
+
+### Step 2: Use Your Adapter
+
+```tsx
+<MarketplaceProvider
+  productRepository={new MyApiRepository('https://api.example.com', 'YOUR_API_KEY')}
+  catererRepository={new MockCatererRepository()}
+  cartRepository={new LocalStorageCartRepository()}
+>
+  {children}
+</MarketplaceProvider>
+```
+
+## Data Transformation Strategy
+
+The **Data Layer** is responsible for transforming external data (API responses, database records) into clean **Domain Models**.
+
+### Why Transform?
+
+- API response structure may change → Domain model stays stable
+- Multiple APIs may have different formats → One unified model
+- Backend uses snake_case → Frontend uses camelCase
+- API includes extra fields → Domain model only has what we need
+
+### Example Transformation
+
+```typescript
+// API Response (what backend sends)
+{
+  "product_id": "abc123",
+  "title": "Deluxe Burger",
+  "price_cents": 1299,
+  "caterer_id": "cat456",
+  "caterer_name": "Burger House",
+  "image_url": "https://...",
+  "in_stock": true,
+  "avg_rating": 4.5
+}
+
+// Domain Model (what our app uses)
+{
+  id: "abc123",
+  name: "Deluxe Burger",
+  price: 12.99,
+  catererId: "cat456",
+  catererName: "Burger House",
+  imageUrl: "https://...",
+  availability: "available",
+  rating: 4.5
+}
+```
+
+## Available Adapters
+
+### MockProductRepository
+- **Purpose**: Development and testing
+- **Data Source**: In-memory mock data
+- **Use Case**: When backend isn't ready yet
+
+### MockCatererRepository
+- **Purpose**: Development and testing
+- **Data Source**: Derived from mock products
+- **Use Case**: When backend isn't ready yet
+
+### LocalStorageCartRepository
+- **Purpose**: Client-side cart persistence
+- **Data Source**: Browser localStorage
+- **Use Case**: Production (cart data doesn't need server)
+
+### ApiProductRepository (Example)
+- **Purpose**: Production
+- **Data Source**: Real backend API
+- **Use Case**: When backend is ready
+
+## Service Layer API
+
+### ProductService
+
+```typescript
+productService.getProducts(params?)
+productService.getProductById(id)
+productService.searchProducts(query, params?)
+productService.filterProducts(filters, params?)
+productService.getProductsByCaterer(catererId, params?)
+productService.getAvailableCategories()
+productService.getAvailableTags()
+productService.groupProductsByCaterer(products)
+```
+
+### CartService
+
+```typescript
+cartService.getCart()
+cartService.addToCart(product, quantity)
+cartService.removeFromCart(productId)
+cartService.updateQuantity(productId, quantity)
+cartService.clearCart()
+cartService.getItemCount()
+cartService.getTotal()
+cartService.isProductInCart(cart, productId)
+cartService.getProductQuantity(cart, productId)
+```
+
+### CatererService
+
+```typescript
+catererService.getCaterers(params?)
+catererService.getCatererById(id)
+catererService.searchCaterers(query, params?)
+```
+
+## Type Definitions
+
+### Product
+
+```typescript
+interface Product {
+  id: string
+  name: string
+  description: string
+  price: number
+  currency: string
+  category: string
+  tags: string[]
+  imageUrl?: string
+  availability: 'available' | 'unavailable' | 'out_of_stock'
+  stock: number
+  minOrder: number
+  preparationTime: string
+  leadTime: string
+  catererId: string
+  catererName: string
+  rating?: number
+  reviewCount?: number
+}
+```
+
+### Cart
+
+```typescript
+interface Cart {
+  items: CartItem[]
+  subtotal: number
+  tax: number
+  taxRate: number
+  deliveryFee: number
+  total: number
+  itemCount: number
+}
+
+interface CartItem {
+  product: Product
+  quantity: number
+  subtotal: number
+}
+```
+
+### Filters
+
+```typescript
+interface MarketplaceFilters {
+  categories: string[]
+  tags: string[]
+  availability?: 'available' | 'unavailable' | 'out_of_stock'
+  minPrice?: number
+  maxPrice?: number
+  catererId?: string
+  searchQuery?: string
+}
+```
+
+### Pagination
+
+```typescript
+interface PaginationParams {
+  page: number
+  pageSize: number
+}
+
+interface PaginatedResult<T> {
+  items: T[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+```
+
+## Advanced Patterns
+
+### Hybrid Data Sources
+
+Mix mock and real data:
+
+```tsx
+<MarketplaceProvider
+  productRepository={new ApiProductRepository()}        // Real API
+  catererRepository={new MockCatererRepository()}       // Mock data
+  cartRepository={new LocalStorageCartRepository()}     // localStorage
+>
+  {children}
+</MarketplaceProvider>
+```
+
+### Conditional Data Sources
+
+Switch based on environment:
+
+```tsx
+const productRepo = process.env.NODE_ENV === 'production'
+  ? new ApiProductRepository()
+  : new MockProductRepository()
+
+<MarketplaceProvider
+  productRepository={productRepo}
+  catererRepository={new MockCatererRepository()}
+  cartRepository={new LocalStorageCartRepository()}
+>
+  {children}
+</MarketplaceProvider>
+```
+
+### Testing with Mocks
+
+```tsx
+import { render } from '@testing-library/react'
+import { MarketplaceProvider, MockProductRepository } from '@/components/domains/marketplace'
+
+test('displays products', async () => {
+  render(
+    <MarketplaceProvider
+      productRepository={new MockProductRepository()}
+      catererRepository={new MockCatererRepository()}
+      cartRepository={new LocalStorageCartRepository()}
+    >
+      <ProductList />
+    </MarketplaceProvider>
+  )
+
+  // assertions...
+})
+```
+
+## Migration from Old Store
+
+The old Zustand store (`useMarketplaceStore`) is still available but deprecated.
+
+**Before**:
+```tsx
+import { useMarketplaceStore } from '@/components/domains/marketplace'
+
+function MyComponent() {
+  const { cart, addToCart, filters, setFilters } = useMarketplaceStore()
+}
+```
+
+**After**:
+```tsx
+import { useMarketplace } from '@/components/domains/marketplace'
+
+function MyComponent() {
+  const { cart, addToCart, filters, setFilters } = useMarketplace()
+}
+```
+
+The API is intentionally similar to ease migration.
 
 ## Best Practices
 
-1. **Always validate user input** - Use Zod schemas
-2. **Keep components atomic** - Single responsibility
-3. **Use TypeScript interfaces** - Type safety
-4. **Follow DDD patterns** - Bounded contexts, ubiquitous language
-5. **Persist cart state** - Better UX
-6. **Make forms configurable** - JSON configuration for flexibility
-7. **Test the complete flow** - Use `/marketplace-test` page
+1. **Always use the Provider**: Wrap your app with `MarketplaceProvider`
+2. **Use hooks in components**: `useMarketplace()`, `useProducts()`, etc.
+3. **Business logic in services**: Don't duplicate logic in components
+4. **Transform data in adapters**: Keep domain models clean
+5. **Type everything**: Leverage TypeScript for safety
+6. **Test with mocks**: Use MockRepositories for unit tests
+7. **Separate concerns**: Respect layer boundaries
+
+## Troubleshooting
+
+### "useMarketplace must be used within MarketplaceProvider"
+
+Ensure your component tree is wrapped with `MarketplaceProvider`.
+
+### Types don't match
+
+Make sure your adapter's `transform` method returns the correct domain model shape.
+
+### Cart not persisting
+
+Check that you're using `LocalStorageCartRepository` and localStorage is available.
+
+## Further Reading
+
+- [ARCHITECTURE.md](./ARCHITECTURE.md) - Detailed forms architecture documentation
+- [Repository Pattern](https://martinfowler.com/eaaCatalog/repository.html)
+- [Domain-Driven Design](https://martinfowler.com/bliki/DomainDrivenDesign.html)
+- [SOLID Principles](https://en.wikipedia.org/wiki/SOLID)

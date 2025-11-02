@@ -6,3 +6,6 @@ export type { CartSidebarProps } from './CartSidebar'
 
 export { FilterPane } from './FilterPane'
 export type { FilterPaneProps } from './FilterPane'
+
+export { MiniCart } from './MiniCart'
+export { FilterChipRail } from './FilterChipRail'

@@ -7,7 +7,7 @@ import { useBulkDeleteIngredients, useBatchUpdateIngredients } from '@/lib/api/i
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Trash2 } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { ConfirmDialog } from '@/components/shared/ui/confirm-dialog'
 import type { RowSelectionState } from '@tanstack/react-table'
 import type { components } from '@/lib/api'
@@ -28,6 +28,7 @@ interface DeleteConfirmState {
 
 export function IngredientTable({ accountId }: IngredientTableProps) {
   const t = useTranslations('inventory.ingredients')
+  const locale = useLocale()
   const queryClient = useQueryClient()
 
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 20 })
@@ -111,6 +112,14 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
     return date.toLocaleDateString()
   }
 
+  // Debug: Log schema structure
+  console.log('📋 IngredientTable schema check:', {
+    hasSchema: !!data?.meta?.schema,
+    columnCount: data?.meta?.schema?.columns?.length,
+    categoryColumn: data?.meta?.schema?.columns?.find(c => c.key === 'category'),
+    locale,
+  })
+
   const handleCellEdit = (rowId: string, columnId: string, value: unknown) => {
     console.log('📝 Cell Edit:', { rowId, columnId, value, valueType: typeof value })
 
@@ -165,6 +174,7 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
         getRowId={(row) => row.id!}
 
         schemaOptions={{
+          locale,
           formatCurrency,
           formatDate,
           t: (key) => t(`table.${key}`),

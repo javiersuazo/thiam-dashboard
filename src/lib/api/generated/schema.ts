@@ -4182,13 +4182,18 @@ export interface paths {
          * List ingredients
          * @description Get paginated list of ingredients for a caterer account with optional filters. Returns ingredients with stock levels, costs, and supplier information.
          *
+         *     **🏷️ IMPORTANT - Categories are now TAG-BASED:**
+         *     - The `category` field in responses is fetched from the tag system (tag_links table)
+         *     - Categories are translatable (English/Spanish) via the tag system
+         *     - You can filter by category slug (e.g., `?category=vegetables`)
+         *
          *     **Example Request:**
          *     ```
-         *     GET /v1/accounts/a0000001-0000-0000-0000-000000000001/ingredients?category=vegetables&search=tomato&sort_by=name&sort_order=asc&page=1&limit=10
+         *     GET /v1/accounts/a0000001-0000-0000-0000-000000000001/ingredients?category=vegetables&search=tomato&sort_by=currentStock&sort_order=desc&page=1&limit=10
          *     Authorization: Bearer YOUR_JWT_TOKEN
          *     ```
          *
-         *     **Available Categories:** vegetables, fruits, meat, seafood, dairy, grains, bakery, spices, oils, condiments, beverages, canned, frozen, supplies, other
+         *     **Available Category Slugs:** vegetables, fruits, meat, seafood, dairy, grains, bakery, spices, oils, condiments, beverages, canned, frozen, supplies, other
          *
          *     **Note:** Authentication required. Use POST /v1/auth/login to get a JWT token first.
          */
@@ -4208,10 +4213,10 @@ export interface paths {
                      */
                     search?: string;
                     /**
-                     * @description Sort column
-                     * @example name
+                     * @description Sort column (use camelCase field names from response)
+                     * @example currentStock
                      */
-                    sort_by?: "name" | "category" | "cost" | "stock" | "created_at";
+                    sort_by?: "name" | "category" | "currentStock" | "costPerUnitCents" | "reorderLevel" | "supplier" | "isActive" | "createdAt";
                     /**
                      * @description Sort order
                      * @example asc
@@ -4281,23 +4286,46 @@ export interface paths {
         put?: never;
         /**
          * Create ingredient
-         * @description Create a new ingredient
+         * @description Create a new ingredient with tag-based category
+         *
+         *     **🏷️ Category Field:**
+         *     - The `category` field must be a valid category **slug** (e.g., "vegetables", "meat", "dairy")
+         *     - This creates a link in the tag_links table: entity_type='ingredient', group_slug='ingredient-categories'
+         *     - Available slugs: vegetables, fruits, meat, seafood, dairy, grains, bakery, spices, oils, condiments, beverages, canned, frozen, supplies, other
+         *
+         *     **Example Request Body:**
+         *     ```json
+         *     {
+         *     "name": "Chicken Breast",
+         *     "category": "meat",
+         *     "unit": "kg",
+         *     "currentStock": 50,
+         *     "reorderLevel": 20,
+         *     "costPerUnitCents": 899,
+         *     "currency": "USD",
+         *     "supplier": "Fresh Farms Ltd",
+         *     "isActive": true
+         *     }
+         *     ```
          */
         post: {
             parameters: {
                 query?: never;
                 header?: never;
-                path?: never;
+                path: {
+                    /** @description Account ID */
+                    accountId: string;
+                };
                 cookie?: never;
             };
-            /** @description Ingredient data */
+            /** @description Ingredient data (category is tag slug) */
             requestBody: {
                 content: {
                     "application/json": components["schemas"]["request.CreateIngredientRequest"];
                 };
             };
             responses: {
-                /** @description Created */
+                /** @description Returns ingredient with category from tags */
                 201: {
                     headers: {
                         [name: string]: unknown;
@@ -4306,7 +4334,7 @@ export interface paths {
                         "application/json": components["schemas"]["response.IngredientResponse"];
                     };
                 };
-                /** @description Bad Request */
+                /** @description Invalid input or missing required fields */
                 400: {
                     headers: {
                         [name: string]: unknown;
@@ -4341,7 +4369,12 @@ export interface paths {
         };
         /**
          * Get ingredient
-         * @description Get ingredient by ID
+         * @description Get a single ingredient by ID with its category from the tag system
+         *
+         *     **🏷️ Response includes category:**
+         *     - The `category` field in the response is fetched from tag_links (group: 'ingredient-categories')
+         *     - Returns the tag slug (e.g., "vegetables", "meat", "dairy")
+         *     - Category is translatable via the tag system
          */
         get: {
             parameters: {
@@ -4386,7 +4419,23 @@ export interface paths {
         };
         /**
          * Update ingredient
-         * @description Update an existing ingredient (for inline editing)
+         * @description Update an existing ingredient with tag-based category (for inline editing)
+         *
+         *     **🏷️ Category Field (optional):**
+         *     - The `category` field must be a valid category **slug** if provided
+         *     - If omitted, the existing category tag is preserved
+         *     - Available slugs: vegetables, fruits, meat, seafood, dairy, grains, bakery, spices, oils, condiments, beverages, canned, frozen, supplies, other
+         *     - Internally updates the tag_links table
+         *
+         *     **Example Request Body (partial update):**
+         *     ```json
+         *     {
+         *     "name": "Organic Chicken Breast",
+         *     "category": "meat",
+         *     "currentStock": 45,
+         *     "isActive": true
+         *     }
+         *     ```
          */
         put: {
             parameters: {
@@ -4681,7 +4730,34 @@ export interface paths {
         head?: never;
         /**
          * Batch update ingredients
-         * @description Updates multiple ingredients with different values for each in a single transaction
+         * @description Updates multiple ingredients with different values for each in a single transaction. Category field is tag-based.
+         *
+         *     **🏷️ Category Field in Updates:**
+         *     - The `category` field in each update must be a valid category **slug**
+         *     - Available slugs: vegetables, fruits, meat, seafood, dairy, grains, bakery, spices, oils, condiments, beverages, canned, frozen, supplies, other
+         *     - Each ingredient's category tag is updated individually in tag_links
+         *
+         *     **Example Request Body:**
+         *     ```json
+         *     {
+         *     "updates": {
+         *     "ingredient-uuid-1": {
+         *     "category": "meat",
+         *     "currentStock": 50,
+         *     "isActive": true
+         *     },
+         *     "ingredient-uuid-2": {
+         *     "category": "vegetables",
+         *     "reorderLevel": 20
+         *     }
+         *     }
+         *     }
+         *     ```
+         *
+         *     **Response includes:**
+         *     - `updatedCount`: Number of successfully updated ingredients
+         *     - `failedCount`: Number of failed updates
+         *     - `failed`: Array of errors with ingredient IDs
          */
         patch: {
             parameters: {
@@ -15844,8 +15920,6 @@ export interface components {
             status?: string[];
         };
         /** @enum {string} */
-        "entity.IngredientCategory": "vegetables" | "fruits" | "meat" | "seafood" | "dairy" | "grains" | "bakery" | "spices" | "oils" | "condiments" | "beverages" | "canned" | "frozen" | "supplies" | "other";
-        /** @enum {string} */
         "entity.IngredientUnit": "kg" | "g" | "l" | "ml" | "piece";
         "entity.LoginAttempt": {
             createdAt?: string;
@@ -15884,6 +15958,9 @@ export interface components {
             color?: string;
             icon?: string;
             label?: string;
+            translations?: {
+                [key: string]: string;
+            };
             value?: string;
         };
         "entity.Translation": {
@@ -17003,7 +17080,7 @@ export interface components {
             meta?: components["schemas"]["response.PaginationMeta"];
         };
         "response.IngredientResponse": {
-            category?: components["schemas"]["entity.IngredientCategory"];
+            category?: string;
             catererId?: string;
             costPerUnitCents?: number;
             createdAt?: string;

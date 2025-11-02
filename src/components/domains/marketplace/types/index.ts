@@ -14,6 +14,7 @@ export interface StoreProduct {
   minOrder?: number
   maxOrder?: number
   preparationTime?: string
+  leadTime?: string
   catererId: string
   catererName: string
   catererLogo?: string

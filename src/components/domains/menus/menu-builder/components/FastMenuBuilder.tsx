@@ -40,15 +40,20 @@ export function FastMenuBuilder({
   const [selectedResultIndex, setSelectedResultIndex] = useState(0)
   const [view, setView] = useState<'builder' | 'details'>('builder')
   const [description, setDescription] = useState(initialMenu?.description || '')
-  const [leadTime, setLeadTime] = useState('48')
-  const [cities, setCities] = useState('Berlin, Munich')
-  const [capacity, setCapacity] = useState('50')
   const [imageUrl, setImageUrl] = useState(initialMenu?.imageUrl || '')
   const [tags, setTags] = useState<string[]>(initialMenu?.tags || [])
   const [tagInput, setTagInput] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+  const [isBrowseModalOpen, setIsBrowseModalOpen] = useState(false)
+  const [browseFilter, setBrowseFilter] = useState<string>('all')
+  const [browseSearch, setBrowseSearch] = useState('')
+  const [browsePage, setBrowsePage] = useState(1)
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
 
   const searchInputRef = useRef<HTMLInputElement>(null)
+
+  // Pagination settings
+  const ITEMS_PER_PAGE = 24
 
   // Computed values from business logic
   const filteredItems = availableItems.filter((item) =>
@@ -57,6 +62,33 @@ export function FastMenuBuilder({
   const totalItems = menuState.getTotalItems()
   const displayPrice = menuState.getTotalPrice()
   const targetCourse = menuState.courses.find((c) => c.id === menuState.targetCourseId)
+
+  // Extract all unique dietary tags for autocomplete
+  const allDietaryTags = Array.from(
+    new Set(
+      availableItems
+        .flatMap((item) => item.dietaryTags || [])
+        .filter(Boolean)
+    )
+  ).sort()
+
+  // Browse modal filtered items with tag filtering
+  const browseFilteredItems = availableItems.filter((item) => {
+    const matchesCategory = browseFilter === 'all' || item.category === browseFilter
+    const matchesSearch = browseSearch === '' ||
+      item.name.toLowerCase().includes(browseSearch.toLowerCase()) ||
+      item.description?.toLowerCase().includes(browseSearch.toLowerCase())
+    const matchesTags = selectedTags.length === 0 ||
+      selectedTags.every(tag => item.dietaryTags?.includes(tag))
+    return matchesCategory && matchesSearch && matchesTags
+  })
+
+  // Paginated items
+  const totalPages = Math.ceil(browseFilteredItems.length / ITEMS_PER_PAGE)
+  const paginatedItems = browseFilteredItems.slice(
+    (browsePage - 1) * ITEMS_PER_PAGE,
+    browsePage * ITEMS_PER_PAGE
+  )
 
   // Event handlers - delegate to business logic
   const handleAddItem = (item: MenuItem, keepFocus = false) => {
@@ -119,6 +151,23 @@ export function FastMenuBuilder({
     } finally {
       setIsSaving(false)
     }
+  }
+
+  const handleToggleTag = (tag: string) => {
+    setSelectedTags(prev =>
+      prev.includes(tag)
+        ? prev.filter(t => t !== tag)
+        : [...prev, tag]
+    )
+    setBrowsePage(1)
+  }
+
+  const handleCloseBrowseModal = () => {
+    setIsBrowseModalOpen(false)
+    setBrowseFilter('all')
+    setBrowseSearch('')
+    setSelectedTags([])
+    setBrowsePage(1)
   }
 
   const handleAddTag = () => {
@@ -215,18 +264,30 @@ export function FastMenuBuilder({
                 className="text-xl font-bold border-b-2 border-brand-500 bg-transparent focus:outline-none"
               />
             ) : (
-              <h1
-                onClick={() => setIsEditingName(true)}
-                className="text-xl font-bold cursor-pointer hover:text-brand-600 dark:hover:text-brand-400"
-              >
-                {menuState.name}
-              </h1>
+              <div className="flex items-center gap-2">
+                <h1
+                  onClick={() => setIsEditingName(true)}
+                  className="text-xl font-bold cursor-pointer hover:text-brand-600 dark:hover:text-brand-400"
+                >
+                  {menuState.name}
+                </h1>
+                <button
+                  onClick={() => setIsEditingName(true)}
+                  className="p-1 text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
+                  title="Edit menu name"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </button>
+              </div>
             )}
 
             {/* Pricing Strategy Toggle */}
             <div className="flex items-center gap-2">
               <button
                 onClick={() => menuState.setPricingStrategy('sum-of-items')}
+                title="Menu price is the sum of all item prices"
                 className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
                   menuState.pricingStrategy === 'sum-of-items'
                     ? 'bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300'
@@ -237,6 +298,7 @@ export function FastMenuBuilder({
               </button>
               <button
                 onClick={() => menuState.setPricingStrategy('fixed')}
+                title="Menu has one fixed price regardless of items"
                 className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
                   menuState.pricingStrategy === 'fixed'
                     ? 'bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300'
@@ -256,79 +318,90 @@ export function FastMenuBuilder({
               )}
             </div>
 
+            {/* Summary Info */}
+            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+              <span>{totalItems} items</span>
+              <span>•</span>
+              <span className="font-semibold text-gray-900 dark:text-white">
+                ${(displayPrice / 100).toFixed(2)}
+              </span>
+            </div>
+
             {/* Status Badge */}
             <Badge variant="solid" color={menuState.isActive ? 'success' : 'light'} size="sm">
               {menuState.isActive ? 'Published' : 'Draft'}
             </Badge>
 
-            {/* Details Button */}
-            <button
-              onClick={() => setView('details')}
-              className="ml-auto px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-            >
-              Details →
-            </button>
-          </div>
-
-          {/* Quick Info Badges */}
-          {view === 'builder' && (
-            <div className="flex items-center gap-2 text-xs">
+            {/* Action Buttons */}
+            <div className="ml-auto flex items-center gap-2">
               <button
                 onClick={() => setView('details')}
-                className="hover:opacity-80 transition-opacity"
+                className="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
               >
-                <Badge variant="light" color="light" size="sm">Lead {leadTime}h</Badge>
-              </button>
-              <button
-                onClick={() => setView('details')}
-                className="hover:opacity-80 transition-opacity"
-              >
-                <Badge variant="light" color="light" size="sm">{cities.split(',')[0]}</Badge>
-              </button>
-              <button
-                onClick={() => setView('details')}
-                className="hover:opacity-80 transition-opacity"
-              >
-                <Badge variant="light" color="light" size="sm">{capacity} ppl</Badge>
+                Details →
               </button>
             </div>
-          )}
+          </div>
         </div>
 
-        {/* Global Search */}
+        {/* Quick Search & Browse Button */}
         <div className="sticky top-0 z-20 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
-          <div className="relative">
-            <Input
-              ref={searchInputRef}
-              type="text"
-              placeholder="Type to search... (Press / to focus)"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              autoFocus
-            />
-            {targetCourse && (
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                <Badge variant="light" color="primary" size="sm">
-                  Adding to: {targetCourse.name}
-                </Badge>
-              </div>
-            )}
-            {searchQuery && filteredItems.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto z-30">
-                {filteredItems.slice(0, 10).map((item, idx) => (
-                  <button
-                    key={item.id}
-                    onClick={() => handleAddItem(item)}
-                    className={`w-full px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-between ${
-                      idx === selectedResultIndex ? 'bg-brand-50 dark:bg-brand-900/20' : ''
-                    }`}
-                  >
-                    <span className="text-sm font-medium">{item.name}</span>
-                    <span className="text-sm text-gray-500">${(item.priceCents / 100).toFixed(2)}</span>
-                  </button>
-                ))}
-              </div>
-            )}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 relative">
+              <Input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Quick search... (Press /)"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                autoFocus
+              />
+              {targetCourse && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <Badge variant="light" color="primary" size="sm">
+                    → {targetCourse.name}
+                  </Badge>
+                </div>
+              )}
+              {/* Quick Search Dropdown */}
+              {searchQuery && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto z-30">
+                  {filteredItems.length > 0 ? (
+                    filteredItems.slice(0, 5).map((item, idx) => (
+                      <button
+                        key={item.id}
+                        onClick={() => handleAddItem(item)}
+                        className={`w-full px-4 py-2.5 text-left hover:bg-brand-50 dark:hover:bg-brand-900/20 flex items-center justify-between ${
+                          idx === selectedResultIndex ? 'bg-brand-50 dark:bg-brand-900/20' : ''
+                        }`}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium">{item.name}</div>
+                          <div className="text-xs text-gray-500 capitalize mt-0.5">{item.category}</div>
+                        </div>
+                        <span className="text-sm text-gray-700 dark:text-gray-300 ml-2">
+                          ${(item.priceCents / 100).toFixed(2)}
+                        </span>
+                      </button>
+                    ))
+                  ) : (
+                    <div className="px-4 py-6 text-center text-sm text-gray-500">
+                      No items found for &ldquo;{searchQuery}&rdquo;
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => setIsBrowseModalOpen(true)}
+              className="flex items-center gap-2 whitespace-nowrap"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+              </svg>
+              Browse All ({availableItems.length})
+            </Button>
           </div>
         </div>
 
@@ -538,42 +611,6 @@ export function FastMenuBuilder({
                 />
               </div>
 
-              {/* Lead Time */}
-              <div>
-                <Label htmlFor="leadTime">Lead Time (hours)</Label>
-                <Input
-                  id="leadTime"
-                  type="number"
-                  value={leadTime}
-                  onChange={(e) => setLeadTime(e.target.value)}
-                  placeholder="48"
-                />
-              </div>
-
-              {/* Cities */}
-              <div>
-                <Label htmlFor="cities">Cities</Label>
-                <Input
-                  id="cities"
-                  type="text"
-                  value={cities}
-                  onChange={(e) => setCities(e.target.value)}
-                  placeholder="Berlin, Munich, Hamburg"
-                />
-              </div>
-
-              {/* Capacity */}
-              <div>
-                <Label htmlFor="capacity">Capacity (people)</Label>
-                <Input
-                  id="capacity"
-                  type="number"
-                  value={capacity}
-                  onChange={(e) => setCapacity(e.target.value)}
-                  placeholder="50"
-                />
-              </div>
-
               {/* Cover Image URL */}
               <div className="sm:col-span-2">
                 <Label htmlFor="imageUrl">Cover Image URL</Label>
@@ -642,7 +679,243 @@ export function FastMenuBuilder({
         </div>
       </div>
 
-      {/* Fixed Footer - Visible on all slides */}
+      {/* Browse Items Modal */}
+      {isBrowseModalOpen && (
+        <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col">
+            {/* Modal Header */}
+            <div className="border-b border-gray-200 dark:border-gray-700 p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold">Browse Menu Items</h2>
+                <button
+                  onClick={handleCloseBrowseModal}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Search */}
+              <div className="mb-4">
+                <Input
+                  type="text"
+                  placeholder="Search by name or description..."
+                  value={browseSearch}
+                  onChange={(e) => {
+                    setBrowseSearch(e.target.value)
+                    setBrowsePage(1)
+                  }}
+                />
+              </div>
+
+              {/* Category Filters */}
+              <div className="mb-3">
+                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">
+                  Category
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { value: 'all', label: 'All Items', count: availableItems.length },
+                    { value: 'appetizers', label: 'Appetizers', count: availableItems.filter(i => i.category === 'appetizers').length },
+                    { value: 'mains', label: 'Mains', count: availableItems.filter(i => i.category === 'mains').length },
+                    { value: 'sides', label: 'Sides', count: availableItems.filter(i => i.category === 'sides').length },
+                    { value: 'desserts', label: 'Desserts', count: availableItems.filter(i => i.category === 'desserts').length },
+                    { value: 'beverages', label: 'Beverages', count: availableItems.filter(i => i.category === 'beverages').length },
+                  ].map((filter) => (
+                    <button
+                      key={filter.value}
+                      onClick={() => {
+                        setBrowseFilter(filter.value)
+                        setBrowsePage(1)
+                      }}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        browseFilter === filter.value
+                          ? 'bg-brand-600 text-white'
+                          : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                      }`}
+                    >
+                      {filter.label} ({filter.count})
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Dietary Tag Filters (Autocomplete) */}
+              {allDietaryTags.length > 0 && (
+                <div>
+                  <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">
+                    Dietary Filters
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {allDietaryTags.map((tag) => (
+                      <button
+                        key={tag}
+                        onClick={() => handleToggleTag(tag)}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all capitalize ${
+                          selectedTags.includes(tag)
+                            ? 'bg-green-600 text-white ring-2 ring-green-600 ring-offset-2 dark:ring-offset-gray-800'
+                            : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50'
+                        }`}
+                      >
+                        {selectedTags.includes(tag) && (
+                          <svg className="w-3 h-3 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Content - Grid */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+              {paginatedItems.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {paginatedItems.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        handleAddItem(item)
+                        toast.success(`Added ${item.name}`)
+                      }}
+                      className="group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden hover:shadow-lg hover:border-brand-500 dark:hover:border-brand-500 transition-all text-left"
+                    >
+                      {/* Image */}
+                      {item.imageUrl && (
+                        <div className="aspect-video w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
+                          <img
+                            src={item.imageUrl}
+                            alt={item.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        </div>
+                      )}
+
+                      {/* Content */}
+                      <div className="p-4">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <h3 className="font-semibold text-sm line-clamp-1">{item.name}</h3>
+                          <span className="text-brand-600 dark:text-brand-400 font-bold text-sm whitespace-nowrap">
+                            ${(item.priceCents / 100).toFixed(2)}
+                          </span>
+                        </div>
+
+                        {item.description && (
+                          <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
+                            {item.description}
+                          </p>
+                        )}
+
+                        <div className="flex items-center justify-between">
+                          <Badge variant="light" size="sm" className="capitalize">
+                            {item.category}
+                          </Badge>
+
+                          <div className="flex items-center gap-1 text-brand-600 dark:text-brand-400 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                            Add
+                          </div>
+                        </div>
+
+                        {/* Dietary Tags */}
+                        {item.dietaryTags && item.dietaryTags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {item.dietaryTags.slice(0, 2).map((tag) => (
+                              <span
+                                key={tag}
+                                className="text-xs px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+                  <svg className="w-16 h-16 mb-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M12 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-sm">No items found</p>
+                  <p className="text-xs mt-1">Try adjusting your filters or search</p>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer with Pagination */}
+            <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-900/50">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  Showing {((browsePage - 1) * ITEMS_PER_PAGE) + 1}-{Math.min(browsePage * ITEMS_PER_PAGE, browseFilteredItems.length)} of {browseFilteredItems.length} items
+                  {browseFilteredItems.length !== availableItems.length && (
+                    <span className="ml-1 text-gray-500">
+                      (filtered from {availableItems.length})
+                    </span>
+                  )}
+                </div>
+
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setBrowsePage(1)}
+                      disabled={browsePage === 1}
+                      className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      First
+                    </button>
+                    <button
+                      onClick={() => setBrowsePage(p => Math.max(1, p - 1))}
+                      disabled={browsePage === 1}
+                      className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      ← Prev
+                    </button>
+
+                    <span className="px-3 py-1.5 text-sm font-medium">
+                      Page {browsePage} of {totalPages}
+                    </span>
+
+                    <button
+                      onClick={() => setBrowsePage(p => Math.min(totalPages, p + 1))}
+                      disabled={browsePage === totalPages}
+                      className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      Next →
+                    </button>
+                    <button
+                      onClick={() => setBrowsePage(totalPages)}
+                      disabled={browsePage === totalPages}
+                      className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      Last
+                    </button>
+                  </div>
+                )}
+
+                <button
+                  onClick={handleCloseBrowseModal}
+                  className="text-brand-600 dark:text-brand-400 hover:underline text-sm font-medium"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bottom Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-6 py-3 shadow-lg z-50">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
@@ -656,11 +929,8 @@ export function FastMenuBuilder({
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">Export</Button>
-            <Button variant="outline" size="sm">Duplicate</Button>
-            <Button variant="outline" size="sm">Clear</Button>
-            <Button onClick={handleSave} disabled={isSaving} size="sm">
-              {isSaving ? 'Saving...' : 'Save'}
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving ? 'Saving...' : 'Save Menu'}
             </Button>
           </div>
         </div>

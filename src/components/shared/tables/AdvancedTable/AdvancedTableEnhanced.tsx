@@ -220,12 +220,6 @@ export function AdvancedTableEnhanced<TData, TValue = unknown>({
     )
   }
 
-  const renderLoadingState = () => {
-    if (loadingState) return loadingState
-
-    return <TableSkeleton rows={defaultPageSize} columns={table.getVisibleLeafColumns().length} />
-  }
-
   const handleCellEdit = async (rowId: string, columnId: string, value: any) => {
     if (onCellEdit) {
       await onCellEdit(rowId, columnId, value)
@@ -335,14 +329,7 @@ export function AdvancedTableEnhanced<TData, TValue = unknown>({
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableRow>
-                <TableCell
-                  colSpan={table.getVisibleLeafColumns().length}
-                  className="px-4 py-3 border border-gray-100 dark:border-white/[0.05]"
-                >
-                  {renderLoadingState()}
-                </TableCell>
-              </TableRow>
+              <TableSkeleton rows={defaultPageSize} columns={table.getVisibleLeafColumns().length} />
             ) : rows.length ? (
               <>
                 {enableVirtualization && paddingTop > 0 && (

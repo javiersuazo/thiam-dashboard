@@ -17,6 +17,7 @@ import type {
   VisibilityState,
   RowSelectionState,
 } from '@tanstack/react-table'
+import type { EntitySchema } from '@/lib/tables/schema'
 
 // =============================================================================
 // CORE TYPES
@@ -24,12 +25,25 @@ import type {
 
 /**
  * Main table configuration
- * Everything is optional except columns and data
+ * Everything is optional except data
+ * Can provide either columns OR schema (schema auto-generates columns)
  */
 export interface TableConfig<TData> {
   // Required
-  columns: ColumnDef<TData>[]
   data: TData[]
+
+  // Column definition (manual or auto-generated)
+  columns?: ColumnDef<TData>[]
+  schema?: EntitySchema
+
+  // Schema customization
+  schemaOptions?: {
+    formatCurrency?: (cents: number, currency?: string) => string
+    formatDate?: (date: string, format?: string) => string
+    t?: (key: string) => string
+    customCells?: Record<string, ColumnDef<TData>['cell']>
+    columnOverrides?: Record<string, Partial<ColumnDef<TData>>>
+  }
 
   // Optional feature groups
   features?: FeatureConfig
@@ -192,7 +206,7 @@ export interface BulkAction<TData> {
   label: string
   icon?: React.ReactNode
   onClick: (selectedRows: TData[]) => void | Promise<void>
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary'
+  variant?: 'default' | 'destructive' | 'success' | 'outline' | 'secondary'
   disabled?: (selectedRows: TData[]) => boolean
   confirmMessage?: string | ((selectedRows: TData[]) => string)
 }

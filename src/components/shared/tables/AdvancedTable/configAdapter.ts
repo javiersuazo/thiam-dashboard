@@ -7,14 +7,17 @@
 
 import type { TableConfig } from './types'
 import type { AdvancedTableProps as LegacyProps } from './types.old'
+import { parseSchema, buildColumnsFromSchema } from '@/lib/tables/schema'
 
 export function adaptTableConfig<TData>(
   config: TableConfig<TData>
 ): LegacyProps<TData> {
   const {
-    columns,
+    columns: manualColumns,
     data,
     getRowId,
+    schema,
+    schemaOptions = {},
     features = {},
     server,
     ui = {},
@@ -23,6 +26,12 @@ export function adaptTableConfig<TData>(
     state = {},
     styling = {},
   } = config
+
+  const parsedSchema = schema ? parseSchema(schema) : null
+
+  const columns = parsedSchema
+    ? buildColumnsFromSchema<TData>(parsedSchema, schemaOptions)
+    : manualColumns || []
 
   // Map features
   const enableSorting = features.sorting ?? true
@@ -64,13 +73,13 @@ export function adaptTableConfig<TData>(
   const bulkActions = actions.bulk ?? []
   const onRowClick = actions.row?.onClick
 
-  // Map editing
+  // Map editing (auto-populate from schema if available)
   const editableColumns = editing.enabled
     ? (Array.isArray(editing.columns)
         ? editing.columns.map((col) =>
             typeof col === 'string' ? col : col.id
           )
-        : [])
+        : parsedSchema?.editableFields || [])
     : []
 
   const onCellEdit = editing.onEdit
@@ -152,9 +161,11 @@ export function applyDefaults<TData>(
   config: Partial<TableConfig<TData>>
 ): TableConfig<TData> {
   return {
-    columns: config.columns ?? [],
+    columns: config.columns,
     data: config.data ?? [],
     getRowId: config.getRowId,
+    schema: config.schema,
+    schemaOptions: config.schemaOptions,
     features: {
       sorting: true,
       filtering: true,

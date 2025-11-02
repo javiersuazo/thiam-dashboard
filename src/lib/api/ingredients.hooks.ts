@@ -500,11 +500,12 @@ export function useBulkDeleteIngredients(
       if (error) throw error
       return data as { deleted: number }
     },
-    onSuccess: () => {
+    ...options,
+    onSuccess: (data, variables, context) => {
       queryClient.invalidateQueries({ queryKey: ['ingredients', accountId] })
       queryClient.refetchQueries({ queryKey: ['ingredients', accountId] })
+      options?.onSuccess?.(data, variables, context)
     },
-    ...options,
   })
 }
 
@@ -527,10 +528,11 @@ export function useBatchUpdateIngredients(
       if (error) throw error
       return data as { updated: number }
     },
-    onSuccess: () => {
+    ...options,
+    onSuccess: (data, variables, context) => {
       queryClient.invalidateQueries({ queryKey: ['ingredients', accountId] })
       queryClient.refetchQueries({ queryKey: ['ingredients', accountId] })
+      options?.onSuccess?.(data, variables, context)
     },
-    ...options,
   })
 }

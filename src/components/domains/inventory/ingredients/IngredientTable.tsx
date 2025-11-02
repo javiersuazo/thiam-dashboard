@@ -1,14 +1,15 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { ColumnDef, SortingState, ColumnFiltersState, RowSelectionState } from '@tanstack/react-table'
+import { useState } from 'react'
 import { AdvancedTable } from '@/components/shared/tables/AdvancedTable'
-import { api, type components } from '@/lib/api'
+import { api } from '@/lib/api'
 import { useBulkDeleteIngredients, useBatchUpdateIngredients } from '@/lib/api/ingredients.hooks'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Trash2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import type { RowSelectionState } from '@tanstack/react-table'
+import type { components } from '@/lib/api'
 
 type Ingredient = components['schemas']['response.IngredientResponse']
 
@@ -21,156 +22,60 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
   const queryClient = useQueryClient()
 
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 20 })
-  const [sorting, setSorting] = useState<SortingState>([{ id: 'name', desc: false }])
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [sorting, setSorting] = useState([{ id: 'name', desc: false }])
+  const [columnFilters, setColumnFilters] = useState([])
   const [globalFilter, setGlobalFilter] = useState('')
-  const [rowSelection, setRowSelection] = useState({})
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
   const [editedRows, setEditedRows] = useState<Record<string, Partial<Ingredient>>>({})
 
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ['ingredients', accountId, pagination, sorting, columnFilters, globalFilter],
     queryFn: async () => {
-      console.log('🔍 Fetching ingredients with params:', {
-        accountId,
-        pagination,
-        sorting,
-        columnFilters,
-        globalFilter,
-      })
-
       const { data, error } = await api.GET('/v1/accounts/{accountId}/ingredients', {
         params: {
           path: { accountId },
           query: {
             limit: pagination.pageSize,
             page: pagination.pageIndex + 1,
-            sort_by: sorting[0]?.id as any,
+            sort_by: (sorting[0]?.id as 'name' | 'category' | 'currentStock' | 'costPerUnitCents') || 'name',
             sort_order: sorting[0]?.desc ? 'desc' : 'asc',
             search: globalFilter || undefined,
-            category: (columnFilters.find(f => f.id === 'category')?.value as string) || undefined,
-            status: (columnFilters.find(f => f.id === 'status')?.value as any) || undefined,
+            category: (columnFilters.find((f) => f.id === 'category')?.value as string) || undefined,
+            status: (columnFilters.find((f) => f.id === 'status')?.value as 'active' | 'inactive' | 'low_stock') || undefined,
           },
         },
       })
 
-      if (error) {
-        console.error('❌ Failed to fetch ingredients:', error)
-        throw error
-      }
-
-      console.log('✅ Ingredients fetched:', {
-        count: data?.data?.length || 0,
-        total: data?.meta?.total || 0,
-        firstItemId: data?.data?.[0]?.id,
-        sampleItem: data?.data?.[0]
-      })
+      if (error) throw error
 
       return {
         data: data?.data || [],
-        total: data?.meta?.total || 0,
-        page: pagination.pageIndex + 1,
-        pageSize: pagination.pageSize,
+        meta: data?.meta,
       }
     },
     enabled: !!accountId,
     placeholderData: (previousData) => previousData,
   })
 
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await api.DELETE('/v1/accounts/{accountId}/ingredients/{id}', {
-        params: { path: { accountId, id } },
-      })
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ingredients', accountId] })
-      toast.success(t('deleteSuccess'))
-    },
-    onError: () => {
-      toast.error(t('deleteFailed'))
-    },
-  })
-
   const bulkDeleteMutation = useBulkDeleteIngredients(accountId, {
-    onSuccess: (data) => {
-      console.log(`✅ Bulk Delete - Success: ${data.deleted} items deleted`)
+    onSuccess: (result) => {
       setRowSelection({})
-      toast.success(t('deleteSuccess'))
-    },
-    onError: (error) => {
-      console.error('❌ Bulk Delete - Failed:', error)
-      toast.error(t('deleteFailed'))
-    },
-  })
-
-  const updateMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Ingredient> }) => {
-      const { error } = await api.PUT('/v1/accounts/{accountId}/ingredients/{id}', {
-        params: { path: { accountId, id } },
-        body: updates as any,
-      })
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ingredients', accountId] })
-      toast.success(t('inlineEdit.success'))
+      toast.success(t('deleteSuccess', { count: result.deleted }))
     },
     onError: () => {
-      toast.error(t('inlineEdit.error'))
+      toast.error(t('deleteFailed'))
     },
   })
 
   const batchUpdateMutation = useBatchUpdateIngredients(accountId, {
-    onSuccess: (data) => {
-      console.log(`✅ Batch Update - Success: ${data.updated} items updated`)
+    onSuccess: (result) => {
       setEditedRows({})
-      toast.success(t('bulkSaveSuccess'))
+      toast.success(t('bulkSaveSuccess', { count: result.updated }))
     },
-    onError: (error) => {
-      console.error('❌ Batch Update - Failed:', error)
+    onError: () => {
       toast.error(t('bulkSaveFailed'))
     },
   })
-
-  const handleCellEdit = (rowId: string, columnId: string, value: any) => {
-    console.log('✏️ Cell Edit:', {
-      rowId,
-      columnId,
-      value,
-      isUUID: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rowId)
-    })
-    setEditedRows(prev => {
-      const updated = {
-        ...prev,
-        [rowId]: {
-          ...prev[rowId],
-          [columnId]: value,
-        },
-      }
-      console.log('📊 Updated editedRows state:', updated)
-      console.log('📊 Keys in editedRows:', Object.keys(updated))
-      return updated
-    })
-  }
-
-  const handleSaveAll = async () => {
-    console.log('💾 Batch Update - Starting for edited rows:', {
-      totalEdited: Object.keys(editedRows).length,
-      editedData: editedRows,
-    })
-
-    console.log('🚀 Sending PATCH /v1/accounts/{accountId}/ingredients/batch-update', {
-      updates: editedRows,
-    })
-
-    await batchUpdateMutation.mutateAsync(editedRows)
-  }
-
-  const handleCancelAll = () => {
-    setEditedRows({})
-    toast.info(t('changesDiscarded'))
-  }
 
   const formatCurrency = (cents: number | null | undefined, currency?: string) => {
     if (cents === null || cents === undefined) return '—'
@@ -181,236 +86,93 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
     }).format(amount)
   }
 
-  const getStockStatus = (currentStock?: number, reorderLevel?: number) => {
-    if (!currentStock || currentStock <= 0) {
-      return {
-        label: t('stockStatus.outOfStock'),
-        className: 'bg-error-50 text-error-600 dark:bg-error-500/15 dark:text-error-500',
-      }
+  const formatDate = (dateString: string, format?: string) => {
+    const date = new Date(dateString)
+    if (format === 'datetime') {
+      return date.toLocaleString()
     }
-    if (reorderLevel && currentStock <= reorderLevel) {
-      return {
-        label: t('stockStatus.lowStock'),
-        className: 'bg-warning-50 text-warning-600 dark:bg-warning-500/15 dark:text-warning-500',
-      }
-    }
-    return {
-      label: t('stockStatus.inStock'),
-      className: 'bg-success-50 text-success-700 dark:bg-success-500/15 dark:text-success-500',
-    }
+    return date.toLocaleDateString()
   }
 
-  const columns = useMemo<ColumnDef<Ingredient>[]>(
-    () => [
-      {
-        id: 'select',
-        header: ({ table }) => (
-          <input
-            type="checkbox"
-            checked={table.getIsAllPageRowsSelected()}
-            onChange={table.getToggleAllPageRowsSelectedHandler()}
-            className="rounded border-gray-300"
-          />
-        ),
-        cell: ({ row }) => (
-          <input
-            type="checkbox"
-            checked={row.getIsSelected()}
-            onChange={row.getToggleSelectedHandler()}
-            className="rounded border-gray-300"
-          />
-        ),
-        size: 50,
-        enableSorting: false,
-        enableHiding: false,
+  const handleCellEdit = (rowId: string, columnId: string, value: unknown) => {
+    setEditedRows(prev => ({
+      ...prev,
+      [rowId]: {
+        ...prev[rowId],
+        [columnId]: value,
       },
-      {
-        accessorKey: 'name',
-        header: t('table.name'),
-        cell: ({ row }) => (
-          <div className="flex flex-col">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              {editedRows[row.id]?.name ?? row.original.name}
-            </span>
-            {row.original.description && (
-              <span className="text-xs text-gray-500 dark:text-gray-500 truncate max-w-xs">
-                {row.original.description}
-              </span>
-            )}
-          </div>
-        ),
-        meta: {
-          filterType: 'text',
-          editType: 'text',
-        },
-      },
-      {
-        accessorKey: 'category',
-        header: t('table.category'),
-        cell: ({ row }) => (
-          <span className="text-sm text-gray-700 dark:text-gray-400 capitalize">
-            {editedRows[row.id]?.category ?? row.original.category}
-          </span>
-        ),
-        meta: {
-          filterType: 'select',
-          editType: 'select',
-          filterOptions: [
-            { label: t('categories.vegetables'), value: 'vegetables' },
-            { label: t('categories.fruits'), value: 'fruits' },
-            { label: t('categories.meat'), value: 'meat' },
-            { label: t('categories.seafood'), value: 'seafood' },
-            { label: t('categories.dairy'), value: 'dairy' },
-            { label: t('categories.grains'), value: 'grains' },
-            { label: t('categories.bakery'), value: 'bakery' },
-            { label: t('categories.spices'), value: 'spices' },
-            { label: t('categories.oils'), value: 'oils' },
-            { label: t('categories.condiments'), value: 'condiments' },
-            { label: t('categories.beverages'), value: 'beverages' },
-            { label: t('categories.canned'), value: 'canned' },
-            { label: t('categories.frozen'), value: 'frozen' },
-            { label: t('categories.supplies'), value: 'supplies' },
-            { label: t('categories.other'), value: 'other' },
-          ],
-          editOptions: [
-            { label: t('categories.vegetables'), value: 'vegetables' },
-            { label: t('categories.fruits'), value: 'fruits' },
-            { label: t('categories.meat'), value: 'meat' },
-            { label: t('categories.seafood'), value: 'seafood' },
-            { label: t('categories.dairy'), value: 'dairy' },
-            { label: t('categories.grains'), value: 'grains' },
-            { label: t('categories.bakery'), value: 'bakery' },
-            { label: t('categories.spices'), value: 'spices' },
-            { label: t('categories.oils'), value: 'oils' },
-            { label: t('categories.condiments'), value: 'condiments' },
-            { label: t('categories.beverages'), value: 'beverages' },
-            { label: t('categories.canned'), value: 'canned' },
-            { label: t('categories.frozen'), value: 'frozen' },
-            { label: t('categories.supplies'), value: 'supplies' },
-            { label: t('categories.other'), value: 'other' },
-          ],
-        },
-      },
-      {
-        accessorKey: 'currentStock',
-        header: t('table.stock'),
-        cell: ({ row }) => {
-          const stock = editedRows[row.id]?.currentStock ?? row.original.currentStock
-          return (
-            <div>
-              <span className="text-sm text-gray-700 dark:text-gray-400">
-                {stock?.toFixed(2) || '0.00'}
-              </span>
-              {row.original.reorderLevel && (
-                <span className="text-xs text-gray-500 dark:text-gray-500 ml-1">
-                  ({t('table.reorderLevel')}: {row.original.reorderLevel})
-                </span>
-              )}
-            </div>
-          )
-        },
-        meta: {
-          editType: 'number',
-        },
-      },
-      {
-        accessorKey: 'unit',
-        header: t('table.unit'),
-        cell: ({ row }) => (
-          <span className="text-sm text-gray-700 dark:text-gray-400 uppercase">
-            {row.original.unit}
-          </span>
-        ),
-      },
-      {
-        accessorKey: 'costPerUnitCents',
-        header: t('table.costPerUnit'),
-        cell: ({ row }) => (
-          <span className="text-sm text-gray-700 dark:text-gray-400">
-            {formatCurrency(
-              editedRows[row.id]?.costPerUnitCents ?? row.original.costPerUnitCents,
-              row.original.currency
-            )}
-          </span>
-        ),
-        meta: {
-          editType: 'number',
-        },
-      },
-      {
-        accessorKey: 'supplier',
-        header: t('table.supplier'),
-        cell: ({ row }) => (
-          <span className="text-sm text-gray-700 dark:text-gray-400">
-            {editedRows[row.id]?.supplier ?? row.original.supplier ?? '—'}
-          </span>
-        ),
-        meta: {
-          filterType: 'text',
-          editType: 'text',
-        },
-      },
-      {
-        id: 'stockStatus',
-        header: t('table.status'),
-        cell: ({ row }) => {
-          const status = getStockStatus(row.original.currentStock, row.original.reorderLevel)
-          return (
-            <span className={`text-xs rounded-full px-2 py-0.5 font-medium ${status.className}`}>
-              {status.label}
-            </span>
-          )
-        },
-        meta: {
-          filterType: 'select',
-          filterOptions: [
-            { label: t('stockStatus.inStock'), value: 'active' },
-            { label: t('stockStatus.lowStock'), value: 'low_stock' },
-            { label: t('stockStatus.outOfStock'), value: 'inactive' },
-          ],
-        },
-      },
-      {
-        accessorKey: 'isActive',
-        header: t('table.active'),
-        cell: ({ row }) => (
-          <input
-            type="checkbox"
-            checked={row.original.isActive}
-            disabled
-            className="h-4 w-4 rounded border-gray-300 text-blue-600 disabled:opacity-50"
-          />
-        ),
-      },
-      {
-        id: 'actions',
-        header: t('table.actions'),
-        cell: ({ row }) => (
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              if (confirm(t('confirmDelete', { name: row.original.name }))) {
-                deleteMutation.mutate(row.original.id!)
-              }
-            }}
-            className="text-red-600 hover:text-red-700"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
-        ),
-      },
-    ],
-    [t, editedRows]
-  )
+    }))
+  }
+
+  const handleSaveAll = async () => {
+    await batchUpdateMutation.mutateAsync(editedRows)
+  }
+
+  const handleCancelAll = () => {
+    setEditedRows({})
+    queryClient.resetQueries({ queryKey: ['ingredients', accountId] })
+    toast.info(t('changesDiscarded'))
+  }
 
   return (
     <AdvancedTable
-      columns={columns}
       data={data?.data || []}
-      getRowId={(row) => {
-        const id = row.id!
-        console.log('🔑 getRowId called:', { id, rowName: row.name })
-        return id
+      schema={data?.meta?.schema}
+      getRowId={(row) => row.id!}
+
+      schemaOptions={{
+        formatCurrency,
+        formatDate,
+        t: (key) => t(`table.${key}`),
+        enableRowSelection: true,
+        customCells: {
+          name: ({ row }) => (
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {editedRows[row.id]?.name ?? row.original.name}
+              </span>
+              {row.original.description && (
+                <span className="text-xs text-gray-500 dark:text-gray-500 truncate max-w-xs">
+                  {row.original.description}
+                </span>
+              )}
+            </div>
+          ),
+          currentStock: ({ row }) => {
+            const stock = editedRows[row.id]?.currentStock ?? row.original.currentStock
+            return (
+              <div>
+                <span className="text-sm text-gray-700 dark:text-gray-400">
+                  {stock?.toFixed(2) || '0.00'}
+                </span>
+                {row.original.reorderLevel && (
+                  <span className="text-xs text-gray-500 dark:text-gray-500 ml-1">
+                    ({t('table.reorderLevel')}: {row.original.reorderLevel})
+                  </span>
+                )}
+              </div>
+            )
+          },
+        },
+        columnOverrides: {
+          actions: {
+            id: 'actions',
+            header: t('table.actions'),
+            cell: ({ row }) => (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  if (confirm(t('confirmDelete', { name: row.original.name }))) {
+                    bulkDeleteMutation.mutate([row.original.id!])
+                  }
+                }}
+                className="text-red-600 hover:text-red-700"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            ),
+          },
+        },
       }}
 
       features={{
@@ -426,7 +188,7 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
         enabled: true,
         isLoading,
         isFetching,
-        totalPages: Math.ceil((data?.total || 0) / pagination.pageSize),
+        totalPages: data?.meta?.totalPages || 0,
       }}
 
       state={{
@@ -442,7 +204,6 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
       editing={{
         enabled: true,
         mode: 'cell',
-        columns: ['name', 'category', 'currentStock', 'costPerUnitCents', 'supplier'],
         onEdit: handleCellEdit,
         bulk: {
           enabled: Object.keys(editedRows).length > 0,
@@ -471,12 +232,7 @@ export function IngredientTable({ accountId }: IngredientTableProps) {
 
       ui={{
         toolbar: {
-          search: {
-            placeholder: t('searchPlaceholder'),
-          },
-          export: {
-            filename: 'ingredients',
-          },
+          show: true,
         },
         states: {
           empty: (

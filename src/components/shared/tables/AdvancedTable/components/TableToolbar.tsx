@@ -1,7 +1,7 @@
 'use client'
 
 import { Table } from '@tanstack/react-table'
-import Button from '../../../ui/button/Button'
+import { Button } from '@/components/shared/ui/button'
 import type { BulkAction } from '../types'
 import { exportToCSV, exportToJSON } from '../utils'
 import { ColumnVisibilityDropdown } from './ColumnVisibilityDropdown'
@@ -81,7 +81,7 @@ export function TableToolbar<TData>({
         {showBulkSave ? (
           <>
             <Button
-              variant="default"
+              variant="success"
               size="sm"
               onClick={onSaveAll}
             >

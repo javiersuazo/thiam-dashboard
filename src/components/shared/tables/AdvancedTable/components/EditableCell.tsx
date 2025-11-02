@@ -8,7 +8,7 @@ import Button from '@/components/shared/ui/button/Button'
 interface EditableCellProps {
   value: any
   onSave: (value: any) => void | Promise<void>
-  type?: 'text' | 'number' | 'select' | 'multiselect' | 'date' | 'datetime'
+  type?: 'text' | 'number' | 'select' | 'multiselect' | 'date' | 'datetime' | 'checkbox'
   options?: { label: string; value: any }[]
   className?: string
   multiple?: boolean
@@ -68,6 +68,60 @@ export function EditableCell({
       setValue(initialValue)
       setEditing(false)
     }
+  }
+
+  // Checkbox - no editing mode, toggle directly
+  if (type === 'checkbox') {
+    return (
+      <label className="flex cursor-pointer items-center">
+        <span className="relative">
+          <input
+            type="checkbox"
+            className="sr-only"
+            checked={!!value}
+            disabled={saving}
+            onChange={async (e) => {
+              const newValue = e.target.checked
+              setValue(newValue)
+              setSaving(true)
+              try {
+                await onSave(newValue)
+              } catch (error) {
+                console.error('Failed to save:', error)
+                setValue(initialValue)
+              } finally {
+                setSaving(false)
+              }
+            }}
+          />
+          <span
+            className={`flex h-4 w-4 items-center justify-center rounded-sm border-[1.25px] transition-colors ${
+              value
+                ? "border-brand-500 bg-brand-500"
+                : "bg-transparent border-gray-300 dark:border-gray-700"
+            } ${saving ? "opacity-50 cursor-not-allowed" : ""}`}
+          >
+            <span className={value ? "" : "opacity-0"}>
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10 3L4.5 8.5L2 6"
+                  stroke="white"
+                  strokeWidth="1.6666"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </span>
+          </span>
+        </span>
+      </label>
+    )
   }
 
   if (editing) {

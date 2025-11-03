@@ -995,6 +995,106 @@
         "reorderSuccess": "Media reordered successfully",
         "reorderFailed": "Failed to reorder media"
       }
+    },
+    "builder": {
+      "title": "Menu Builder",
+      "menuDetails": "Menu Details",
+      "editName": "Edit menu name",
+      "pricingStrategy": {
+        "label": "Pricing Strategy",
+        "sum": "Sum",
+        "sumTooltip": "Menu price is the sum of all item prices",
+        "fixed": "Fixed",
+        "fixedTooltip": "Menu has one fixed price regardless of items",
+        "fixedPlaceholder": "0.00"
+      },
+      "status": {
+        "published": "Published",
+        "draft": "Draft"
+      },
+      "search": {
+        "placeholder": "Search items to add...",
+        "browseButton": "Browse All Items"
+      },
+      "course": {
+        "default": "Course",
+        "removeTooltip": "Remove course"
+      },
+      "item": {
+        "removeTooltip": "Remove item from course"
+      },
+      "emptyState": {
+        "title": "No courses yet",
+        "description": "Start building your menu by searching and adding items above"
+      },
+      "bottomBar": {
+        "courses": "courses",
+        "items": "items",
+        "fixedPrice": "(Fixed)",
+        "saveButton": "Save Menu",
+        "savingButton": "Saving..."
+      },
+      "details": {
+        "backButton": "Menu Builder",
+        "title": "Menu Details",
+        "name": {
+          "label": "Menu Name",
+          "placeholder": "Enter menu name"
+        },
+        "description": {
+          "label": "Description",
+          "placeholder": "Describe your menu..."
+        },
+        "imageUrl": {
+          "label": "Image URL",
+          "placeholder": "https://example.com/image.jpg"
+        },
+        "tags": {
+          "label": "Tags",
+          "placeholder": "Add a tag...",
+          "addButton": "Add"
+        },
+        "availability": {
+          "label": "Availability Schedule",
+          "placeholder": "e.g., Monday-Friday, 9AM-5PM"
+        },
+        "status": {
+          "label": "Status",
+          "active": "Active (Published)",
+          "inactive": "Inactive (Draft)"
+        }
+      },
+      "browse": {
+        "title": "Browse Menu Items",
+        "closeButton": "Close",
+        "filter": {
+          "all": "All Items",
+          "appetizers": "Appetizers",
+          "mains": "Mains",
+          "sides": "Sides",
+          "desserts": "Desserts",
+          "beverages": "Beverages"
+        },
+        "search": "Search items...",
+        "addButton": "Add",
+        "addedButton": "Added",
+        "emptyState": "No items found",
+        "pagination": {
+          "showing": "Showing",
+          "of": "of",
+          "items": "items",
+          "previous": "Previous",
+          "next": "Next"
+        }
+      },
+      "validation": {
+        "nameRequired": "Menu name is required",
+        "courseRequired": "At least one course with items is required"
+      },
+      "messages": {
+        "saveSuccess": "Menu saved successfully",
+        "saveError": "Failed to save menu. Please try again."
+      }
     }
   },
   "media": {

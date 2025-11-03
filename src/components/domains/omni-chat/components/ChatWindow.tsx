@@ -30,22 +30,26 @@ export function ChatWindow({
   onChangeDockPosition,
 }: ChatWindowProps) {
   const isFullscreen = mode === 'fullscreen'
+  const isDocked = mode === 'docked'
 
   const getDockedStyles = () => {
     if (isFullscreen) {
-      return 'fixed inset-0 w-full h-full'
+      return 'fixed inset-0 w-full h-full z-[9998]'
     }
 
-    switch (dockPosition) {
-      case 'left':
-        return 'fixed left-0 top-0 bottom-0 w-96 max-w-[90vw]'
-      case 'right':
-        return 'fixed right-0 top-0 bottom-0 w-96 max-w-[90vw]'
-      case 'bottom':
-        return 'fixed bottom-0 left-0 right-0 h-96 max-h-[90vh]'
-      default:
-        return 'fixed right-0 top-0 bottom-0 w-96 max-w-[90vw]'
+    if (isDocked) {
+      switch (dockPosition) {
+        case 'left':
+        case 'right':
+          return 'h-screen w-96'
+        case 'bottom':
+          return 'w-full h-96'
+        default:
+          return 'h-screen w-96'
+      }
     }
+
+    return 'h-screen w-96'
   }
 
   const getBorderStyles = () => {
@@ -65,17 +69,30 @@ export function ChatWindow({
 
   return (
     <div
-      className={`${getDockedStyles()} ${getBorderStyles()} z-[9998] bg-white dark:bg-gray-900 shadow-2xl border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 ease-in-out`}
-      style={{
-        transform: isFullscreen ? 'none' : undefined,
-      }}
+      className={`${getDockedStyles()} ${getBorderStyles()} bg-white dark:bg-gray-900 shadow-2xl border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-500 ease-out animate-[slideIn_0.4s_ease-out]`}
     >
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-brand-500 to-brand-600">
-        <div className="flex items-center gap-3">
-          <div className="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse"></div>
+      {/* Animated gradient header */}
+      <div className="relative flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 overflow-hidden">
+        {/* Animated background gradient */}
+        <div className="absolute inset-0 bg-gradient-to-r from-brand-500 via-brand-600 to-brand-700 animate-[gradientShift_6s_ease-in-out_infinite]"></div>
+
+        {/* Shimmer overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[shimmer_3s_linear_infinite]"></div>
+
+        <div className="flex items-center gap-3 relative z-10">
+          {/* Enhanced online indicator */}
+          <div className="relative">
+            <div className="w-2.5 h-2.5 bg-green-400 rounded-full animate-[pulse_2s_ease-in-out_infinite]"></div>
+            <div className="absolute inset-0 w-2.5 h-2.5 bg-green-400 rounded-full animate-[ping_2s_ease-in-out_infinite]"></div>
+          </div>
           <div>
-            <h3 className="text-white font-semibold text-lg">TASTY LABS AI</h3>
-            <p className="text-white/80 text-xs">Your intelligent assistant</p>
+            <h3 className="text-white font-semibold text-lg flex items-center gap-2">
+              TASTY LABS AI
+              <span className="inline-block animate-[wave_2s_ease-in-out_infinite]">✨</span>
+            </h3>
+            <p className="text-white/90 text-xs font-medium animate-[fadeIn_0.5s_ease-in]">
+              Your intelligent assistant
+            </p>
           </div>
         </div>
 
@@ -167,6 +184,54 @@ export function ChatWindow({
           />
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateX(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        @keyframes gradientShift {
+          0%, 100% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+        }
+        @keyframes shimmer {
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
+        }
+        @keyframes wave {
+          0%, 100% {
+            transform: rotate(0deg);
+          }
+          25% {
+            transform: rotate(20deg);
+          }
+          75% {
+            transform: rotate(-20deg);
+          }
+        }
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+      `}</style>
     </div>
   )
 }

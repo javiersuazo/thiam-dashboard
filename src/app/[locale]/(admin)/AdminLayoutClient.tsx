@@ -68,7 +68,6 @@ export default function AdminLayoutClient({
 
   const isFullscreen = chatState.mode === 'fullscreen'
   const isDocked = chatState.mode === 'docked' && chatState.isExpanded
-  const isMinimizedOrFloating = chatState.mode === 'minimized' || chatState.mode === 'floating'
 
   return (
     <div className="min-h-screen xl:flex">
@@ -89,34 +88,14 @@ export default function AdminLayoutClient({
         <div className={getRouteSpecificStyles()}>{children}</div>
       </div>
 
-      {/* OmniChat - positioned in flex when docked, fixed when minimized/floating */}
-      <div
-        className={`transition-all duration-300 ease-in-out ${
-          isDocked
-            ? chatState.dockPosition === 'bottom'
-              ? 'w-full'
-              : 'w-96'
-            : ''
-        }`}
-        style={{
-          display: isDocked ? 'block' : 'none',
-        }}
-      >
+      {/* OmniChat - conditionally part of flex or fixed */}
+      <div className={isDocked ? 'flex-shrink-0' : 'contents'}>
         <OmniChat
           initialMode="minimized"
           initialDockPosition="right"
           onStateChange={setChatState}
         />
       </div>
-
-      {/* OmniChat for minimized/floating modes */}
-      {isMinimizedOrFloating && (
-        <OmniChat
-          initialMode="minimized"
-          initialDockPosition="right"
-          onStateChange={setChatState}
-        />
-      )}
     </div>
   );
 }

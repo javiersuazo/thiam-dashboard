@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { MenuItem, MenuBuilder, CourseItem } from '../types'
 import { useMenuBuilderState } from '../hooks/useMenuBuilderState'
 import Input from '@/components/shared/form/input/InputField'
@@ -10,6 +11,7 @@ import TextArea from '@/components/shared/form/input/TextArea'
 import Badge from '@/components/shared/ui/badge/Badge'
 import Button from '@/components/shared/ui/button/Button'
 import { toast } from 'sonner'
+import { useSidebar } from '@/context/SidebarContext'
 
 interface FastMenuBuilderProps {
   accountId: string
@@ -24,6 +26,12 @@ export function FastMenuBuilder({
   availableItems,
   onSave,
 }: FastMenuBuilderProps) {
+  // Translations
+  const t = useTranslations('menu.builder')
+
+  // Sidebar state for bottom bar positioning
+  const { isExpanded, isHovered, isMobileOpen } = useSidebar()
+
   // Business logic hook - handles all menu state and operations
   const menuState = useMenuBuilderState({
     initialName: initialMenu?.name,
@@ -236,10 +244,10 @@ export function FastMenuBuilder({
   }
 
   return (
-    <div className="flex h-full bg-gray-50 dark:bg-gray-900 relative overflow-hidden pb-16">
+    <div className="flex h-full max-h-full bg-gray-50 dark:bg-gray-900 relative overflow-hidden">
       {/* Main Builder View */}
       <div
-        className={`flex-1 flex flex-col overflow-hidden transition-transform duration-300 ease-in-out ${
+        className={`flex-1 flex flex-col overflow-hidden transition-transform duration-300 ease-in-out pb-16 ${
           view !== 'builder' ? '-translate-x-full' : 'translate-x-0'
         }`}
       >
@@ -544,7 +552,7 @@ export function FastMenuBuilder({
 
       {/* Details Slide-In Panel */}
       <div
-        className={`absolute inset-0 bg-white dark:bg-gray-800 transition-transform duration-300 ease-in-out ${
+        className={`absolute inset-0 bg-white dark:bg-gray-800 transition-transform duration-300 ease-in-out pb-16 ${
           view !== 'builder' ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -915,22 +923,30 @@ export function FastMenuBuilder({
         </div>
       )}
 
-      {/* Bottom Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-6 py-3 shadow-lg z-50">
-        <div className="flex items-center justify-between">
+      {/* Bottom Action Bar - Fixed to viewport like navbar */}
+      <div
+        className={`fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-6 py-3 shadow-lg z-[9997] transition-all duration-300 ${
+          isMobileOpen
+            ? 'xl:left-0'
+            : isExpanded || isHovered
+            ? 'xl:left-[290px]'
+            : 'xl:left-[90px]'
+        }`}
+      >
+        <div className="flex items-center justify-between max-w-(--breakpoint-2xl) mx-auto">
           <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-            <span>{menuState.courses.length} courses</span>
+            <span>{menuState.courses.length} {t('bottomBar.courses')}</span>
             <span>•</span>
-            <span>{totalItems} items</span>
+            <span>{totalItems} {t('bottomBar.items')}</span>
             <span>•</span>
             <span className="font-semibold text-gray-900 dark:text-white">
               ${(displayPrice / 100).toFixed(2)}
-              {menuState.pricingStrategy === 'fixed' && <span className="text-xs ml-1">(Fixed)</span>}
+              {menuState.pricingStrategy === 'fixed' && <span className="text-xs ml-1">{t('bottomBar.fixedPrice')}</span>}
             </span>
           </div>
           <div className="flex items-center gap-2">
             <Button onClick={handleSave} disabled={isSaving}>
-              {isSaving ? 'Saving...' : 'Save Menu'}
+              {isSaving ? t('bottomBar.savingButton') : t('bottomBar.saveButton')}
             </Button>
           </div>
         </div>

@@ -66,8 +66,8 @@ export function ChatBubble({
   return (
     <div
       ref={bubbleRef}
-      className={`fixed z-[9999] w-96 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden transition-transform ${
-        isDragging ? 'cursor-grabbing scale-105' : 'cursor-grab'
+      className={`fixed z-[9999] w-96 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border-2 border-brand-200 dark:border-brand-800 flex flex-col overflow-hidden transition-all duration-300 animate-[popIn_0.3s_cubic-bezier(0.68,-0.55,0.265,1.55)] ${
+        isDragging ? 'cursor-grabbing scale-105 shadow-3xl' : 'cursor-grab hover:shadow-brand-500/20'
       }`}
       style={{
         left: `${position.x}px`,
@@ -76,13 +76,27 @@ export function ChatBubble({
         transform: 'translate(-50%, -50%)',
       }}
     >
+      {/* Glow effect when not dragging */}
+      {!isDragging && (
+        <div className="absolute -inset-1 bg-gradient-to-r from-brand-400 to-brand-600 rounded-2xl opacity-20 blur-xl animate-[pulse_3s_ease-in-out_infinite]"></div>
+      )}
+
       <div
-        className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-brand-500 to-brand-600"
+        className="relative flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-brand-500 via-brand-600 to-brand-700 overflow-hidden"
         onMouseDown={handleMouseDown}
       >
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-          <span className="text-white font-semibold">TASTY LABS AI</span>
+        {/* Animated shimmer on drag handle */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[shimmer_3s_linear_infinite]"></div>
+
+        <div className="flex items-center gap-2 relative z-10">
+          <div className="relative">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-[pulse_2s_ease-in-out_infinite]"></div>
+            <div className="absolute inset-0 w-2 h-2 bg-green-400 rounded-full animate-[ping_2s_ease-in-out_infinite]"></div>
+          </div>
+          <span className="text-white font-semibold flex items-center gap-1.5">
+            TASTY LABS AI
+            <span className="text-xs opacity-75">✨</span>
+          </span>
         </div>
 
         <div className="flex items-center gap-1">
@@ -119,6 +133,27 @@ export function ChatBubble({
           />
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes popIn {
+          0% {
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0;
+          }
+          100% {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+          }
+        }
+        @keyframes shimmer {
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
+        }
+      `}</style>
     </div>
   )
 }

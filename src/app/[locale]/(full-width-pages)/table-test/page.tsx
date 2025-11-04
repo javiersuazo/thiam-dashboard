@@ -1,544 +1,438 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { ColumnDef } from '@tanstack/react-table'
-import { AdvancedTableEnhanced } from '@/components/shared/tables/AdvancedTable/AdvancedTableEnhanced'
+import { useState } from 'react'
+import {
+  AdvancedTablePlugin,
+  MockDataSource,
+  LocalStorageDataSource,
+  ManualSchemaProvider,
+  type ColumnDefinition,
+  type CellRenderProps,
+} from '@/components/shared/tables/AdvancedTable'
 import Badge from '@/components/shared/ui/badge/Badge'
-import { TrashBinIcon, PencilIcon, EyeIcon, CheckLineIcon, CloseIcon } from '@/icons'
+import { TrashBinIcon, PencilIcon, EyeIcon } from '@/icons'
+import { Button } from '@/components/shared/ui/button'
 
-interface SampleData {
+interface Product {
   id: string
   name: string
-  email: string
-  role: string
-  status: 'active' | 'inactive' | 'pending'
-  department: string
-  salary: number
-  joinDate: string
-  skills: string[]
+  category: string
+  price: number
+  inStock: boolean
+  rating: number
+  launchDate: string
+  tags: string[]
 }
 
-const departments = ['Engineering', 'Product', 'Design', 'Marketing', 'Sales', 'Finance', 'HR', 'Customer Success', 'Analytics', 'Operations']
-const roles = ['Software Engineer', 'Product Manager', 'Designer', 'Marketing Manager', 'Sales Rep', 'Financial Analyst', 'HR Specialist', 'Customer Success Manager', 'Data Analyst', 'Operations Manager']
-const statuses: Array<'active' | 'inactive' | 'pending'> = ['active', 'active', 'active', 'active', 'inactive', 'pending']
-const allSkills = ['JavaScript', 'TypeScript', 'React', 'Node.js', 'Python', 'SQL', 'Leadership', 'Communication', 'Project Management', 'Data Analysis']
+const categories = ['Electronics', 'Clothing', 'Food', 'Books', 'Toys']
+const allTags = ['New', 'Popular', 'Sale', 'Featured', 'Limited Edition', 'Bestseller']
 
-function generateEmployee(id: number): SampleData {
-  const firstName = ['John', 'Jane', 'Bob', 'Alice', 'Charlie', 'Diana', 'Ethan', 'Fiona', 'George', 'Hannah'][id % 10]
-  const lastName = ['Doe', 'Smith', 'Johnson', 'Williams', 'Brown', 'Martinez', 'Davis', 'Garcia', 'Wilson', 'Lee'][Math.floor(id / 10) % 10]
-  const name = `${firstName} ${lastName} ${id > 15 ? id : ''}`
-  const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${id > 15 ? id : ''}@example.com`
-  const role = roles[id % roles.length]
-  const department = departments[id % departments.length]
-  const status = statuses[id % statuses.length]
-  const salary = 60000 + (id % 10) * 10000 + Math.floor(id / 10) * 5000
-  const joinDate = new Date(2020 + (id % 5), (id % 12), (id % 28) + 1).toISOString().split('T')[0]
+function generateProduct(id: number): Product {
+  const products = ['Laptop', 'Phone', 'Tablet', 'Headphones', 'Watch', 'Camera', 'Speaker', 'Monitor']
+  const name = `${products[id % products.length]} ${id > 8 ? id : ''}`
+  const category = categories[id % categories.length]
+  const price = 50 + (id % 10) * 100
+  const inStock = id % 3 !== 0
+  const rating = 3 + (id % 3)
+  const launchDate = new Date(2022 + (id % 3), (id % 12), (id % 28) + 1).toISOString().split('T')[0]
 
-  // Generate 2-4 random skills per employee
-  const skillCount = 2 + (id % 3)
-  const skills = Array.from({ length: skillCount }, (_, i) =>
-    allSkills[(id + i) % allSkills.length]
+  const tagCount = 1 + (id % 3)
+  const tags = Array.from({ length: tagCount }, (_, i) =>
+    allTags[(id + i) % allTags.length]
   )
 
   return {
     id: String(id),
     name,
-    email,
-    role,
-    status,
-    department,
-    salary,
-    joinDate,
-    skills,
+    category,
+    price,
+    inStock,
+    rating,
+    launchDate,
+    tags,
   }
 }
 
-const mockData: SampleData[] = Array.from({ length: 100 }, (_, i) => generateEmployee(i + 1))
+const mockProducts: Product[] = Array.from({ length: 50 }, (_, i) => generateProduct(i + 1))
 
 export default function TableTestPage() {
-  const [data, setData] = useState<SampleData[]>(mockData)
-  const [editedRows, setEditedRows] = useState<Record<string, Partial<SampleData>>>({})
-
-  const handleCellEdit = async (rowId: string, columnId: string, value: any) => {
-    setEditedRows(prev => ({
-      ...prev,
-      [rowId]: {
-        ...prev[rowId],
-        [columnId]: value
-      }
-    }))
-  }
-
-  const handleSaveRow = (rowId: string) => {
-    setData((prev) =>
-      prev.map((item) => {
-        if (item.id === rowId && editedRows[rowId]) {
-          return { ...item, ...editedRows[rowId] }
-        }
-        return item
-      })
-    )
-
-    const changes = editedRows[rowId]
-    const changedFields = Object.keys(changes).join(', ')
-
-    alert(`Successfully saved changes to row ${rowId}!\n\nUpdated fields: ${changedFields}`)
-    console.log('Row saved:', rowId, changes)
-
-    setEditedRows(prev => {
-      const newEdited = { ...prev }
-      delete newEdited[rowId]
-      return newEdited
-    })
-  }
-
-  const handleCancelRow = (rowId: string) => {
-    setEditedRows(prev => {
-      const newEdited = { ...prev }
-      delete newEdited[rowId]
-      return newEdited
-    })
-  }
-
-  const handleSaveAllChanges = () => {
-    setData((prev) =>
-      prev.map((item) => {
-        if (editedRows[item.id]) {
-          return { ...item, ...editedRows[item.id] }
-        }
-        return item
-      })
-    )
-
-    const changedCount = Object.keys(editedRows).length
-    const totalChanges = Object.values(editedRows).reduce(
-      (sum, changes) => sum + Object.keys(changes).length,
-      0
-    )
-
-    alert(
-      `Successfully saved all changes!\n\n` +
-      `• ${changedCount} employee(s) updated\n` +
-      `• ${totalChanges} total field(s) changed`
-    )
-
-    console.log('Bulk changes saved:', editedRows)
-    setEditedRows({})
-  }
-
-  const handleCancelAllChanges = () => {
-    if (confirm(`Discard changes for ${Object.keys(editedRows).length} row(s)?`)) {
-      setEditedRows({})
-    }
-  }
-
-  const columns = useMemo<ColumnDef<SampleData>[]>(
-    () => [
-      {
-        id: 'select',
-        header: ({ table }) => (
-          <input
-            type="checkbox"
-            checked={table.getIsAllPageRowsSelected()}
-            onChange={table.getToggleAllPageRowsSelectedHandler()}
-            className="w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500"
-          />
-        ),
-        cell: ({ row }) => (
-          <input
-            type="checkbox"
-            checked={row.getIsSelected()}
-            onChange={row.getToggleSelectedHandler()}
-            className="w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500"
-          />
-        ),
-        enableSorting: false,
-        enableHiding: false,
-        size: 50,
-      },
-      {
-        accessorKey: 'name',
-        header: 'Employee',
-        cell: ({ row }) => (
-          <div>
-            <p className="font-medium text-gray-800 dark:text-white/90">
-              {row.original.name}
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              {row.original.email}
-            </p>
-          </div>
-        ),
-      },
-      {
-        accessorKey: 'role',
-        header: 'Role',
-        cell: ({ row }) => (
-          <span className="text-gray-800 dark:text-gray-400">
-            {editedRows[row.id]?.role ?? row.original.role}
+  const productColumns: ColumnDefinition<Product, any>[] = [
+    {
+      key: 'name',
+      header: 'Product Name',
+      type: 'text',
+      sortable: true,
+      filterable: true,
+      cell: ({ value }: CellRenderProps<Product, string>) => (
+        <span className="font-medium text-gray-800 dark:text-white/90">{value}</span>
+      ),
+    } as ColumnDefinition<Product, string>,
+    {
+      key: 'category',
+      header: 'Category',
+      type: 'select',
+      sortable: true,
+      filterable: true,
+      options: categories.map(cat => ({ label: cat, value: cat })),
+      cell: ({ value }: CellRenderProps<Product, string>) => (
+        <Badge size="sm" color="default">{value}</Badge>
+      ),
+    } as ColumnDefinition<Product, string>,
+    {
+      key: 'price',
+      header: 'Price',
+      type: 'currency',
+      sortable: true,
+      filterable: true,
+      align: 'right',
+      format: (value: number) => `$${value.toFixed(2)}`,
+      cell: ({ value }: CellRenderProps<Product, number>) => {
+        const price = value as number
+        return (
+          <span className="font-mono font-semibold text-gray-800 dark:text-white/90">
+            ${price.toFixed(2)}
           </span>
-        ),
-        meta: {
-          filterType: 'text',
-        },
+        )
       },
-      {
-        accessorKey: 'department',
-        header: 'Department',
-        cell: ({ row }) => (
-          <span className="text-gray-800 dark:text-gray-400">
-            {editedRows[row.id]?.department ?? row.original.department}
-          </span>
-        ),
-        meta: {
-          filterType: 'select',
-          filterOptions: [
-            { label: 'Engineering', value: 'Engineering' },
-            { label: 'Product', value: 'Product' },
-            { label: 'Design', value: 'Design' },
-            { label: 'Marketing', value: 'Marketing' },
-            { label: 'Sales', value: 'Sales' },
-            { label: 'Finance', value: 'Finance' },
-            { label: 'HR', value: 'HR' },
-            { label: 'Customer Success', value: 'Customer Success' },
-            { label: 'Analytics', value: 'Analytics' },
-            { label: 'Operations', value: 'Operations' },
-          ],
-          editType: 'select',
-          editOptions: [
-            { label: 'Engineering', value: 'Engineering' },
-            { label: 'Product', value: 'Product' },
-            { label: 'Design', value: 'Design' },
-            { label: 'Marketing', value: 'Marketing' },
-            { label: 'Sales', value: 'Sales' },
-            { label: 'Finance', value: 'Finance' },
-            { label: 'HR', value: 'HR' },
-            { label: 'Customer Success', value: 'Customer Success' },
-            { label: 'Analytics', value: 'Analytics' },
-            { label: 'Operations', value: 'Operations' },
-          ],
-        },
-      },
-      {
-        accessorKey: 'salary',
-        header: 'Salary',
-        cell: ({ row }) => (
-          <span className="font-medium text-gray-800 dark:text-white/90">
-            ${(editedRows[row.id]?.salary ?? row.original.salary).toLocaleString()}
-          </span>
-        ),
-        meta: {
-          filterType: 'range',
-        },
-      },
-      {
-        accessorKey: 'joinDate',
-        header: 'Join Date',
-        cell: ({ row }) => {
-          const date = editedRows[row.id]?.joinDate ?? row.original.joinDate
-          return (
-            <span className="text-gray-800 dark:text-gray-400">
-              {new Date(date).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-              })}
-            </span>
-          )
-        },
-        meta: {
-          editType: 'date',
-        },
-      },
-      {
-        accessorKey: 'skills',
-        header: 'Skills',
-        cell: ({ row }) => {
-          const skills = editedRows[row.id]?.skills ?? row.original.skills
-          return (
-            <div className="flex flex-wrap gap-1">
-              {skills.map((skill, idx) => (
-                <Badge key={idx} size="sm" color="default">
-                  {skill}
-                </Badge>
-              ))}
-            </div>
-          )
-        },
-        meta: {
-          editType: 'multiselect',
-          editOptions: allSkills.map(skill => ({ label: skill, value: skill })),
-        },
-      },
-      {
-        accessorKey: 'status',
-        header: 'Status',
-        cell: ({ row }) => {
-          const status = editedRows[row.id]?.status ?? row.original.status
-          const colorMap = {
-            active: 'success' as const,
-            inactive: 'error' as const,
-            pending: 'warning' as const,
-          }
-
-          return (
-            <Badge size="sm" color={colorMap[status]}>
-              {status.charAt(0).toUpperCase() + status.slice(1)}
+    } as ColumnDefinition<Product, number>,
+    {
+      key: 'inStock',
+      header: 'In Stock',
+      type: 'boolean',
+      sortable: true,
+      filterable: true,
+      align: 'center',
+      cell: ({ value }: CellRenderProps<Product, boolean>) => (
+        <Badge size="sm" color={value ? 'success' : 'error'}>
+          {value ? 'Yes' : 'No'}
+        </Badge>
+      ),
+    } as ColumnDefinition<Product, boolean>,
+    {
+      key: 'rating',
+      header: 'Rating',
+      type: 'number',
+      sortable: true,
+      filterable: true,
+      align: 'center',
+      cell: ({ value }: CellRenderProps<Product, number>) => (
+        <div className="flex items-center justify-center gap-1">
+          <span className="text-yellow-500">★</span>
+          <span className="font-medium text-gray-800 dark:text-white/90">{value}.0</span>
+        </div>
+      ),
+    } as ColumnDefinition<Product, number>,
+    {
+      key: 'launchDate',
+      header: 'Launch Date',
+      type: 'date',
+      sortable: true,
+      filterable: true,
+      cell: ({ value }: CellRenderProps<Product, string>) => (
+        <span className="text-gray-800 dark:text-gray-400">
+          {new Date(value).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          })}
+        </span>
+      ),
+    } as ColumnDefinition<Product, string>,
+    {
+      key: 'tags',
+      header: 'Tags',
+      type: 'multi-select',
+      filterable: true,
+      options: allTags.map(tag => ({ label: tag, value: tag })),
+      cell: ({ value }: CellRenderProps<Product, string[]>) => (
+        <div className="flex flex-wrap gap-1">
+          {value.map((tag, idx) => (
+            <Badge key={idx} size="sm" color="default">
+              {tag}
             </Badge>
-          )
-        },
-        meta: {
-          filterType: 'select',
-          filterOptions: [
-            { label: 'Active', value: 'active' },
-            { label: 'Inactive', value: 'inactive' },
-            { label: 'Pending', value: 'pending' },
-          ],
-          editType: 'select',
-          editOptions: [
-            { label: 'Active', value: 'active' },
-            { label: 'Inactive', value: 'inactive' },
-            { label: 'Pending', value: 'pending' },
-          ],
-        },
-      },
-      {
-        id: 'actions',
-        header: 'Actions',
-        cell: ({ row }) => {
-          const hasChanges = !!editedRows[row.id]
+          ))}
+        </div>
+      ),
+    } as ColumnDefinition<Product, string[]>,
+    {
+      key: 'actions' as keyof Product,
+      header: 'Actions',
+      type: 'custom',
+      sortable: false,
+      filterable: false,
+      width: 120,
+      cell: ({ row }: CellRenderProps<Product, unknown>) => (
+        <div className="flex items-center gap-2">
+          <button
+            className="text-gray-500 hover:text-brand-600 dark:text-gray-400 dark:hover:text-brand-500"
+            onClick={(e) => {
+              e.stopPropagation()
+              alert(`View details for ${row.name}`)
+            }}
+            title="View"
+          >
+            <EyeIcon />
+          </button>
+          <button
+            className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white/90"
+            onClick={(e) => {
+              e.stopPropagation()
+              alert(`Edit ${row.name}`)
+            }}
+            title="Edit"
+          >
+            <PencilIcon />
+          </button>
+          <button
+            className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+            onClick={(e) => {
+              e.stopPropagation()
+              if (confirm(`Delete ${row.name}?`)) {
+                alert('Deleted!')
+              }
+            }}
+            title="Delete"
+          >
+            <TrashBinIcon />
+          </button>
+        </div>
+      ),
+    } as ColumnDefinition<Product, unknown>,
+  ]
 
-          if (hasChanges) {
-            return (
-              <div className="flex items-center gap-2">
-                <button
-                  className="text-green-500 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleSaveRow(row.id)
-                  }}
-                  title="Save changes"
-                >
-                  <CheckLineIcon className="w-5 h-5" />
-                </button>
-                <button
-                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleCancelRow(row.id)
-                  }}
-                  title="Cancel changes"
-                >
-                  <CloseIcon className="w-5 h-5" />
-                </button>
-              </div>
-            )
-          }
+  const mockDataSource = new MockDataSource({
+    data: mockProducts,
+    getRowId: (row) => row.id,
+    delay: 500,
+  })
 
-          return (
-            <div className="flex items-center gap-2">
-              <button
-                className="text-gray-500 hover:text-brand-600 dark:text-gray-400 dark:hover:text-brand-500"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  alert(`View details for ${row.original.name}`)
-                }}
-                title="View"
-              >
-                <EyeIcon />
-              </button>
-              <button
-                className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white/90"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  alert(`Edit ${row.original.name}`)
-                }}
-                title="Edit"
-              >
-                <PencilIcon />
-              </button>
-              <button
-                className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  if (confirm(`Delete ${row.original.name}?`)) {
-                    alert('Deleted!')
-                  }
-                }}
-                title="Delete"
-              >
-                <TrashBinIcon />
-              </button>
-            </div>
-          )
-        },
-        enableSorting: false,
-        size: 120,
-      },
-    ],
-    [editedRows]
-  )
+  const localStorageDataSource = new LocalStorageDataSource({
+    key: 'table-test-products',
+    getRowId: (row) => row.id,
+    defaultData: mockProducts,
+  })
+
+  const schemaProvider = new ManualSchemaProvider(productColumns)
 
   return (
     <div className="p-4 md:p-6 2xl:p-10">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
-          Advanced Table Test - Enhanced Edition
+          Advanced Table Plugin - Complete Feature Showcase
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
-          Demonstrating inline editing with multiple input types. Double-click cells to edit: text (Role), number (Salary), select (Department, Status), multiselect (Skills), and date (Join Date).
+          All features in one place: sorting, filtering, search, pagination, row selection, bulk actions, inline editing, exports, and more
         </p>
       </div>
 
-      <AdvancedTableEnhanced
-        columns={columns}
-        data={data}
-        enableSorting
-        enableFiltering
-        enableGlobalFilter
-        enablePagination
-        enableRowSelection
-        enableMultiRowSelection
-        enableVirtualization={false}
-        searchPlaceholder="Search employees..."
-        defaultPageSize={20}
-        pageSizeOptions={[10, 20, 50, 100]}
-        onCellEdit={handleCellEdit}
-        editableColumns={['salary', 'role', 'department', 'status', 'joinDate', 'skills']}
-        getRowClassName={(row) => editedRows[row.id] ? 'bg-yellow-50 dark:bg-yellow-900/10' : ''}
-        showBulkSave={Object.keys(editedRows).length > 0}
-        onSaveAll={handleSaveAllChanges}
-        onCancelAll={handleCancelAllChanges}
-        bulkSaveLabel={`Save Changes (${Object.keys(editedRows).length})`}
-        showSearch={false}
+      <div className="mb-4 p-4 bg-brand-50 dark:bg-brand-900/20 rounded-lg border border-brand-200 dark:border-brand-800">
+        <h3 className="font-medium text-brand-900 dark:text-brand-300 mb-2">
+          🎯 Complete Feature Set
+        </h3>
+        <p className="text-sm text-brand-800 dark:text-brand-400 mb-3">
+          This example demonstrates EVERY feature available in the plugin architecture:
+        </p>
+        <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 text-sm text-brand-800 dark:text-brand-400">
+          <li>✓ <strong>Row Selection</strong> - Checkboxes with select all</li>
+          <li>✓ <strong>Bulk Actions</strong> - Delete, Edit, Update selected rows</li>
+          <li>✓ <strong>Inline Editing</strong> - Text, Select, Checkbox, Multi-Select</li>
+          <li>✓ <strong>Sorting</strong> - Click column headers</li>
+          <li>✓ <strong>Global Search</strong> - Search across all columns</li>
+          <li>✓ <strong>Pagination</strong> - Navigate pages, change size</li>
+          <li>✓ <strong>Export</strong> - Download as CSV</li>
+          <li>✓ <strong>Column Visibility</strong> - Show/hide columns</li>
+          <li>✓ <strong>Action Column</strong> - View/Edit/Delete per row</li>
+          <li>✓ <strong>Yellow Highlight</strong> - Edited rows</li>
+          <li>✓ <strong>Save/Cancel</strong> - Per row or bulk save</li>
+          <li>✓ <strong>Dark Mode</strong> - Full theme support</li>
+        </ul>
+      </div>
+
+      <AdvancedTablePlugin
+        dataSource={mockDataSource}
+        schemaProvider={schemaProvider}
+        features={{
+          sorting: true,
+          filtering: true,
+          globalSearch: true,
+          pagination: {
+            pageSize: 10,
+            pageSizeOptions: [5, 10, 20, 50],
+          },
+          rowSelection: {
+            multiple: true,
+            preserveSelection: false,
+          },
+          inlineEditing: true,
+          columnVisibility: true,
+          export: true,
+        }}
+        editableColumns={['name', 'category', 'price', 'inStock', 'rating', 'tags']}
+        onCellEdit={async (rowId, columnId, value) => {
+          console.log('Cell edited:', { rowId, columnId, value })
+        }}
+        onSaveRow={async (rowId, changes) => {
+          console.log('Saving row:', { rowId, changes })
+          alert(`Saved changes for row ${rowId}:\n${JSON.stringify(changes, null, 2)}`)
+        }}
+        onCancelRow={(rowId) => {
+          console.log('Cancelled edits for row:', rowId)
+        }}
+        onSaveAll={async (allChanges) => {
+          console.log('Saving all changes:', allChanges)
+          alert(`Saving ${Object.keys(allChanges).length} edited rows:\n${JSON.stringify(allChanges, null, 2)}`)
+        }}
+        onCancelAll={() => {
+          console.log('Cancelled all edits')
+          alert('Cancelled all pending edits')
+        }}
         bulkActions={[
           {
             label: 'Delete Selected',
             variant: 'destructive',
-            icon: <TrashBinIcon />,
+            icon: <TrashBinIcon className="w-4 h-4" />,
             onClick: (selectedRows) => {
-              if (confirm(`Delete ${selectedRows.length} employee(s)?`)) {
-                alert(`Deleted ${selectedRows.length} employees!`)
+              if (confirm(`Delete ${selectedRows.length} product(s)?`)) {
+                alert(`Deleted ${selectedRows.length} products!\n\nProducts: ${selectedRows.map(p => p.name).join(', ')}`)
               }
+            },
+          },
+          {
+            label: 'Mark as Featured',
+            variant: 'default',
+            onClick: (selectedRows) => {
+              alert(`Marked ${selectedRows.length} products as featured!\n\nProducts: ${selectedRows.map(p => p.name).join(', ')}`)
+            },
+          },
+          {
+            label: 'Update Stock',
+            variant: 'outline',
+            onClick: (selectedRows) => {
+              alert(`Update stock for ${selectedRows.length} products?\n\nProducts: ${selectedRows.map(p => p.name).join(', ')}`)
             },
           },
           {
             label: 'Export Selected',
             variant: 'outline',
             onClick: (selectedRows) => {
-              alert(`Exporting ${selectedRows.length} employees...`)
-              console.log('Selected rows:', selectedRows)
-            },
-          },
-          {
-            label: 'Send Email',
-            variant: 'default',
-            onClick: (selectedRows) => {
-              alert(`Sending email to ${selectedRows.length} employees...`)
+              console.log('Exporting selected rows:', selectedRows)
+              alert(`Exporting ${selectedRows.length} products to CSV...`)
             },
           },
         ]}
-        onRowClick={(row) => {
-          console.log('Row clicked:', row)
-        }}
-        showSearch
-        showPagination
-        showExport
-        showRowsPerPage
-        showColumnVisibility
-        exportFileName="employees-enhanced"
-        onExport={(data) => {
-          console.log('Exporting data:', data)
-        }}
+        getRowId={(row) => row.id}
+        onRowClick={(row) => console.log('Row clicked:', row)}
+        searchPlaceholder="Search products..."
+        exportFileName="products-showcase"
       />
 
       <div className="mt-8 p-6 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Features Demonstrated
+          📋 Feature Testing Checklist
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div>
-            <h3 className="font-medium text-gray-900 dark:text-white mb-3">Base Features</h3>
-            <ul className="space-y-2 text-gray-600 dark:text-gray-400 text-sm">
-              <li className="flex items-start gap-2">
-                <span className="text-green-500 mt-0.5">✓</span>
-                <span><strong>Sorting:</strong> Click column headers to sort</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-green-500 mt-0.5">✓</span>
-                <span><strong>Global Search:</strong> Search across all columns</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-green-500 mt-0.5">✓</span>
-                <span><strong>Pagination:</strong> Navigate with page sizes (10-100)</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-green-500 mt-0.5">✓</span>
-                <span><strong>Row Selection:</strong> Select multiple rows</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-green-500 mt-0.5">✓</span>
-                <span><strong>Bulk Actions:</strong> Perform actions on selected rows</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-green-500 mt-0.5">✓</span>
-                <span><strong>Export:</strong> Export table data to CSV</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-green-500 mt-0.5">✓</span>
-                <span><strong>Dark Mode:</strong> Full light/dark theme support</span>
-              </li>
+            <h3 className="font-medium text-gray-900 dark:text-white mb-3">Data Operations</h3>
+            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+              <li>☐ <strong>Sort:</strong> Click column headers (name, price, rating, etc.)</li>
+              <li>☐ <strong>Search:</strong> Type in search box to filter globally</li>
+              <li>☐ <strong>Pagination:</strong> Navigate pages, change rows per page</li>
+              <li>☐ <strong>Filter:</strong> Use column-specific filters</li>
             </ul>
           </div>
+
           <div>
-            <h3 className="font-medium text-gray-900 dark:text-white mb-3">Advanced Features</h3>
-            <ul className="space-y-2 text-gray-600 dark:text-gray-400 text-sm">
-              <li className="flex items-start gap-2">
-                <span className="text-brand-500 mt-0.5">★</span>
-                <span><strong>Virtual Scrolling:</strong> Handles 100k+ rows efficiently (toggle in code)</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-brand-500 mt-0.5">★</span>
-                <span><strong>Inline Editing:</strong> Multiple input types - text, number, select, multiselect, date</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-purple-500 mt-0.5">★</span>
-                <span><strong>Row Highlighting:</strong> Edited rows get yellow background</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-purple-500 mt-0.5">★</span>
-                <span><strong>Save/Cancel Actions:</strong> Action buttons change to Save/Cancel when row is edited</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-blue-500 mt-0.5">ℹ</span>
-                <span className="text-xs italic">Changes tracked per row with visual feedback</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-blue-500 mt-0.5">ℹ</span>
-                <span className="text-xs italic">100 employee records with realistic data</span>
-              </li>
+            <h3 className="font-medium text-gray-900 dark:text-white mb-3">Row Actions</h3>
+            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+              <li>☐ <strong>Select Row:</strong> Click checkbox on any row</li>
+              <li>☐ <strong>Select All:</strong> Click header checkbox</li>
+              <li>☐ <strong>View:</strong> Click eye icon in Actions column</li>
+              <li>☐ <strong>Edit:</strong> Click pencil icon in Actions column</li>
+              <li>☐ <strong>Delete:</strong> Click trash icon in Actions column</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="font-medium text-gray-900 dark:text-white mb-3">Bulk Operations</h3>
+            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+              <li>☐ <strong>Bulk Delete:</strong> Select rows → Click &quot;Delete Selected&quot;</li>
+              <li>☐ <strong>Bulk Edit:</strong> Select rows → Click &quot;Mark as Featured&quot;</li>
+              <li>☐ <strong>Bulk Update:</strong> Select rows → Click &quot;Update Stock&quot;</li>
+              <li>☐ <strong>Bulk Export:</strong> Select rows → Click &quot;Export Selected&quot;</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="font-medium text-gray-900 dark:text-white mb-3">Inline Editing</h3>
+            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+              <li>☐ <strong>Text:</strong> Double-click Name (text input)</li>
+              <li>☐ <strong>Select:</strong> Double-click Category (dropdown)</li>
+              <li>☐ <strong>Number:</strong> Double-click Price or Rating</li>
+              <li>☐ <strong>Checkbox:</strong> Click In Stock (toggle checkbox)</li>
+              <li>☐ <strong>Multi-Select:</strong> Double-click Tags (multi-select popup)</li>
+              <li>☐ <strong>Yellow Highlight:</strong> Edited rows show background</li>
+              <li>☐ <strong>Save/Cancel:</strong> Checkmark/X in actions column</li>
+              <li>☐ <strong>Bulk Save:</strong> Edit multiple → toolbar appears</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="font-medium text-gray-900 dark:text-white mb-3">Export & Display</h3>
+            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+              <li>☐ <strong>Export CSV:</strong> Click &quot;Export CSV&quot; button</li>
+              <li>☐ <strong>Column Visibility:</strong> Toggle columns on/off</li>
+              <li>☐ <strong>Row Click:</strong> Click anywhere on row (check console)</li>
+              <li>☐ <strong>Dark Mode:</strong> Toggle theme to test styling</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="font-medium text-gray-900 dark:text-white mb-3">Plugin Architecture</h3>
+            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+              <li>☐ <strong>Data Source:</strong> MockDataSource with 500ms delay</li>
+              <li>☐ <strong>Loading States:</strong> Skeleton appears during fetch</li>
+              <li>☐ <strong>Schema Provider:</strong> ManualSchemaProvider defines columns</li>
+              <li>☐ <strong>Swappable:</strong> Can replace with ApiDataSource or LocalStorage</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="font-medium text-gray-900 dark:text-white mb-3">Column Types</h3>
+            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+              <li>☐ <strong>Text:</strong> Product Name (sortable)</li>
+              <li>☐ <strong>Select:</strong> Category (badges)</li>
+              <li>☐ <strong>Currency:</strong> Price ($XX.XX format)</li>
+              <li>☐ <strong>Boolean:</strong> In Stock (Yes/No badges)</li>
+              <li>☐ <strong>Number:</strong> Rating (star display)</li>
+              <li>☐ <strong>Date:</strong> Launch Date (formatted)</li>
+              <li>☐ <strong>Multi-Select:</strong> Tags (multiple badges)</li>
+              <li>☐ <strong>Custom:</strong> Actions (icon buttons)</li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-          <h4 className="font-medium text-blue-900 dark:text-blue-300 mb-2 text-sm">
-            💡 How to Use Inline Editing
+        <div className="mt-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+          <h4 className="font-medium text-yellow-900 dark:text-yellow-300 mb-2 text-sm">
+            💡 Quick Usage Example
           </h4>
-          <ul className="space-y-1 text-xs text-blue-800 dark:text-blue-400">
-            <li>1. <strong>Double-click</strong> any editable cell (Role, Salary, Department, Status, Skills, Join Date)</li>
-            <li>2. <strong>Edit the value</strong> - different input types for each column:</li>
-            <li className="ml-4">• <strong>Text:</strong> Role - type freely</li>
-            <li className="ml-4">• <strong>Number:</strong> Salary - numeric input</li>
-            <li className="ml-4">• <strong>Select:</strong> Department & Status - choose one option</li>
-            <li className="ml-4">• <strong>Multi-select:</strong> Skills - check multiple options, then Save</li>
-            <li className="ml-4">• <strong>Date:</strong> Join Date - use date picker</li>
-            <li>3. <strong>Press Enter</strong> to confirm (or Save button for multi-select) or <strong>Escape</strong> to cancel</li>
-            <li>4. <strong>Click the green checkmark (✓)</strong> in Actions column to save all row changes</li>
-            <li>5. <strong>Click the X</strong> to discard all changes and restore original values</li>
-            <li>• You can edit multiple fields in the same row before saving</li>
-            <li>• The row background turns yellow when it has unsaved changes</li>
-          </ul>
+          <pre className="text-xs text-yellow-800 dark:text-yellow-400 font-mono overflow-x-auto">
+{`// 1. Create your data source (swap anytime!)
+const dataSource = new MockDataSource({ data: products })
+// const dataSource = new ApiDataSource({ transport, endpoints })
+// const dataSource = new LocalStorageDataSource({ key: 'my-data' })
+
+// 2. Define your schema
+const schema = new ManualSchemaProvider(columns)
+
+// 3. Render the table - DONE! 🎉
+<AdvancedTablePlugin
+  dataSource={dataSource}
+  schemaProvider={schema}
+  features={{ sorting: true, pagination: true, rowSelection: true }}
+  bulkActions={[{ label: 'Delete', onClick: (rows) => deleteRows(rows) }]}
+/>`}
+          </pre>
         </div>
       </div>
     </div>

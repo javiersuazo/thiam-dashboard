@@ -166,6 +166,7 @@ export function EditableCell({
         setSaving(true)
         try {
           await onSave(selectedItems)
+          setValue(selectedItems)
           setEditing(false)
         } catch (error) {
           console.error('Failed to save:', error)
@@ -183,83 +184,92 @@ export function EditableCell({
       }
 
       return (
-        <div className="absolute top-0 left-0 z-50 min-w-[300px] max-w-[400px] bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg shadow-theme-lg p-3">
-          {/* Selected items display - limited height with scroll */}
-          {selectedItems.length > 0 && (
-            <div className="mb-3 max-h-24 overflow-y-auto">
-              <div className="flex flex-wrap gap-2">
-                {selectedItems.map((itemValue, idx) => {
-                  const option = options.find(opt => opt.value === itemValue)
-                  return (
-                    <div
-                      key={idx}
-                      className="group flex items-center gap-1 px-2.5 py-1 text-xs bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white/90 rounded-full border border-gray-200 dark:border-gray-700"
-                    >
-                      <span>{option?.label || itemValue}</span>
-                      <button
-                        onClick={() => toggleItem(itemValue)}
-                        className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+        <div className="relative">
+          <div className="fixed inset-0 z-40" onClick={() => {
+            setSelectedItems(Array.isArray(initialValue) ? initialValue : [])
+            setEditing(false)
+          }} />
+          <div className="absolute left-0 top-0 z-50 min-w-[320px] max-w-[420px] bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg shadow-2xl p-4">
+            {/* Selected items display - limited height with scroll */}
+            {selectedItems.length > 0 && (
+              <div className="mb-3 max-h-24 overflow-y-auto">
+                <p className="text-xs font-medium text-gray-700 dark:text-gray-400 mb-2">
+                  Selected ({selectedItems.length}):
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {selectedItems.map((itemValue, idx) => {
+                    const option = options.find(opt => opt.value === itemValue)
+                    return (
+                      <div
+                        key={idx}
+                        className="group flex items-center gap-1 px-2.5 py-1 text-xs bg-brand-50 dark:bg-brand-900/20 text-brand-800 dark:text-brand-300 rounded-full border border-brand-200 dark:border-brand-800"
                       >
-                        <svg width="12" height="12" viewBox="0 0 14 14" fill="currentColor">
-                          <path fillRule="evenodd" clipRule="evenodd" d="M3.40717 4.46881C3.11428 4.17591 3.11428 3.70104 3.40717 3.40815C3.70006 3.11525 4.17494 3.11525 4.46783 3.40815L6.99943 5.93975L9.53095 3.40822C9.82385 3.11533 10.2987 3.11533 10.5916 3.40822C10.8845 3.70112 10.8845 4.17599 10.5916 4.46888L8.06009 7.00041L10.5916 9.53193C10.8845 9.82482 10.8845 10.2997 10.5916 10.5926C10.2987 10.8855 9.82385 10.8855 9.53095 10.5926L6.99943 8.06107L4.46783 10.5927C4.17494 10.8856 3.70006 10.8856 3.40717 10.5927C3.11428 10.2998 3.11428 9.8249 3.40717 9.53201L5.93877 7.00041L3.40717 4.46881Z" />
-                        </svg>
-                      </button>
-                    </div>
-                  )
-                })}
+                        <span>{option?.label || itemValue}</span>
+                        <button
+                          onClick={() => toggleItem(itemValue)}
+                          className="text-brand-600 hover:text-brand-800 dark:text-brand-400 dark:hover:text-brand-200"
+                        >
+                          <svg width="12" height="12" viewBox="0 0 14 14" fill="currentColor">
+                            <path fillRule="evenodd" clipRule="evenodd" d="M3.40717 4.46881C3.11428 4.17591 3.11428 3.70104 3.40717 3.40815C3.70006 3.11525 4.17494 3.11525 4.46783 3.40815L6.99943 5.93975L9.53095 3.40822C9.82385 3.11533 10.2987 3.11533 10.5916 3.40822C10.8845 3.70112 10.8845 4.17599 10.5916 4.46888L8.06009 7.00041L10.5916 9.53193C10.8845 9.82482 10.8845 10.2997 10.5916 10.5926C10.2987 10.8855 9.82385 10.8855 9.53095 10.5926L6.99943 8.06107L4.46783 10.5927C4.17494 10.8856 3.70006 10.8856 3.40717 10.5927C3.11428 10.2998 3.11428 9.8249 3.40717 9.53201L5.93877 7.00041L3.40717 4.46881Z" />
+                          </svg>
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Available options - scrollable list */}
+            <div className="mb-3">
+              <p className="text-xs font-medium text-gray-700 dark:text-gray-400 mb-2">
+                Available options:
+              </p>
+              <div className="max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg">
+                {options.map((option) => (
+                  <label
+                    key={option.value}
+                    className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-100 dark:border-gray-800 last:border-b-0"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedItems.includes(option.value)}
+                      onChange={() => toggleItem(option.value)}
+                      className="w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500"
+                      disabled={saving}
+                    />
+                    <span className="text-sm text-gray-900 dark:text-white/90">
+                      {option.label}
+                    </span>
+                  </label>
+                ))}
               </div>
             </div>
-          )}
 
-          {/* Available options - scrollable list */}
-          <div className="mb-3">
-            <p className="text-xs font-medium text-gray-700 dark:text-gray-400 mb-2">
-              Select options:
-            </p>
-            <div className="max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg">
-              {options.map((option) => (
-                <label
-                  key={option.value}
-                  className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-100 dark:border-gray-800 last:border-b-0"
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedItems.includes(option.value)}
-                    onChange={() => toggleItem(option.value)}
-                    className="w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-brand-500"
-                    disabled={saving}
-                  />
-                  <span className="text-sm text-gray-900 dark:text-white/90">
-                    {option.label}
-                  </span>
-                </label>
-              ))}
+            {/* Action buttons */}
+            <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-800">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSelectedItems(Array.isArray(initialValue) ? initialValue : [])
+                  setEditing(false)
+                }}
+                disabled={saving}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleMultiSave}
+                disabled={saving}
+                className="flex-1"
+              >
+                {saving ? 'Saving...' : 'Save'}
+              </Button>
             </div>
-          </div>
-
-          {/* Action buttons */}
-          <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-800">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setSelectedItems(Array.isArray(initialValue) ? initialValue : [])
-                setEditing(false)
-              }}
-              disabled={saving}
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={handleMultiSave}
-              disabled={saving}
-              className="flex-1"
-            >
-              {saving ? 'Saving...' : 'Save'}
-            </Button>
           </div>
         </div>
       )
@@ -294,10 +304,19 @@ export function EditableCell({
     )
   }
 
-  // For select fields, display the label instead of the value (key)
-  const displayValue = type === 'select' && options.length > 0
-    ? options.find(opt => opt.value === value)?.label || value
-    : value
+  // Display logic for different types
+  let displayContent: React.ReactNode = value
+
+  if (type === 'select' && options.length > 0) {
+    displayContent = options.find(opt => opt.value === value)?.label || value
+  } else if (type === 'multiselect' && Array.isArray(value)) {
+    displayContent = value.length > 0
+      ? value.map((v, idx) => {
+          const option = options.find(opt => opt.value === v)
+          return option?.label || v
+        }).join(', ')
+      : '-'
+  }
 
   return (
     <div
@@ -306,7 +325,7 @@ export function EditableCell({
       title="Double-click to edit"
     >
       <span className="text-gray-900 dark:text-white">
-        {displayValue ?? <span className="text-gray-400 dark:text-gray-500">-</span>}
+        {displayContent ?? <span className="text-gray-400 dark:text-gray-500">-</span>}
       </span>
     </div>
   )

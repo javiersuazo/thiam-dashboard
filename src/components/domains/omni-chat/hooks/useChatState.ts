@@ -1,25 +1,27 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import type { ChatMode, DockPosition, Position, Message, ChatState } from '../types'
+import type { ChatMode, Position, Message, ChatState } from '../types'
 import { DEFAULT_CHAT_STATE } from '../types'
 
 interface UseChatStateProps {
   initialMode?: ChatMode
-  initialDockPosition?: DockPosition
   onModeChange?: (mode: ChatMode) => void
 }
 
 export function useChatState({
   initialMode = 'minimized',
-  initialDockPosition = 'right',
   onModeChange,
 }: UseChatStateProps = {}) {
   const [mode, setMode] = useState<ChatMode>(initialMode)
-  const [dockPosition, setDockPosition] = useState<DockPosition>(initialDockPosition)
   const [floatingPosition, setFloatingPosition] = useState<Position>(() => {
     if (typeof window === 'undefined') return { x: 0, y: 0 }
+
+    const chatWidth = 500
+    const chatHeight = 700
+    const padding = 20
+
     return {
-      x: window.innerWidth - 40,
-      y: window.innerHeight - 40,
+      x: window.innerWidth - chatWidth / 2 - padding - 40,
+      y: window.innerHeight - chatHeight / 2 - padding - 40,
     }
   })
   const [isExpanded, setIsExpanded] = useState(false)
@@ -35,9 +37,7 @@ export function useChatState({
     setMode(newMode)
     if (newMode === 'minimized') {
       setIsExpanded(false)
-    } else if (newMode === 'docked' || newMode === 'floating') {
-      setIsExpanded(true)
-    } else if (newMode === 'fullscreen') {
+    } else if (newMode === 'floating' || newMode === 'fullscreen') {
       setIsExpanded(true)
     }
     onModeChange?.(newMode)
@@ -45,7 +45,7 @@ export function useChatState({
 
   const toggleMinimize = useCallback(() => {
     if (mode === 'minimized') {
-      changeMode('docked')
+      changeMode('floating')
     } else {
       changeMode('minimized')
     }
@@ -53,16 +53,9 @@ export function useChatState({
 
   const toggleFullscreen = useCallback(() => {
     if (mode === 'fullscreen') {
-      changeMode('docked')
+      changeMode('floating')
     } else {
       changeMode('fullscreen')
-    }
-  }, [mode, changeMode])
-
-  const changeDockPosition = useCallback((position: DockPosition) => {
-    setDockPosition(position)
-    if (mode !== 'docked') {
-      changeMode('docked')
     }
   }, [mode, changeMode])
 
@@ -74,34 +67,32 @@ export function useChatState({
 
   const onDrag = useCallback((clientX: number, clientY: number) => {
     if (!isDragging) return
+    if (typeof window === 'undefined') return
 
     const deltaX = clientX - dragStartPos.current.x
     const deltaY = clientY - dragStartPos.current.y
 
-    const newX = chatStartPos.current.x + deltaX
-    const newY = chatStartPos.current.y + deltaY
+    let newX = chatStartPos.current.x + deltaX
+    let newY = chatStartPos.current.y + deltaY
+
+    const chatWidth = 500
+    const chatHeight = 700
+    const padding = 20
+
+    const minX = chatWidth / 2 + padding
+    const maxX = window.innerWidth - chatWidth / 2 - padding
+    const minY = chatHeight / 2 + padding
+    const maxY = window.innerHeight - chatHeight / 2 - padding
+
+    newX = Math.max(minX, Math.min(maxX, newX))
+    newY = Math.max(minY, Math.min(maxY, newY))
 
     setFloatingPosition({ x: newX, y: newY })
   }, [isDragging])
 
-  const endDrag = useCallback((clientX: number, clientY: number) => {
+  const endDrag = useCallback(() => {
     setIsDragging(false)
-
-    const threshold = 50
-    if (typeof window === 'undefined') return
-
-    if (clientX < threshold) {
-      changeDockPosition('left')
-    } else if (clientX > window.innerWidth - threshold) {
-      changeDockPosition('right')
-    } else if (clientY > window.innerHeight - threshold) {
-      changeDockPosition('bottom')
-    } else {
-      if (mode !== 'floating') {
-        changeMode('floating')
-      }
-    }
-  }, [mode, changeMode, changeDockPosition])
+  }, [])
 
   const addMessage = useCallback((message: Omit<Message, 'id' | 'timestamp'>) => {
     const newMessage: Message = {
@@ -138,7 +129,7 @@ export function useChatState({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && mode === 'fullscreen') {
-        changeMode('docked')
+        changeMode('floating')
       }
     }
 
@@ -148,7 +139,6 @@ export function useChatState({
 
   const chatState: ChatState = {
     mode,
-    dockPosition,
     floatingPosition,
     isExpanded,
     isDragging,
@@ -162,7 +152,6 @@ export function useChatState({
     changeMode,
     toggleMinimize,
     toggleFullscreen,
-    changeDockPosition,
     startDrag,
     onDrag,
     endDrag,

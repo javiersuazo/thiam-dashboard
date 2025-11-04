@@ -59,30 +59,37 @@ export function ChatBubble({
   }, [isDragging, onDrag, onEndDrag])
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('.chat-content')) return
+    const target = e.target as HTMLElement
+    if (target.closest('.chat-content')) return
+    if (target.closest('button')) return
+
+    e.preventDefault()
     onStartDrag(e.clientX, e.clientY)
   }
 
   return (
     <div
       ref={bubbleRef}
-      className={`fixed z-[9999] w-96 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border-2 border-brand-200 dark:border-brand-800 flex flex-col overflow-hidden transition-all duration-300 animate-[popIn_0.3s_cubic-bezier(0.68,-0.55,0.265,1.55)] ${
-        isDragging ? 'cursor-grabbing scale-105 shadow-3xl' : 'cursor-grab hover:shadow-brand-500/20'
+      className={`fixed z-[9999] w-[500px] bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border-2 border-brand-200 dark:border-brand-800 flex flex-col overflow-hidden transition-shadow duration-200 animate-[popIn_0.3s_cubic-bezier(0.68,-0.55,0.265,1.55)] ${
+        isDragging ? 'shadow-3xl' : 'hover:shadow-brand-500/20'
       }`}
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
-        maxHeight: '600px',
+        height: '700px',
         transform: 'translate(-50%, -50%)',
+        willChange: isDragging ? 'transform' : 'auto',
+        pointerEvents: 'auto',
       }}
     >
-      {/* Glow effect when not dragging */}
       {!isDragging && (
         <div className="absolute -inset-1 bg-gradient-to-r from-brand-400 to-brand-600 rounded-2xl opacity-20 blur-xl animate-[pulse_3s_ease-in-out_infinite]"></div>
       )}
 
       <div
-        className="relative flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-brand-500 via-brand-600 to-brand-700 overflow-hidden"
+        className={`relative flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-brand-500 via-brand-600 to-brand-700 overflow-hidden ${
+          isDragging ? 'cursor-grabbing' : 'cursor-grab'
+        }`}
         onMouseDown={handleMouseDown}
       >
         {/* Animated shimmer on drag handle */}
@@ -120,7 +127,7 @@ export function ChatBubble({
         </div>
       </div>
 
-      <div className="chat-content flex flex-col flex-1 overflow-hidden">
+      <div className="chat-content flex flex-col flex-1 overflow-hidden" style={{ pointerEvents: 'auto' }}>
         <MessageList messages={messages} isLoading={isLoading} />
 
         <div className="p-4 border-t border-gray-200 dark:border-gray-700">

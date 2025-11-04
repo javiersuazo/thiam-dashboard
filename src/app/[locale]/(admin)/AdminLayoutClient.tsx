@@ -23,11 +23,9 @@ export default function AdminLayoutClient({
   const pathname = usePathname();
   const [chatState, setChatState] = useState<ChatStateInfo>({
     mode: 'minimized',
-    dockPosition: 'right',
     isExpanded: false,
   });
 
-  // Route-specific styles for the main content container
   const getRouteSpecificStyles = () => {
     switch (pathname) {
       case "/text-generator":
@@ -43,31 +41,13 @@ export default function AdminLayoutClient({
     }
   };
 
-  // Dynamic class for main content margin based on sidebar state
   const mainContentMargin = isMobileOpen
     ? "ml-0"
     : isExpanded || isHovered
     ? "xl:ml-[290px]"
     : "xl:ml-[90px]";
 
-  const getChatMargin = () => {
-    const isDocked = chatState.mode === 'docked' && chatState.isExpanded
-    if (!isDocked) return {}
-
-    switch (chatState.dockPosition) {
-      case 'left':
-        return { marginLeft: '384px' }
-      case 'right':
-        return { marginRight: '384px' }
-      case 'bottom':
-        return { marginBottom: '384px' }
-      default:
-        return {}
-    }
-  }
-
   const isFullscreen = chatState.mode === 'fullscreen'
-  const isDocked = chatState.mode === 'docked' && chatState.isExpanded
 
   return (
     <div className="min-h-screen xl:flex">
@@ -88,14 +68,10 @@ export default function AdminLayoutClient({
         <div className={getRouteSpecificStyles()}>{children}</div>
       </div>
 
-      {/* OmniChat - conditionally part of flex or fixed */}
-      <div className={isDocked ? 'flex-shrink-0' : 'contents'}>
-        <OmniChat
-          initialMode="minimized"
-          initialDockPosition="right"
-          onStateChange={setChatState}
-        />
-      </div>
+      <OmniChat
+        initialMode="minimized"
+        onStateChange={setChatState}
+      />
     </div>
   );
 }

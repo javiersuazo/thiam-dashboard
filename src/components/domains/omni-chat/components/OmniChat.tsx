@@ -3,42 +3,37 @@
 import { useEffect, useRef } from 'react'
 import { useChatState } from '../hooks/useChatState'
 import { useChatHistory, useSendMessage } from '../hooks/useChatData'
-import type { Message, ChatMode, DockPosition } from '../types'
+import type { Message, ChatMode } from '../types'
 import { ChatBubble } from './ChatBubble'
 import { ChatWindow } from './ChatWindow'
 import { ChatMinimized } from './ChatMinimized'
 
 export interface ChatStateInfo {
   mode: ChatMode
-  dockPosition?: DockPosition
   isExpanded: boolean
 }
 
 interface OmniChatProps {
   initialMode?: ChatMode
-  initialDockPosition?: DockPosition
   onMessageSent?: (message: string) => void
   onStateChange?: (state: ChatStateInfo) => void
 }
 
 export function OmniChat({
   initialMode = 'minimized',
-  initialDockPosition = 'right',
   onMessageSent,
   onStateChange,
 }: OmniChatProps) {
   const chatState = useChatState({
     initialMode,
-    initialDockPosition,
   })
 
   useEffect(() => {
     onStateChange?.({
       mode: chatState.mode,
-      dockPosition: chatState.dockPosition,
       isExpanded: chatState.isExpanded,
     })
-  }, [chatState.mode, chatState.dockPosition, chatState.isExpanded, onStateChange])
+  }, [chatState.mode, chatState.isExpanded, onStateChange])
 
   const { data: historyMessages = [] } = useChatHistory()
   const sendMessageMutation = useSendMessage()
@@ -126,7 +121,6 @@ export function OmniChat({
   return (
     <ChatWindow
       mode={chatState.mode}
-      dockPosition={chatState.dockPosition}
       messages={chatState.messages}
       inputValue={chatState.inputValue}
       isLoading={chatState.isLoading}
@@ -134,7 +128,6 @@ export function OmniChat({
       onInputChange={chatState.setInput}
       onMinimize={chatState.toggleMinimize}
       onFullscreen={chatState.toggleFullscreen}
-      onChangeDockPosition={chatState.changeDockPosition}
     />
   )
 }

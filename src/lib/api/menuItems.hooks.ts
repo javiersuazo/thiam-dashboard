@@ -467,3 +467,61 @@ export function useReorderMedia(
     ...options,
   })
 }
+
+/**
+ * DELETE /caterers/{catererId}/menu-items/bulk-delete - Bulk delete menu items
+ */
+export function useBulkDeleteMenuItems(
+  catererId: string,
+  options?: UseMutationOptions<{ deleted: number }, Error, string[]>
+) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { data, error } = await api.DELETE('/v1/caterers/{catererId}/menu-items/bulk-delete', {
+        params: { path: { catererId } },
+        body: { ids } as any,
+      })
+      if (error) throw error
+      return data as { deleted: number }
+    },
+    ...options,
+    onSuccess: (data, variables, context) => {
+      queryClient.invalidateQueries({
+        queryKey: ['menu-items', catererId],
+        refetchType: 'active'
+      })
+      options?.onSuccess?.(data, variables, context)
+    },
+  })
+}
+
+/**
+ * PATCH /caterers/{catererId}/menu-items/batch-update - Batch update menu items
+ */
+export function useBatchUpdateMenuItems(
+  catererId: string,
+  options?: UseMutationOptions<{ updated: number }, Error, Record<string, Partial<UpdateMenuItemRequest>>>
+) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (updates: Record<string, Partial<UpdateMenuItemRequest>>) => {
+      const { data, error } = await api.PATCH('/v1/caterers/{catererId}/menu-items/batch-update', {
+        params: { path: { catererId } },
+        body: { updates } as any,
+      })
+      if (error) throw error
+      return data as { updated: number }
+    },
+    ...options,
+    onSuccess: (data, variables, context) => {
+      queryClient.invalidateQueries({
+        queryKey: ['menu-items', catererId],
+        refetchType: 'active'
+      })
+      options?.onSuccess?.(data, variables, context)
+    },
+  })
+}

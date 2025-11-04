@@ -1,6 +1,4 @@
-export type ChatMode = 'minimized' | 'docked' | 'floating' | 'fullscreen'
-
-export type DockPosition = 'left' | 'right' | 'bottom'
+export type ChatMode = 'minimized' | 'floating' | 'fullscreen'
 
 export type MessageRole = 'user' | 'assistant' | 'system'
 
@@ -39,7 +37,6 @@ export interface Message {
 
 export interface ChatState {
   mode: ChatMode
-  dockPosition?: DockPosition
   floatingPosition?: Position
   isExpanded: boolean
   isDragging: boolean
@@ -53,12 +50,10 @@ export interface ChatSettings {
   enableSounds: boolean
   animationsEnabled: boolean
   defaultMode: ChatMode
-  defaultDockPosition: DockPosition
 }
 
 export const DEFAULT_CHAT_STATE: ChatState = {
   mode: 'minimized',
-  dockPosition: 'right',
   floatingPosition: { x: window.innerWidth - 100, y: window.innerHeight - 100 },
   isExpanded: false,
   isDragging: false,
@@ -71,6 +66,5 @@ export const DEFAULT_CHAT_SETTINGS: ChatSettings = {
   showTimestamp: true,
   enableSounds: true,
   animationsEnabled: true,
-  defaultMode: 'docked',
-  defaultDockPosition: 'right',
+  defaultMode: 'minimized',
 }

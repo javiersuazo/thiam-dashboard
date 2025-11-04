@@ -12579,6 +12579,148 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/menus/bulk-delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Bulk delete menus
+         * @description Deletes multiple menus in a single transaction
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Menu IDs to delete */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["request.BulkDeleteMenus"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.BulkOperationResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/menus/bulk-update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Bulk update menus
+         * @description Updates multiple menus with the same field values in a single transaction
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Menu IDs and updates */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["request.BulkUpdateMenus"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.BulkOperationResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response.Error"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
     "/v1/menus/courses": {
         parameters: {
             query?: never;
@@ -16089,6 +16231,9 @@ export interface components {
         "request.BulkDeleteMenuItems": {
             ids: string[];
         };
+        "request.BulkDeleteMenus": {
+            ids: string[];
+        };
         "request.BulkImportIngredientsRequest": {
             ingredients: components["schemas"]["request.CreateIngredientRequest"][];
         };
@@ -16099,6 +16244,12 @@ export interface components {
             };
         };
         "request.BulkUpdateMenuItems": {
+            ids: string[];
+            updates: {
+                [key: string]: unknown;
+            };
+        };
+        "request.BulkUpdateMenus": {
             ids: string[];
             updates: {
                 [key: string]: unknown;
@@ -16250,8 +16401,6 @@ export interface components {
             orderableInMultiplesOf?: number;
             /** @enum {string} */
             publishStatus: "draft" | "published" | "archived";
-            /** @enum {string} */
-            seasonality?: "classic" | "seasonal" | "special_offer" | "custom";
             /** @description { "dietary-options": ["vegan", "gluten-free"], ... } */
             tags?: {
                 [key: string]: string[];
@@ -16611,8 +16760,6 @@ export interface components {
             orderableInMultiplesOf?: number;
             /** @enum {string} */
             publishStatus: "draft" | "published" | "archived";
-            /** @enum {string} */
-            seasonality?: "classic" | "seasonal" | "special_offer" | "custom";
             /** @description { "dietary-options": ["vegan", "gluten-free"], ... } */
             tags?: {
                 [key: string]: string[];
@@ -17170,7 +17317,6 @@ export interface components {
             name?: string;
             orderableInMultiplesOf?: number;
             publishStatus?: string;
-            seasonality?: string;
             updatedAt?: string;
             visibility?: string;
             visibleFrom?: string;
@@ -17332,7 +17478,6 @@ export interface components {
             name?: string;
             orderableInMultiplesOf?: number;
             publishStatus?: string;
-            seasonality?: string;
             tags?: components["schemas"]["response.Tag"][];
             updatedAt?: string;
             visibility?: string;

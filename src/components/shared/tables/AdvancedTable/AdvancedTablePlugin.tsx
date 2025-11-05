@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, useEffect, useCallback } from 'react'
+import { useMemo, useState, useEffect, useCallback, useRef } from 'react'
 import {
   flexRender,
   getCoreRowModel,
@@ -21,8 +21,12 @@ import { TableToolbar } from './components/TableToolbar'
 import { TablePagination } from './components/TablePagination'
 import { TableSkeleton } from './components/TableSkeleton'
 import { EditableCell } from './components/EditableCell'
+import { FilterPopover } from './components/FilterPopover'
 import { AngleDownIcon, AngleUpIcon, CheckLineIcon, CloseIcon } from '@/icons'
 import Checkbox from '../../form/input/Checkbox'
+import { useTableData } from './hooks/useTableData'
+import { useTableEditing } from './hooks/useTableEditing'
+import { useTableSelection } from './hooks/useTableSelection'
 import type {
   IDataSource,
   ISchemaProvider,
@@ -96,6 +100,7 @@ export function AdvancedTablePlugin<TRow = any>({
 
   const [total, setTotal] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
+  const [openFilterColumn, setOpenFilterColumn] = useState<string | null>(null)
 
   const handleCellEdit = useCallback(async (rowId: string, columnId: string, value: any) => {
     setEditedRows(prev => ({
@@ -245,7 +250,8 @@ export function AdvancedTablePlugin<TRow = any>({
           const value = context.getValue()
           const row = context.row.original
           const rowId = getRowId(row)
-          const editedValue = editedRows[rowId]?.[col.key as keyof TRow]
+          const meta = context.table.options.meta as any
+          const editedValue = meta?.editedRows?.[rowId]?.[col.key as keyof TRow]
           const displayValue = editedValue !== undefined ? editedValue : value
 
           if (isEditable && features.inlineEditing) {
@@ -269,7 +275,7 @@ export function AdvancedTablePlugin<TRow = any>({
             return (
               <EditableCell
                 value={displayValue}
-                onSave={(newValue) => handleCellEdit(rowId, String(col.key), newValue)}
+                onSave={(newValue) => meta?.handleCellEdit?.(rowId, String(col.key), newValue)}
                 type={editType}
                 options={col.options}
               />
@@ -300,14 +306,60 @@ export function AdvancedTablePlugin<TRow = any>({
     return cols
   }, [baseColumns, features])
 
+  const sortingState = useMemo(() => {
+    return tableState.sorting.map(s => ({
+      id: s.field,
+      desc: s.direction === 'desc',
+    }))
+  }, [tableState.sorting])
+
+  const paginationState = useMemo(() => ({
+    pageIndex: tableState.pagination.page - 1,
+    pageSize: tableState.pagination.pageSize,
+  }), [tableState.pagination.page, tableState.pagination.pageSize])
+
+  const tableMeta = useMemo(() => ({
+    editedRows,
+    handleCellEdit,
+  }), [editedRows, handleCellEdit])
+
+  const previousSelectionRef = useRef<Set<string>>(new Set())
+  const previousStateRef = useRef<Record<string, boolean>>({})
+
   const rowSelectionState = useMemo(() => {
+    const selectionArray = Array.from(tableState.selection).sort()
+    const previousArray = Array.from(previousSelectionRef.current).sort()
+
+    const selectionsEqual =
+      selectionArray.length === previousArray.length &&
+      selectionArray.every((id, i) => id === previousArray[i])
+
+    if (selectionsEqual && previousStateRef.current) {
+      return previousStateRef.current
+    }
+
+    if (tableState.selection.size === 0) {
+      previousSelectionRef.current = tableState.selection
+      previousStateRef.current = {}
+      return {}
+    }
+
     const state: Record<string, boolean> = {}
+    const idToIndexMap = new Map<string, number>()
+
+    data.forEach((row, index) => {
+      idToIndexMap.set(getRowId(row), index)
+    })
+
     tableState.selection.forEach((id) => {
-      const index = data.findIndex(row => getRowId(row) === id)
-      if (index !== -1) {
+      const index = idToIndexMap.get(id)
+      if (index !== undefined) {
         state[index] = true
       }
     })
+
+    previousSelectionRef.current = tableState.selection
+    previousStateRef.current = state
     return state
   }, [tableState.selection, data, getRowId])
 
@@ -324,15 +376,12 @@ export function AdvancedTablePlugin<TRow = any>({
     manualSorting: true,
     manualFiltering: true,
     pageCount: totalPages,
+    autoResetPageIndex: false,
+    autoResetExpanded: false,
+    meta: tableMeta,
     state: {
-      pagination: {
-        pageIndex: tableState.pagination.page - 1,
-        pageSize: tableState.pagination.pageSize,
-      },
-      sorting: tableState.sorting.map(s => ({
-        id: s.field,
-        desc: s.direction === 'desc',
-      })),
+      pagination: paginationState,
+      sorting: sortingState,
       rowSelection: rowSelectionState,
     },
     onPaginationChange: (updater) => {
@@ -384,10 +433,19 @@ export function AdvancedTablePlugin<TRow = any>({
         }
       })
 
-      setTableState(prev => ({
-        ...prev,
-        selection: selectedIds,
-      }))
+      setTableState(prev => {
+        if (prev.selection === selectedIds) return prev
+
+        return {
+          pagination: prev.pagination,
+          sorting: prev.sorting,
+          filters: prev.filters,
+          search: prev.search,
+          selection: selectedIds,
+          expandedRows: prev.expandedRows,
+          editingCells: prev.editingCells,
+        }
+      })
     },
   })
 
@@ -474,37 +532,85 @@ export function AdvancedTablePlugin<TRow = any>({
                       }}
                     >
                       {header.isPlaceholder ? null : (
-                        <div className="flex items-center justify-between w-full">
-                          <div
-                            className={`flex items-center gap-1 ${
-                              header.column.getCanSort() ? 'cursor-pointer select-none' : ''
-                            }`}
-                            onClick={header.column.getToggleSortingHandler()}
-                          >
-                            <p className="font-medium text-gray-700 text-theme-xs dark:text-gray-400">
-                              {flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
+                        <div className="flex flex-col gap-2 w-full">
+                          <div className="flex items-center justify-between w-full">
+                            <div
+                              className={`flex items-center gap-1 ${
+                                header.column.getCanSort() ? 'cursor-pointer select-none' : ''
+                              }`}
+                              onClick={header.column.getToggleSortingHandler()}
+                            >
+                              <p className="font-medium text-gray-700 text-theme-xs dark:text-gray-400">
+                                {flexRender(
+                                  header.column.columnDef.header,
+                                  header.getContext()
+                                )}
+                              </p>
+                              {header.column.getCanSort() && (
+                                <div className="flex flex-col">
+                                  <AngleUpIcon
+                                    className={`w-3 h-3 ${
+                                      header.column.getIsSorted() === 'asc'
+                                        ? 'text-brand-500 dark:text-brand-500'
+                                        : 'text-gray-300 dark:text-gray-700'
+                                    }`}
+                                  />
+                                  <AngleDownIcon
+                                    className={`w-3 h-3 -mt-1 ${
+                                      header.column.getIsSorted() === 'desc'
+                                        ? 'text-brand-500 dark:text-brand-500'
+                                        : 'text-gray-300 dark:text-gray-700'
+                                    }`}
+                                  />
+                                </div>
                               )}
-                            </p>
-                            {header.column.getCanSort() && (
-                              <div className="flex flex-col">
-                                <AngleUpIcon
-                                  className={`w-3 h-3 ${
-                                    header.column.getIsSorted() === 'asc'
-                                      ? 'text-brand-500 dark:text-brand-500'
-                                      : 'text-gray-300 dark:text-gray-700'
-                                  }`}
-                                />
-                                <AngleDownIcon
-                                  className={`w-3 h-3 -mt-1 ${
-                                    header.column.getIsSorted() === 'desc'
-                                      ? 'text-brand-500 dark:text-brand-500'
-                                      : 'text-gray-300 dark:text-gray-700'
-                                  }`}
-                                />
-                              </div>
-                            )}
+                              {header.column.getCanFilter() && features.filtering !== false && (
+                                <div className="relative inline-block ml-2">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      setOpenFilterColumn(
+                                        openFilterColumn === header.column.id ? null : header.column.id
+                                      )
+                                    }}
+                                    className="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 transition-colors"
+                                    title="Filter column"
+                                  >
+                                    <svg
+                                      width="14"
+                                      height="14"
+                                      viewBox="0 0 16 16"
+                                      fill="none"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      className={`${
+                                        header.column.getFilterValue()
+                                          ? 'text-brand-600 dark:text-brand-400'
+                                          : 'text-gray-400 dark:text-gray-500'
+                                      }`}
+                                    >
+                                      <path
+                                        d="M2 3.5H14L9.5 9V13L6.5 14.5V9L2 3.5Z"
+                                        stroke="currentColor"
+                                        strokeWidth="1.2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        fill="none"
+                                      />
+                                    </svg>
+                                  </button>
+                                  {openFilterColumn === header.column.id && (
+                                    <FilterPopover
+                                      column={
+                                        baseColumns.find((col) => String(col.key) === header.column.id)!
+                                      }
+                                      value={header.column.getFilterValue()}
+                                      onFilterChange={(value) => header.column.setFilterValue(value)}
+                                      onClose={() => setOpenFilterColumn(null)}
+                                    />
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       )}
@@ -546,7 +652,7 @@ export function AdvancedTablePlugin<TRow = any>({
                           {isActionsColumn && hasChanges ? (
                             <div className="flex items-center gap-2">
                               <button
-                                className="text-green-500 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
+                                className="text-green-500 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 active:bg-green-100 dark:active:bg-green-900/30"
                                 onClick={(e) => {
                                   e.stopPropagation()
                                   handleSaveRowEdits(rowId)
@@ -556,7 +662,7 @@ export function AdvancedTablePlugin<TRow = any>({
                                 <CheckLineIcon className="w-5 h-5" />
                               </button>
                               <button
-                                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 active:bg-gray-100 dark:active:bg-gray-700"
                                 onClick={(e) => {
                                   e.stopPropagation()
                                   handleCancelRowEdits(rowId)

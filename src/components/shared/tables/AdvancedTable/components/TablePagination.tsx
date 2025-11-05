@@ -118,7 +118,7 @@ export function TablePagination<TData>({
           <button
             onClick={() => table.firstPage()}
             disabled={!canPreviousPage}
-            className="flex items-center justify-center w-9 h-9 rounded-lg border border-gray-300 bg-white text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+            className="flex items-center justify-center min-w-[44px] min-h-[44px] w-11 h-11 rounded-lg border border-gray-300 bg-white text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-800 active:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white dark:active:bg-gray-700"
           >
             <svg
               className="stroke-current"
@@ -145,7 +145,7 @@ export function TablePagination<TData>({
           <button
             onClick={() => table.previousPage()}
             disabled={!canPreviousPage}
-            className="flex items-center justify-center w-9 h-9 rounded-lg border border-gray-300 bg-white text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+            className="flex items-center justify-center min-w-[44px] min-h-[44px] w-11 h-11 rounded-lg border border-gray-300 bg-white text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-800 active:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white dark:active:bg-gray-700"
           >
             <svg
               className="stroke-current"
@@ -169,7 +169,7 @@ export function TablePagination<TData>({
               return (
                 <span
                   key={`ellipsis-${index}`}
-                  className="flex items-center justify-center w-9 h-9 text-gray-500 dark:text-gray-400"
+                  className="flex items-center justify-center min-w-[44px] min-h-[44px] w-11 h-11 text-gray-500 dark:text-gray-400"
                 >
                   ...
                 </span>
@@ -183,10 +183,10 @@ export function TablePagination<TData>({
               <button
                 key={pageNumber}
                 onClick={() => table.setPageIndex(pageNumber)}
-                className={`flex items-center justify-center w-9 h-9 rounded-lg border text-sm font-medium transition-colors ${
+                className={`flex items-center justify-center min-w-[44px] min-h-[44px] w-11 h-11 rounded-lg border text-sm font-medium transition-colors ${
                   isActive
                     ? 'border-brand-500 bg-brand-500 text-white'
-                    : 'border-gray-300 bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white'
+                    : 'border-gray-300 bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-800 active:bg-gray-100 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white dark:active:bg-gray-700'
                 }`}
               >
                 {pageNumber + 1}
@@ -197,7 +197,7 @@ export function TablePagination<TData>({
           <button
             onClick={() => table.nextPage()}
             disabled={!canNextPage}
-            className="flex items-center justify-center w-9 h-9 rounded-lg border border-gray-300 bg-white text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+            className="flex items-center justify-center min-w-[44px] min-h-[44px] w-11 h-11 rounded-lg border border-gray-300 bg-white text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-800 active:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white dark:active:bg-gray-700"
           >
             <svg
               className="stroke-current"
@@ -219,7 +219,7 @@ export function TablePagination<TData>({
           <button
             onClick={() => table.lastPage()}
             disabled={!canNextPage}
-            className="flex items-center justify-center w-9 h-9 rounded-lg border border-gray-300 bg-white text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+            className="flex items-center justify-center min-w-[44px] min-h-[44px] w-11 h-11 rounded-lg border border-gray-300 bg-white text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-800 active:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white dark:active:bg-gray-700"
           >
             <svg
               className="stroke-current"

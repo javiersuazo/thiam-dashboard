@@ -51,17 +51,9 @@ export function EditableCell({
       return
     }
 
-    console.log('💾 EditableCell handleSave:', {
-      valueToSave,
-      finalValue,
-      initialValue,
-      valueType: typeof finalValue
-    })
-
     let cleanValue = finalValue
     if (typeof finalValue === 'object' && finalValue !== null && !Array.isArray(finalValue)) {
       if ('target' in finalValue) {
-        console.error('❌ Attempted to save React event object:', finalValue)
         cleanValue = finalValue.target?.value || finalValue
       }
     }
@@ -189,7 +181,7 @@ export function EditableCell({
             setSelectedItems(Array.isArray(initialValue) ? initialValue : [])
             setEditing(false)
           }} />
-          <div className="absolute left-0 top-0 z-50 min-w-[320px] max-w-[420px] bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg shadow-2xl p-4">
+          <div className="fixed inset-4 sm:absolute sm:left-0 sm:top-0 sm:inset-auto z-50 sm:min-w-[320px] sm:max-w-[420px] w-auto bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg shadow-2xl p-4 max-h-[90vh] overflow-y-auto">
             {/* Selected items display - limited height with scroll */}
             {selectedItems.length > 0 && (
               <div className="mb-3 max-h-24 overflow-y-auto">
@@ -321,8 +313,13 @@ export function EditableCell({
   return (
     <div
       onDoubleClick={() => setEditing(true)}
-      className={`cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 px-3 py-2 -mx-3 -my-2 rounded-lg transition-colors ${className}`}
-      title="Double-click to edit"
+      onClick={(e) => {
+        if ('ontouchstart' in window) {
+          setEditing(true)
+        }
+      }}
+      className={`cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 active:bg-gray-100 dark:active:bg-gray-700 px-3 py-2 -mx-3 -my-2 rounded-lg transition-colors ${className}`}
+      title="Double-click to edit (tap on mobile)"
     >
       <span className="text-gray-900 dark:text-white">
         {displayContent ?? <span className="text-gray-400 dark:text-gray-500">-</span>}

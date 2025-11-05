@@ -32,6 +32,19 @@ export type {
 } from './plugins'
 
 export { ReactQueryTransport } from './adapters'
+export type { IApiClient } from './core/IApiClient'
+
+export {
+  useTableData,
+  useTableEditing,
+  useTableSelection,
+} from './hooks'
+export type {
+  UseTableDataResult,
+  UseTableEditingResult,
+  UseTableEditingOptions,
+  UseTableSelectionResult,
+} from './hooks'
 
 // Clean API (wrapper around AdvancedTableEnhanced)
 export { AdvancedTable, createTableConfig, TablePresets } from './AdvancedTable'

@@ -297,28 +297,6 @@ export default function TableTestPage() {
               }
             },
           },
-          {
-            label: 'Mark as Featured',
-            variant: 'default',
-            onClick: (selectedRows) => {
-              alert(`Marked ${selectedRows.length} products as featured!\n\nProducts: ${selectedRows.map(p => p.name).join(', ')}`)
-            },
-          },
-          {
-            label: 'Update Stock',
-            variant: 'outline',
-            onClick: (selectedRows) => {
-              alert(`Update stock for ${selectedRows.length} products?\n\nProducts: ${selectedRows.map(p => p.name).join(', ')}`)
-            },
-          },
-          {
-            label: 'Export Selected',
-            variant: 'outline',
-            onClick: (selectedRows) => {
-              console.log('Exporting selected rows:', selectedRows)
-              alert(`Exporting ${selectedRows.length} products to CSV...`)
-            },
-          },
         ]}
         getRowId={(row) => row.id}
         onRowClick={(row) => console.log('Row clicked:', row)}
@@ -336,9 +314,9 @@ export default function TableTestPage() {
             <h3 className="font-medium text-gray-900 dark:text-white mb-3">Data Operations</h3>
             <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
               <li>☐ <strong>Sort:</strong> Click column headers (name, price, rating, etc.)</li>
-              <li>☐ <strong>Search:</strong> Type in search box to filter globally</li>
+              <li>☐ <strong>Global Search:</strong> Type in search box to filter globally</li>
+              <li>☐ <strong>Column Filters:</strong> Use filter inputs in each column header</li>
               <li>☐ <strong>Pagination:</strong> Navigate pages, change rows per page</li>
-              <li>☐ <strong>Filter:</strong> Use column-specific filters</li>
             </ul>
           </div>
 
@@ -356,10 +334,10 @@ export default function TableTestPage() {
           <div>
             <h3 className="font-medium text-gray-900 dark:text-white mb-3">Bulk Operations</h3>
             <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+              <li>☐ <strong>Row Selection:</strong> Select multiple rows with checkboxes</li>
               <li>☐ <strong>Bulk Delete:</strong> Select rows → Click &quot;Delete Selected&quot;</li>
-              <li>☐ <strong>Bulk Edit:</strong> Select rows → Click &quot;Mark as Featured&quot;</li>
-              <li>☐ <strong>Bulk Update:</strong> Select rows → Click &quot;Update Stock&quot;</li>
-              <li>☐ <strong>Bulk Export:</strong> Select rows → Click &quot;Export Selected&quot;</li>
+              <li>☐ <strong>Select All:</strong> Click header checkbox to select all on page</li>
+              <li>☐ <strong>Deselect All:</strong> Click header checkbox again to deselect</li>
             </ul>
           </div>
 

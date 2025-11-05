@@ -1,13 +1,15 @@
 import type { ITransport, TransportConfig } from '../core/interfaces'
-import { api } from '@/lib/api'
+import type { IApiClient } from '../core/IApiClient'
 
 export class ReactQueryTransport implements ITransport {
+  constructor(private apiClient: IApiClient) {}
+
   async request<T>(config: TransportConfig): Promise<T> {
     const { method, url, params, data } = config
 
     switch (method) {
       case 'GET': {
-        const { data: response, error } = await api.GET(url as any, {
+        const { data: response, error } = await this.apiClient.GET(url as any, {
           params: { query: params } as any,
         })
         if (error) throw error
@@ -15,7 +17,7 @@ export class ReactQueryTransport implements ITransport {
       }
 
       case 'POST': {
-        const { data: response, error } = await api.POST(url as any, {
+        const { data: response, error } = await this.apiClient.POST(url as any, {
           body: data as any,
         })
         if (error) throw error
@@ -23,7 +25,7 @@ export class ReactQueryTransport implements ITransport {
       }
 
       case 'PUT': {
-        const { data: response, error } = await api.PUT(url as any, {
+        const { data: response, error } = await this.apiClient.PUT(url as any, {
           body: data as any,
         })
         if (error) throw error
@@ -31,7 +33,7 @@ export class ReactQueryTransport implements ITransport {
       }
 
       case 'PATCH': {
-        const { data: response, error } = await api.PATCH(url as any, {
+        const { data: response, error } = await this.apiClient.PATCH(url as any, {
           body: data as any,
         })
         if (error) throw error
@@ -39,7 +41,7 @@ export class ReactQueryTransport implements ITransport {
       }
 
       case 'DELETE': {
-        const { error } = await api.DELETE(url as any, {
+        const { error } = await this.apiClient.DELETE(url as any, {
           body: data as any,
         })
         if (error) throw error

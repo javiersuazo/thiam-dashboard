@@ -47,7 +47,8 @@ export function AdjustmentThread({ adjustment, onAddComment, onResolve }: Adjust
             <p className="text-sm text-gray-700 dark:text-gray-300">{adjustment.changeDescription}</p>
           </div>
           <Badge
-            variant={adjustment.status === 'pending' ? 'warning' : 'success'}
+            variant="light"
+            color={adjustment.status === 'pending' ? 'warning' : 'success'}
             size="sm"
             className="rounded-full flex-shrink-0"
           >

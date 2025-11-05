@@ -63,6 +63,7 @@ export type FieldType =
 export interface SelectOption {
   value: string | number
   label: string
+  translationKey?: string
   disabled?: boolean
 }
 
@@ -80,6 +81,7 @@ export type CellRenderer<TRow = any, TValue = any> = (props: CellRenderProps<TRo
 export interface ColumnDefinition<TRow = any, TValue = any> {
   key: keyof TRow | string
   header: string
+  headerTranslationKey?: string
   type?: FieldType
 
   cell?: CellRenderer<TRow, TValue>
@@ -95,6 +97,8 @@ export interface ColumnDefinition<TRow = any, TValue = any> {
   hidden?: boolean
 
   options?: SelectOption[]
+
+  valueTranslationKey?: string
 
   format?: (value: any) => string
   parse?: (value: string) => any
@@ -126,8 +130,7 @@ export interface TableState {
   filters: Record<string, any>
   search: string
   selection: Set<string>
-  expandedRows: Set<string>
-  editingCells: Map<string, any>
+  columnSizing?: Record<string, number>
 }
 
 export interface TableContext<TRow = any> {
@@ -162,6 +165,39 @@ export interface ITransport {
   request<T>(config: TransportConfig): Promise<T>
 }
 
+export interface TableLabels {
+  show?: string
+  entries?: string
+  showing?: string
+  to?: string
+  of?: string
+  page?: string
+  exportCSV?: string
+  columns?: string
+  manageColumns?: string
+  showAll?: string
+  apply?: string
+  clear?: string
+  cancel?: string
+  saveAllChanges?: string
+  filterBy?: string
+  search?: string
+  searchPlaceholder?: string
+  min?: string
+  max?: string
+  from?: string
+  all?: string
+  yes?: string
+  no?: string
+  selectValue?: string
+  selected?: string
+  availableOptions?: string
+  dragToReorder?: string
+  clearSearch?: string
+}
+
+export type TranslationFunction = (key: string, params?: Record<string, any>) => string
+
 export interface TableFeatures {
   sorting?: boolean
   filtering?: boolean
@@ -183,5 +219,6 @@ export interface TableFeatures {
   }
   columnVisibility?: boolean
   columnReorder?: boolean
+  columnResize?: boolean
   rowExpansion?: boolean
 }

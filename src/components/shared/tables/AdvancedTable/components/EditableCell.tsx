@@ -185,9 +185,9 @@ export function EditableCell({
             {/* Selected items display - limited height with scroll */}
             {selectedItems.length > 0 && (
               <div className="mb-3 max-h-24 overflow-y-auto">
-                <p className="text-xs font-medium text-gray-700 dark:text-gray-400 mb-2">
+                <div className="text-xs font-medium text-gray-700 dark:text-gray-400 mb-2">
                   Selected ({selectedItems.length}):
-                </p>
+                </div>
                 <div className="flex flex-wrap gap-2">
                   {selectedItems.map((itemValue, idx) => {
                     const option = options.find(opt => opt.value === itemValue)
@@ -214,9 +214,9 @@ export function EditableCell({
 
             {/* Available options - scrollable list */}
             <div className="mb-3">
-              <p className="text-xs font-medium text-gray-700 dark:text-gray-400 mb-2">
+              <div className="text-xs font-medium text-gray-700 dark:text-gray-400 mb-2">
                 Available options:
-              </p>
+              </div>
               <div className="max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg">
                 {options.map((option) => (
                   <label

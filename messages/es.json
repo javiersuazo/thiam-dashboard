@@ -800,5 +800,64 @@
       "deleteSuccess": "Ingrediente eliminado correctamente",
       "deleteFailed": "Error al eliminar ingrediente"
     }
+  },
+  "table": {
+    "show": "Mostrar",
+    "entries": "entradas",
+    "showing": "Mostrando",
+    "to": "a",
+    "of": "de",
+    "page": "Página",
+    "exportCSV": "Exportar CSV",
+    "columns": "Columnas",
+    "manageColumns": "Gestionar Columnas",
+    "showAll": "Mostrar Todas",
+    "apply": "Aplicar",
+    "clear": "Limpiar",
+    "cancel": "Cancelar",
+    "saveAllChanges": "Guardar Todos los Cambios",
+    "filterBy": "Filtrar por",
+    "search": "Buscar",
+    "searchPlaceholder": "Buscar...",
+    "min": "Mín",
+    "max": "Máx",
+    "from": "Desde",
+    "all": "Todos",
+    "yes": "Sí",
+    "no": "No",
+    "selectValue": "Seleccionar valor...",
+    "selected": "Seleccionado",
+    "availableOptions": "Opciones disponibles",
+    "dragToReorder": "Arrastra elementos para reordenar columnas",
+    "clearSearch": "Limpiar búsqueda"
+  },
+  "products": {
+    "columns": {
+      "id": "ID",
+      "name": "Nombre del Producto",
+      "category": "Categoría",
+      "status": "Estado",
+      "price": "Precio",
+      "stock": "Inventario",
+      "rating": "Calificación",
+      "createdAt": "Fecha de Creación"
+    }
+  },
+  "categories": {
+    "electronics": "Electrónica",
+    "clothing": "Ropa",
+    "food": "Alimentos",
+    "books": "Libros",
+    "toys": "Juguetes",
+    "sports": "Deportes",
+    "home": "Hogar",
+    "beauty": "Belleza"
+  },
+  "statuses": {
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "pending": "Pendiente",
+    "archived": "Archivado",
+    "draft": "Borrador"
   }
 }

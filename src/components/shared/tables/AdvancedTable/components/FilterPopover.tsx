@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import type { ColumnDefinition, FieldType } from '../core/interfaces'
 import Input from '@/components/shared/form/input/InputField'
 import Select from '@/components/shared/form/Select'
@@ -15,7 +15,47 @@ interface FilterPopoverProps {
 
 export function FilterPopover({ column, value, onFilterChange, onClose }: FilterPopoverProps) {
   const popoverRef = useRef<HTMLDivElement>(null)
-  const [localValue, setLocalValue] = useState(value ?? '')
+
+  const getInitialValue = useCallback(() => {
+    if (value !== undefined && value !== null && value !== '') return value
+
+    if (column.type === 'number' || column.type === 'currency') {
+      return { min: '', max: '' }
+    }
+    if (column.type === 'date' || column.type === 'datetime') {
+      return { from: '', to: '' }
+    }
+    if (column.type === 'multi-select') {
+      return []
+    }
+    return ''
+  }, [value, column.type])
+
+  const [localValue, setLocalValue] = useState(getInitialValue)
+  const [position, setPosition] = useState<{ right?: boolean; left?: boolean }>({})
+
+  useEffect(() => {
+    const newValue = getInitialValue()
+    console.log('🔄 FilterPopover useEffect:', { value, newValue, columnType: column.type })
+    setLocalValue(newValue)
+  }, [getInitialValue])
+
+  useEffect(() => {
+    if (popoverRef.current) {
+      const rect = popoverRef.current.getBoundingClientRect()
+      const viewportWidth = window.innerWidth
+
+      // Check if popover overflows right edge
+      const overflowsRight = rect.right > viewportWidth - 20
+      // Check if there's enough space on the left
+      const spaceOnLeft = rect.left > 280
+
+      setPosition({
+        right: overflowsRight && spaceOnLeft,
+        left: !overflowsRight || !spaceOnLeft,
+      })
+    }
+  }, [])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -29,13 +69,53 @@ export function FilterPopover({ column, value, onFilterChange, onClose }: Filter
   }, [onClose])
 
   const handleApply = () => {
-    onFilterChange(localValue)
+    let valueToApply = localValue
+
+    if (column.type === 'number' || column.type === 'currency') {
+      const min = localValue?.min !== '' ? Number(localValue.min) : undefined
+      const max = localValue?.max !== '' ? Number(localValue.max) : undefined
+
+      if (min === undefined && max === undefined) {
+        valueToApply = undefined
+      } else {
+        valueToApply = { min, max }
+      }
+    } else if (column.type === 'date' || column.type === 'datetime') {
+      const from = localValue?.from !== '' ? localValue.from : undefined
+      const to = localValue?.to !== '' ? localValue.to : undefined
+
+      if (from === undefined && to === undefined) {
+        valueToApply = undefined
+      } else {
+        valueToApply = { from, to }
+      }
+    } else if (column.type === 'multi-select') {
+      if (Array.isArray(localValue) && localValue.length === 0) {
+        valueToApply = undefined
+      }
+    } else {
+      if (localValue === '' || localValue === null) {
+        valueToApply = undefined
+      }
+    }
+
+    onFilterChange(valueToApply)
     onClose()
   }
 
   const handleClear = () => {
-    setLocalValue('')
-    onFilterChange('')
+    let clearValue: any = ''
+
+    if (column.type === 'number' || column.type === 'currency') {
+      clearValue = { min: '', max: '' }
+    } else if (column.type === 'date' || column.type === 'datetime') {
+      clearValue = { from: '', to: '' }
+    } else if (column.type === 'multi-select') {
+      clearValue = []
+    }
+
+    setLocalValue(clearValue)
+    onFilterChange(undefined)
     onClose()
   }
 
@@ -64,11 +144,11 @@ export function FilterPopover({ column, value, onFilterChange, onClose }: Filter
             <label className="text-xs font-medium text-gray-700 dark:text-gray-400">
               Filter by {column.header}
             </label>
-            <div className="max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg">
+            <div className="max-h-40 md:max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg">
               {column.options?.map((option) => (
                 <label
                   key={option.value}
-                  className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-100 dark:border-gray-800 last:border-b-0"
+                  className="flex items-center gap-2 px-2 py-1.5 md:px-3 md:py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-100 dark:border-gray-800 last:border-b-0"
                 >
                   <Checkbox
                     checked={Array.isArray(localValue) && localValue.includes(option.value)}
@@ -177,21 +257,23 @@ export function FilterPopover({ column, value, onFilterChange, onClose }: Filter
   return (
     <div
       ref={popoverRef}
-      className="absolute top-full left-0 mt-1 z-50 min-w-[280px] bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg shadow-2xl p-4"
+      className={`absolute top-full mt-1 z-50 w-64 md:min-w-[280px] bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg shadow-2xl p-3 md:p-4 ${
+        position.right ? 'right-0' : 'left-0'
+      }`}
       onClick={(e) => e.stopPropagation()}
     >
       {renderFilterInput()}
 
-      <div className="flex gap-2 mt-4 pt-3 border-t border-gray-200 dark:border-gray-800">
+      <div className="flex gap-2 mt-3 md:mt-4 pt-2 md:pt-3 border-t border-gray-200 dark:border-gray-800">
         <button
           onClick={handleClear}
-          className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 min-h-[44px]"
+          className="flex-1 px-2 py-2 md:px-3 text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 min-h-[40px] md:min-h-[44px]"
         >
           Clear
         </button>
         <button
           onClick={handleApply}
-          className="flex-1 px-3 py-2 text-sm font-medium text-white bg-brand-500 rounded-lg hover:bg-brand-600 min-h-[44px]"
+          className="flex-1 px-2 py-2 md:px-3 text-xs md:text-sm font-medium text-white bg-brand-500 rounded-lg hover:bg-brand-600 min-h-[40px] md:min-h-[44px]"
         >
           Apply
         </button>

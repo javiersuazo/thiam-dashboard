@@ -135,7 +135,7 @@ export function ColumnVisibilityDropdown<TData>({
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="dropdown-toggle inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
+        className="inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-gray-700 bg-white rounded-lg transition ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03] dark:hover:text-gray-300"
       >
         <svg
           className="fill-current"
@@ -158,7 +158,7 @@ export function ColumnVisibilityDropdown<TData>({
             fill="currentColor"
           />
         </svg>
-        Columns
+        <span>Columns</span>
         <span className="text-xs text-gray-500 dark:text-gray-400">
           ({visibleCount}/{orderedColumns.length})
         </span>

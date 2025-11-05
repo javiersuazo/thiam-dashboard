@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import {
   AdvancedTablePlugin,
   MockDataSource,
@@ -12,6 +12,7 @@ import {
 import Badge from '@/components/shared/ui/badge/Badge'
 import { TrashBinIcon, PencilIcon, EyeIcon } from '@/icons'
 import { Button } from '@/components/shared/ui/button'
+import { useTableTranslations } from '@/lib/table-i18n'
 
 interface Product {
   id: string
@@ -24,13 +25,14 @@ interface Product {
   tags: string[]
 }
 
+const categoryKeys = ['electronics', 'clothing', 'food', 'books', 'toys']
 const categories = ['Electronics', 'Clothing', 'Food', 'Books', 'Toys']
 const allTags = ['New', 'Popular', 'Sale', 'Featured', 'Limited Edition', 'Bestseller']
 
 function generateProduct(id: number): Product {
   const products = ['Laptop', 'Phone', 'Tablet', 'Headphones', 'Watch', 'Camera', 'Speaker', 'Monitor']
   const name = `${products[id % products.length]} ${id > 8 ? id : ''}`
-  const category = categories[id % categories.length]
+  const category = categoryKeys[id % categoryKeys.length]
   const price = 50 + (id % 10) * 100
   const inStock = id % 3 !== 0
   const rating = 3 + (id % 3)
@@ -56,10 +58,13 @@ function generateProduct(id: number): Product {
 const mockProducts: Product[] = Array.from({ length: 50 }, (_, i) => generateProduct(i + 1))
 
 export default function TableTestPage() {
-  const productColumns: ColumnDefinition<Product, any>[] = [
+  const { translateColumn, translateValue, getTableLabels } = useTableTranslations()
+
+  const productColumns: ColumnDefinition<Product, any>[] = useMemo(() => [
     {
       key: 'name',
       header: 'Product Name',
+      headerTranslationKey: 'products.columns.name',
       type: 'text',
       sortable: true,
       filterable: true,
@@ -70,17 +75,24 @@ export default function TableTestPage() {
     {
       key: 'category',
       header: 'Category',
+      headerTranslationKey: 'products.columns.category',
       type: 'select',
       sortable: true,
       filterable: true,
-      options: categories.map(cat => ({ label: cat, value: cat })),
+      valueTranslationKey: 'categories',
+      options: categoryKeys.map((key, idx) => ({
+        value: key,
+        label: categories[idx],
+        translationKey: `categories.${key}`
+      })),
       cell: ({ value }: CellRenderProps<Product, string>) => (
-        <Badge size="sm" color="default">{value}</Badge>
+        <Badge size="sm" color="default">{translateValue(value, 'categories')}</Badge>
       ),
     } as ColumnDefinition<Product, string>,
     {
       key: 'price',
       header: 'Price',
+      headerTranslationKey: 'products.columns.price',
       type: 'currency',
       sortable: true,
       filterable: true,
@@ -98,6 +110,7 @@ export default function TableTestPage() {
     {
       key: 'inStock',
       header: 'In Stock',
+      headerTranslationKey: 'products.columns.stock',
       type: 'boolean',
       sortable: true,
       filterable: true,
@@ -111,6 +124,7 @@ export default function TableTestPage() {
     {
       key: 'rating',
       header: 'Rating',
+      headerTranslationKey: 'products.columns.rating',
       type: 'number',
       sortable: true,
       filterable: true,
@@ -125,6 +139,7 @@ export default function TableTestPage() {
     {
       key: 'launchDate',
       header: 'Launch Date',
+      headerTranslationKey: 'products.columns.createdAt',
       type: 'date',
       sortable: true,
       filterable: true,
@@ -198,7 +213,13 @@ export default function TableTestPage() {
         </div>
       ),
     } as ColumnDefinition<Product, unknown>,
-  ]
+  ], [translateValue])
+
+  const translatedColumns = useMemo(() => {
+    return productColumns.map(translateColumn)
+  }, [productColumns, translateColumn])
+
+  const labels = getTableLabels
 
   const mockDataSource = new MockDataSource({
     data: mockProducts,
@@ -212,7 +233,7 @@ export default function TableTestPage() {
     defaultData: mockProducts,
   })
 
-  const schemaProvider = new ManualSchemaProvider(productColumns)
+  const schemaProvider = new ManualSchemaProvider(translatedColumns)
 
   return (
     <div className="p-4 md:p-6 2xl:p-10">
@@ -227,23 +248,24 @@ export default function TableTestPage() {
 
       <div className="mb-4 p-4 bg-brand-50 dark:bg-brand-900/20 rounded-lg border border-brand-200 dark:border-brand-800">
         <h3 className="font-medium text-brand-900 dark:text-brand-300 mb-2">
-          🎯 Complete Feature Set
+          🎯 Complete Feature Set + i18n Support
         </h3>
         <p className="text-sm text-brand-800 dark:text-brand-400 mb-3">
-          This example demonstrates EVERY feature available in the plugin architecture:
+          This example demonstrates EVERY feature + full internationalization:
         </p>
         <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 text-sm text-brand-800 dark:text-brand-400">
+          <li>✓ <strong>i18n Ready</strong> - Full translation support (change locale!)</li>
+          <li>✓ <strong>Translated Data</strong> - Category values auto-translate</li>
           <li>✓ <strong>Row Selection</strong> - Checkboxes with select all</li>
           <li>✓ <strong>Bulk Actions</strong> - Delete, Edit, Update selected rows</li>
           <li>✓ <strong>Inline Editing</strong> - Text, Select, Checkbox, Multi-Select</li>
           <li>✓ <strong>Sorting</strong> - Click column headers</li>
           <li>✓ <strong>Global Search</strong> - Search across all columns</li>
+          <li>✓ <strong>Filtering</strong> - Per-column filters with ranges</li>
           <li>✓ <strong>Pagination</strong> - Navigate pages, change size</li>
           <li>✓ <strong>Export</strong> - Download as CSV</li>
-          <li>✓ <strong>Column Visibility</strong> - Show/hide columns</li>
-          <li>✓ <strong>Action Column</strong> - View/Edit/Delete per row</li>
-          <li>✓ <strong>Yellow Highlight</strong> - Edited rows</li>
-          <li>✓ <strong>Save/Cancel</strong> - Per row or bulk save</li>
+          <li>✓ <strong>Column Visibility</strong> - Show/hide/reorder columns</li>
+          <li>✓ <strong>Column Resizing</strong> - Drag column edges to resize</li>
           <li>✓ <strong>Dark Mode</strong> - Full theme support</li>
         </ul>
       </div>
@@ -251,6 +273,7 @@ export default function TableTestPage() {
       <AdvancedTablePlugin
         dataSource={mockDataSource}
         schemaProvider={schemaProvider}
+        labels={labels}
         features={{
           sorting: true,
           filtering: true,
@@ -265,6 +288,7 @@ export default function TableTestPage() {
           },
           inlineEditing: true,
           columnVisibility: true,
+          columnResize: true,
           export: true,
         }}
         editableColumns={['name', 'category', 'price', 'inStock', 'rating', 'tags']}

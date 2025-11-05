@@ -4,6 +4,7 @@ import type { IDataSource, DataSourceParams, TableState } from '../core/interfac
 export interface UseTableDataResult<TRow> {
   data: TRow[]
   total: number
+  totalPages: number
   isLoading: boolean
   error: Error | null
   refetch: () => Promise<void>
@@ -15,6 +16,7 @@ export function useTableData<TRow>(
 ): UseTableDataResult<TRow> {
   const [data, setData] = useState<TRow[]>([])
   const [total, setTotal] = useState(0)
+  const [totalPages, setTotalPages] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
@@ -34,10 +36,12 @@ export function useTableData<TRow>(
 
       setData(result.data)
       setTotal(result.total)
+      setTotalPages(result.totalPages)
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch data'))
       setData([])
       setTotal(0)
+      setTotalPages(0)
     } finally {
       setIsLoading(false)
     }
@@ -56,6 +60,7 @@ export function useTableData<TRow>(
   return {
     data,
     total,
+    totalPages,
     isLoading,
     error,
     refetch: fetchData,

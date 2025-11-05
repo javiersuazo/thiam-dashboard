@@ -1,14 +1,7 @@
 'use client'
 
-import { useMemo, useState, useEffect, useCallback, useRef } from 'react'
-import {
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from '@tanstack/react-table'
+import { useMemo, useState, useEffect, useCallback } from 'react'
+import { flexRender } from '@tanstack/react-table'
 import {
   Table,
   TableBody,
@@ -20,13 +13,13 @@ import {
 import { TableToolbar } from './components/TableToolbar'
 import { TablePagination } from './components/TablePagination'
 import { TableSkeleton } from './components/TableSkeleton'
-import { EditableCell } from './components/EditableCell'
-import { FilterPopover } from './components/FilterPopover'
-import { AngleDownIcon, AngleUpIcon, CheckLineIcon, CloseIcon } from '@/icons'
-import Checkbox from '../../form/input/Checkbox'
+import { TableHeaderCell } from './components/TableHeaderCell'
+import { TableDataCell } from './components/TableDataCell'
 import { useTableData } from './hooks/useTableData'
 import { useTableEditing } from './hooks/useTableEditing'
 import { useTableSelection } from './hooks/useTableSelection'
+import { useTableColumns } from './hooks/useTableColumns'
+import { useTableConfiguration } from './hooks/useTableConfiguration'
 import type {
   IDataSource,
   ISchemaProvider,
@@ -79,11 +72,6 @@ export function AdvancedTablePlugin<TRow = any>({
   onCancelAll,
   getRowClassName,
 }: AdvancedTablePluginProps<TRow>) {
-  const [data, setData] = useState<TRow[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<Error | null>(null)
-  const [editedRows, setEditedRows] = useState<Record<string, Partial<TRow>>>({})
-
   const [tableState, setTableState] = useState<TableState>({
     pagination: {
       page: 1,
@@ -94,108 +82,47 @@ export function AdvancedTablePlugin<TRow = any>({
     filters: {},
     search: '',
     selection: new Set<string>(),
-    expandedRows: new Set<string>(),
-    editingCells: new Map<string, any>(),
   })
 
-  const [total, setTotal] = useState(0)
-  const [totalPages, setTotalPages] = useState(0)
   const [openFilterColumn, setOpenFilterColumn] = useState<string | null>(null)
 
-  const handleCellEdit = useCallback(async (rowId: string, columnId: string, value: any) => {
-    setEditedRows(prev => ({
-      ...prev,
-      [rowId]: {
-        ...prev[rowId],
-        [columnId]: value
-      }
-    }))
+  const { data, total, totalPages, isLoading, error } = useTableData(dataSource, tableState)
 
-    if (onCellEdit) {
-      await onCellEdit(rowId, columnId, value)
-    }
-  }, [onCellEdit])
+  const {
+    editedRows,
+    hasEdits,
+    handleCellEdit,
+    handleSaveRowEdits,
+    handleCancelRowEdits,
+    handleSaveAllEdits,
+    handleCancelAllEdits,
+  } = useTableEditing<TRow>({
+    onCellEdit,
+    onSaveRow,
+    onCancelRow,
+    onSaveAll,
+    onCancelAll,
+  })
 
-  const handleSaveRowEdits = useCallback(async (rowId: string) => {
-    const changes = editedRows[rowId]
-    if (!changes) return
-
-    if (onSaveRow) {
-      await onSaveRow(rowId, changes)
-    }
-
-    setEditedRows(prev => {
-      const newEdited = { ...prev }
-      delete newEdited[rowId]
-      return newEdited
-    })
-  }, [editedRows, onSaveRow])
-
-  const handleCancelRowEdits = useCallback((rowId: string) => {
-    if (onCancelRow) {
-      onCancelRow(rowId)
-    }
-
-    setEditedRows(prev => {
-      const newEdited = { ...prev }
-      delete newEdited[rowId]
-      return newEdited
-    })
-  }, [onCancelRow])
-
-  const handleSaveAllEdits = useCallback(async () => {
-    if (onSaveAll) {
-      await onSaveAll(editedRows)
-    }
-    setEditedRows({})
-  }, [editedRows, onSaveAll])
-
-  const handleCancelAllEdits = useCallback(() => {
-    if (onCancelAll) {
-      onCancelAll()
-    }
-    setEditedRows({})
-  }, [onCancelAll])
+  const { rowSelectionState, handleRowSelectionChange } = useTableSelection(tableState, data, getRowId)
 
   const baseColumns = useMemo(() => {
     return schemaProvider.getColumns()
   }, [schemaProvider])
 
-  const fetchData = useCallback(async () => {
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      const params: DataSourceParams = {
-        pagination: tableState.pagination,
-        sorting: tableState.sorting,
-        filters: tableState.filters,
-        search: tableState.search,
-      }
-
-      const result = await dataSource.fetch(params)
-
-      setData(result.data)
-      setTotal(result.total)
-      setTotalPages(result.totalPages)
-    } catch (err) {
-      setError(err as Error)
-      console.error('Failed to fetch data:', err)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [dataSource, tableState])
-
-  useEffect(() => {
-    fetchData()
-  }, [fetchData])
+  const tanstackColumns = useTableColumns({
+    baseColumns,
+    features,
+    editableColumns,
+    getRowId,
+  })
 
   useEffect(() => {
     plugins.forEach(plugin => {
       plugin.onInit?.({
         data,
         state: tableState,
-        columns,
+        columns: baseColumns,
         getRowId,
       })
     })
@@ -207,246 +134,18 @@ export function AdvancedTablePlugin<TRow = any>({
     })
   }, [data, plugins])
 
-  const tanstackColumns = useMemo(() => {
-    const cols = []
-
-    if (features.rowSelection) {
-      const multiple = typeof features.rowSelection === 'object'
-        ? features.rowSelection.multiple !== false
-        : true
-
-      cols.push({
-        id: 'select',
-        header: ({ table }: any) => (
-          <Checkbox
-            checked={table.getIsAllPageRowsSelected()}
-            onChange={(checked) => {
-              table.toggleAllPageRowsSelected(checked)
-            }}
-          />
-        ),
-        cell: ({ row }: any) => (
-          <Checkbox
-            checked={row.getIsSelected()}
-            onChange={(checked) => {
-              row.toggleSelected(checked)
-            }}
-          />
-        ),
-        size: 50,
-        enableSorting: false,
-        enableColumnFilter: false,
-      })
-    }
-
-    baseColumns.forEach(col => {
-      const isEditable = editableColumns.includes(String(col.key))
-
-      cols.push({
-        id: String(col.key),
-        accessorKey: String(col.key),
-        header: col.header,
-        cell: (context: any) => {
-          const value = context.getValue()
-          const row = context.row.original
-          const rowId = getRowId(row)
-          const meta = context.table.options.meta as any
-          const editedValue = meta?.editedRows?.[rowId]?.[col.key as keyof TRow]
-          const displayValue = editedValue !== undefined ? editedValue : value
-
-          if (isEditable && features.inlineEditing) {
-            const fieldType = col.type
-            let editType: 'text' | 'number' | 'select' | 'multiselect' | 'date' | 'datetime' | 'checkbox' = 'text'
-
-            if (fieldType === 'boolean') {
-              editType = 'checkbox'
-            } else if (fieldType === 'select') {
-              editType = 'select'
-            } else if (fieldType === 'multi-select') {
-              editType = 'multiselect'
-            } else if (fieldType === 'number' || fieldType === 'currency') {
-              editType = 'number'
-            } else if (fieldType === 'date') {
-              editType = 'date'
-            } else if (fieldType === 'datetime') {
-              editType = 'datetime'
-            }
-
-            return (
-              <EditableCell
-                value={displayValue}
-                onSave={(newValue) => meta?.handleCellEdit?.(rowId, String(col.key), newValue)}
-                type={editType}
-                options={col.options}
-              />
-            )
-          }
-
-          if (col.cell) {
-            return col.cell({
-              value: displayValue,
-              row,
-              column: col,
-              rowIndex: context.row.index,
-            })
-          }
-
-          if (col.format) return col.format(displayValue)
-          if (displayValue === null || displayValue === undefined) return '-'
-          return String(displayValue)
-        },
-        enableSorting: col.sortable !== false && features.sorting !== false,
-        enableColumnFilter: col.filterable !== false && features.filtering !== false,
-        size: typeof col.width === 'number' ? col.width : undefined,
-        minSize: col.minWidth,
-        maxSize: col.maxWidth,
-      })
-    })
-
-    return cols
-  }, [baseColumns, features])
-
-  const sortingState = useMemo(() => {
-    return tableState.sorting.map(s => ({
-      id: s.field,
-      desc: s.direction === 'desc',
-    }))
-  }, [tableState.sorting])
-
-  const paginationState = useMemo(() => ({
-    pageIndex: tableState.pagination.page - 1,
-    pageSize: tableState.pagination.pageSize,
-  }), [tableState.pagination.page, tableState.pagination.pageSize])
-
-  const tableMeta = useMemo(() => ({
-    editedRows,
-    handleCellEdit,
-  }), [editedRows, handleCellEdit])
-
-  const previousSelectionRef = useRef<Set<string>>(new Set())
-  const previousStateRef = useRef<Record<string, boolean>>({})
-
-  const rowSelectionState = useMemo(() => {
-    const selectionArray = Array.from(tableState.selection).sort()
-    const previousArray = Array.from(previousSelectionRef.current).sort()
-
-    const selectionsEqual =
-      selectionArray.length === previousArray.length &&
-      selectionArray.every((id, i) => id === previousArray[i])
-
-    if (selectionsEqual && previousStateRef.current) {
-      return previousStateRef.current
-    }
-
-    if (tableState.selection.size === 0) {
-      previousSelectionRef.current = tableState.selection
-      previousStateRef.current = {}
-      return {}
-    }
-
-    const state: Record<string, boolean> = {}
-    const idToIndexMap = new Map<string, number>()
-
-    data.forEach((row, index) => {
-      idToIndexMap.set(getRowId(row), index)
-    })
-
-    tableState.selection.forEach((id) => {
-      const index = idToIndexMap.get(id)
-      if (index !== undefined) {
-        state[index] = true
-      }
-    })
-
-    previousSelectionRef.current = tableState.selection
-    previousStateRef.current = state
-    return state
-  }, [tableState.selection, data, getRowId])
-
-  const table = useReactTable({
+  const table = useTableConfiguration({
     data,
     columns: tanstackColumns,
-    getRowId: (row, index) => getRowId(row),
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: features.filtering !== false ? getFilteredRowModel() : undefined,
-    getSortedRowModel: features.sorting !== false ? getSortedRowModel() : undefined,
-    getPaginationRowModel: features.pagination !== false ? getPaginationRowModel() : undefined,
-    enableRowSelection: features.rowSelection !== false,
-    manualPagination: true,
-    manualSorting: true,
-    manualFiltering: true,
-    pageCount: totalPages,
-    autoResetPageIndex: false,
-    autoResetExpanded: false,
-    meta: tableMeta,
-    state: {
-      pagination: paginationState,
-      sorting: sortingState,
-      rowSelection: rowSelectionState,
-    },
-    onPaginationChange: (updater) => {
-      setTableState(prev => {
-        const newPagination = typeof updater === 'function'
-          ? updater({ pageIndex: prev.pagination.page - 1, pageSize: prev.pagination.pageSize })
-          : updater
-
-        return {
-          ...prev,
-          pagination: {
-            page: newPagination.pageIndex + 1,
-            pageSize: newPagination.pageSize,
-          }
-        }
-      })
-    },
-    onSortingChange: (updater) => {
-      setTableState(prev => {
-        const currentSorting = prev.sorting.map(s => ({
-          id: s.field,
-          desc: s.direction === 'desc',
-        }))
-
-        const newSorting = typeof updater === 'function'
-          ? updater(currentSorting)
-          : updater
-
-        return {
-          ...prev,
-          sorting: newSorting.map(s => ({
-            field: s.id,
-            direction: s.desc ? 'desc' : 'asc',
-          }))
-        }
-      })
-    },
-    onRowSelectionChange: (updater) => {
-      const currentSelection = rowSelectionState
-      const newSelection = typeof updater === 'function'
-        ? updater(currentSelection)
-        : updater
-
-      const selectedIds = new Set<string>()
-      Object.keys(newSelection).forEach((indexStr) => {
-        const index = parseInt(indexStr, 10)
-        if (newSelection[indexStr] && data[index]) {
-          selectedIds.add(getRowId(data[index]))
-        }
-      })
-
-      setTableState(prev => {
-        if (prev.selection === selectedIds) return prev
-
-        return {
-          pagination: prev.pagination,
-          sorting: prev.sorting,
-          filters: prev.filters,
-          search: prev.search,
-          selection: selectedIds,
-          expandedRows: prev.expandedRows,
-          editingCells: prev.editingCells,
-        }
-      })
-    },
+    features,
+    totalPages,
+    tableState,
+    setTableState,
+    rowSelectionState,
+    handleRowSelectionChange,
+    editedRows,
+    handleCellEdit,
+    getRowId,
   })
 
   const handleSearch = useCallback((value: string) => {
@@ -484,7 +183,6 @@ export function AdvancedTablePlugin<TRow = any>({
 
   const startIndex = (tableState.pagination.page - 1) * tableState.pagination.pageSize
   const endIndex = Math.min(startIndex + tableState.pagination.pageSize, total)
-  const hasEdits = Object.keys(editedRows).length > 0
 
   return (
     <div className={`overflow-hidden bg-white dark:bg-white/[0.03] rounded-xl ${className}`}>
@@ -518,105 +216,22 @@ export function AdvancedTablePlugin<TRow = any>({
           </div>
         )}
 
-        <Table>
+        <Table style={{ width: table.getTotalSize() }}>
           <TableHeader className="border-t border-gray-100 dark:border-white/[0.05] sticky top-0 z-10 bg-white dark:bg-white/[0.03]">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead
-                      key={header.id}
-                      className="px-4 py-3 border border-gray-100 dark:border-white/[0.05]"
-                      style={{
-                        width: header.getSize(),
-                      }}
-                    >
-                      {header.isPlaceholder ? null : (
-                        <div className="flex flex-col gap-2 w-full">
-                          <div className="flex items-center justify-between w-full">
-                            <div
-                              className={`flex items-center gap-1 ${
-                                header.column.getCanSort() ? 'cursor-pointer select-none' : ''
-                              }`}
-                              onClick={header.column.getToggleSortingHandler()}
-                            >
-                              <p className="font-medium text-gray-700 text-theme-xs dark:text-gray-400">
-                                {flexRender(
-                                  header.column.columnDef.header,
-                                  header.getContext()
-                                )}
-                              </p>
-                              {header.column.getCanSort() && (
-                                <div className="flex flex-col">
-                                  <AngleUpIcon
-                                    className={`w-3 h-3 ${
-                                      header.column.getIsSorted() === 'asc'
-                                        ? 'text-brand-500 dark:text-brand-500'
-                                        : 'text-gray-300 dark:text-gray-700'
-                                    }`}
-                                  />
-                                  <AngleDownIcon
-                                    className={`w-3 h-3 -mt-1 ${
-                                      header.column.getIsSorted() === 'desc'
-                                        ? 'text-brand-500 dark:text-brand-500'
-                                        : 'text-gray-300 dark:text-gray-700'
-                                    }`}
-                                  />
-                                </div>
-                              )}
-                              {header.column.getCanFilter() && features.filtering !== false && (
-                                <div className="relative inline-block ml-2">
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      setOpenFilterColumn(
-                                        openFilterColumn === header.column.id ? null : header.column.id
-                                      )
-                                    }}
-                                    className="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 transition-colors"
-                                    title="Filter column"
-                                  >
-                                    <svg
-                                      width="14"
-                                      height="14"
-                                      viewBox="0 0 16 16"
-                                      fill="none"
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      className={`${
-                                        header.column.getFilterValue()
-                                          ? 'text-brand-600 dark:text-brand-400'
-                                          : 'text-gray-400 dark:text-gray-500'
-                                      }`}
-                                    >
-                                      <path
-                                        d="M2 3.5H14L9.5 9V13L6.5 14.5V9L2 3.5Z"
-                                        stroke="currentColor"
-                                        strokeWidth="1.2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        fill="none"
-                                      />
-                                    </svg>
-                                  </button>
-                                  {openFilterColumn === header.column.id && (
-                                    <FilterPopover
-                                      column={
-                                        baseColumns.find((col) => String(col.key) === header.column.id)!
-                                      }
-                                      value={header.column.getFilterValue()}
-                                      onFilterChange={(value) => header.column.setFilterValue(value)}
-                                      onClose={() => setOpenFilterColumn(null)}
-                                    />
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </TableHead>
-                  )
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHeaderCell
+                    key={header.id}
+                    header={header}
+                    features={features}
+                    baseColumns={baseColumns}
+                    tableState={tableState}
+                    setTableState={setTableState}
+                    openFilterColumn={openFilterColumn}
+                    setOpenFilterColumn={setOpenFilterColumn}
+                  />
+                ))}
               </TableRow>
             ))}
           </TableHeader>
@@ -627,57 +242,28 @@ export function AdvancedTablePlugin<TRow = any>({
               rows.map((row) => {
                 const rowId = getRowId(row.original)
                 const hasChanges = !!editedRows[rowId]
-                const rowClass = hasChanges
+                const editClass = hasChanges
                   ? 'bg-yellow-50 dark:bg-yellow-900/10'
                   : ''
+                const customClass = getRowClassName?.(row.original) || ''
 
                 return (
                   <TableRow
                     key={row.id}
                     data-state={tableState.selection.has(rowId) && 'selected'}
                     onClick={() => onRowClick?.(row.original)}
-                    className={`${onRowClick ? 'cursor-pointer' : ''} ${rowClass}`.trim()}
+                    className={`${onRowClick ? 'cursor-pointer' : ''} ${editClass} ${customClass}`.trim()}
                   >
-                    {row.getVisibleCells().map((cell) => {
-                      const isActionsColumn = cell.column.id === 'actions'
-
-                      return (
-                        <TableCell
-                          key={cell.id}
-                          className="px-4 py-3 border border-gray-100 dark:border-white/[0.05] text-theme-sm"
-                          style={{
-                            width: cell.column.getSize(),
-                          }}
-                        >
-                          {isActionsColumn && hasChanges ? (
-                            <div className="flex items-center gap-2">
-                              <button
-                                className="text-green-500 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 active:bg-green-100 dark:active:bg-green-900/30"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleSaveRowEdits(rowId)
-                                }}
-                                title="Save changes"
-                              >
-                                <CheckLineIcon className="w-5 h-5" />
-                              </button>
-                              <button
-                                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 active:bg-gray-100 dark:active:bg-gray-700"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleCancelRowEdits(rowId)
-                                }}
-                                title="Cancel changes"
-                              >
-                                <CloseIcon className="w-5 h-5" />
-                              </button>
-                            </div>
-                          ) : (
-                            flexRender(cell.column.columnDef.cell, cell.getContext())
-                          )}
-                        </TableCell>
-                      )
-                    })}
+                    {row.getVisibleCells().map((cell) => (
+                      <TableDataCell
+                        key={cell.id}
+                        cell={cell}
+                        hasChanges={hasChanges}
+                        rowId={rowId}
+                        handleSaveRowEdits={handleSaveRowEdits}
+                        handleCancelRowEdits={handleCancelRowEdits}
+                      />
+                    ))}
                   </TableRow>
                 )
               })

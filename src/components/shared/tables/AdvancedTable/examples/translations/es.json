@@ -1,0 +1,62 @@
+{
+  "table": {
+    "show": "Mostrar",
+    "entries": "entradas",
+    "showing": "Mostrando",
+    "to": "a",
+    "of": "de",
+    "page": "Página",
+    "exportCSV": "Exportar CSV",
+    "columns": "Columnas",
+    "manageColumns": "Gestionar Columnas",
+    "showAll": "Mostrar Todo",
+    "apply": "Aplicar",
+    "clear": "Limpiar",
+    "cancel": "Cancelar",
+    "saveAllChanges": "Guardar Todos los Cambios",
+    "filterBy": "Filtrar por",
+    "search": "Buscar",
+    "searchPlaceholder": "Buscar...",
+    "min": "Mín",
+    "max": "Máx",
+    "from": "Desde",
+    "to": "Hasta",
+    "all": "Todos",
+    "yes": "Sí",
+    "no": "No",
+    "selectValue": "Seleccionar valor...",
+    "selected": "Seleccionado",
+    "availableOptions": "Opciones disponibles",
+    "dragToReorder": "💡 Arrastra los elementos para reordenar columnas",
+    "clearSearch": "Limpiar búsqueda"
+  },
+  "products": {
+    "columns": {
+      "id": "ID",
+      "name": "Nombre del Producto",
+      "category": "Categoría",
+      "status": "Estado",
+      "price": "Precio",
+      "stock": "Inventario",
+      "rating": "Calificación",
+      "createdAt": "Fecha de Creación"
+    }
+  },
+  "categories": {
+    "electronics": "Electrónica",
+    "clothing": "Ropa",
+    "food": "Alimentos y Bebidas",
+    "books": "Libros",
+    "toys": "Juguetes y Juegos",
+    "sports": "Deportes y Aire Libre",
+    "home": "Hogar y Jardín",
+    "beauty": "Salud y Belleza"
+  },
+  "statuses": {
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "pending": "Pendiente de Aprobación",
+    "archived": "Archivado",
+    "draft": "Borrador"
+  }
+}

@@ -47,7 +47,34 @@ export class MockDataSource<TRow = any> implements IDataSource<TRow> {
         return Object.entries(params.filters!).every(([key, value]) => {
           const rowValue = (row as any)[key]
           if (value === undefined || value === null || value === '') return true
-          return String(rowValue) === String(value)
+
+          // Handle numeric range filters (e.g., {min: 1, max: 100})
+          if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+            if ('min' in value || 'max' in value) {
+              const numValue = Number(rowValue)
+              if (value.min !== undefined && numValue < Number(value.min)) return false
+              if (value.max !== undefined && numValue > Number(value.max)) return false
+              return true
+            }
+            // Handle date range filters (e.g., {from: '2024-01-01', to: '2024-12-31'})
+            if ('from' in value || 'to' in value) {
+              const dateValue = new Date(rowValue).getTime()
+              if (value.from && dateValue < new Date(value.from).getTime()) return false
+              if (value.to && dateValue > new Date(value.to).getTime()) return false
+              return true
+            }
+          }
+
+          // Handle array filters (multi-select) - check if any selected value exists in row array
+          if (Array.isArray(value) && value.length > 0) {
+            if (Array.isArray(rowValue)) {
+              return value.some(v => rowValue.includes(v))
+            }
+            return value.includes(rowValue)
+          }
+
+          // Handle simple equality (text, select)
+          return String(rowValue).toLowerCase() === String(value).toLowerCase()
         })
       })
     }

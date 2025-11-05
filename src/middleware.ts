@@ -37,6 +37,7 @@ const PUBLIC_ROUTES = [
   '/marketplace-enhanced',
   '/marketplace-checkout',
   '/offers/builder/demo',
+  '/offers',
 ]
 
 /**

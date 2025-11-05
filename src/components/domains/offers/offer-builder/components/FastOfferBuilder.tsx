@@ -15,7 +15,6 @@ import Button from '@/components/shared/ui/button/Button'
 import Input from '@/components/shared/form/input/InputField'
 import Badge from '@/components/shared/ui/badge/Badge'
 import { AddBlockModal } from './blocks/AddBlockModal'
-import { AddAdjustmentModal } from './AddAdjustmentModal'
 import { AdjustmentThread } from './AdjustmentThread'
 
 interface FastOfferBuilderProps {
@@ -41,7 +40,6 @@ export function FastOfferBuilder({
   })
 
   const [isAddBlockModalOpen, setIsAddBlockModalOpen] = useState(false)
-  const [isAdjustmentModalOpen, setIsAdjustmentModalOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedResultIndex, setSelectedResultIndex] = useState(0)
   const [isSaving, setIsSaving] = useState(false)
@@ -50,10 +48,23 @@ export function FastOfferBuilder({
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [adjustments, setAdjustments] = useState<OfferAdjustment[]>(initialAdjustments)
-  const [selectedAdjustmentTarget, setSelectedAdjustmentTarget] = useState<{
+  const [sidebarTab, setSidebarTab] = useState<'request' | 'adjustments'>('request')
+  const [activeCommentBox, setActiveCommentBox] = useState<{
     type: 'block' | 'item'
     id: string
+    name: string
   } | null>(null)
+  const [commentText, setCommentText] = useState('')
+  const [commentPhotos, setCommentPhotos] = useState<File[]>([])
+  const [lastAdjustmentId, setLastAdjustmentId] = useState<string | null>(null)
+  const [showShortcutsModal, setShowShortcutsModal] = useState(false)
+  const [touchStart, setTouchStart] = useState<number | null>(null)
+  const [touchEnd, setTouchEnd] = useState<number | null>(null)
+  const [previousTotal, setPreviousTotal] = useState<number | null>(null)
+  const [priceChangeDirection, setPriceChangeDirection] = useState<'up' | 'down' | null>(null)
+  const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit')
+  const undoTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const priceChangeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const searchInputRef = useRef<HTMLInputElement>(null)
   const blockScrollRef = useRef<HTMLDivElement>(null)
@@ -123,21 +134,56 @@ export function FastOfferBuilder({
     return courseGroups
   }
 
+  const calculateSmartQuantity = (item: MenuItem) => {
+    const selectedBlock = offerState.offer?.blocks.find(b => b.id === offerState.selectedBlockId)
+    const headcount = selectedBlock?.headcount || request?.guestCount || 1
+    const desc = item.description?.toLowerCase() || ''
+
+    // Beverages: 1-1.5 per person
+    if (desc.includes('beverage') || desc.includes('drink') || desc.includes('coffee') || desc.includes('juice')) {
+      return Math.ceil(headcount * 1.2)
+    }
+
+    // Appetizers/Sides: 0.5-0.75 per person (shared)
+    if (desc.includes('appetizer') || desc.includes('side') || desc.includes('salad')) {
+      return Math.ceil(headcount * 0.6)
+    }
+
+    // Desserts: 0.8 per person
+    if (desc.includes('dessert')) {
+      return Math.ceil(headcount * 0.8)
+    }
+
+    // Main courses: 1 per person
+    if (desc.includes('main') || desc.includes('entree')) {
+      return headcount
+    }
+
+    // Default: 1 per person
+    return headcount
+  }
+
   const handleAddItem = (item: MenuItem) => {
     if (!offerState.selectedBlockId) {
       toast.error('Select a block first')
       return
     }
 
+    const smartQuantity = calculateSmartQuantity(item)
+
     offerState.addItemToBlock(offerState.selectedBlockId, {
       itemType: 'menu_item',
       itemName: item.name,
       itemDescription: item.description,
       menuItemId: item.id,
-      quantity: 1,
+      quantity: smartQuantity,
       unitPriceCents: item.priceCents,
       isOptional: false,
       taxRateBps: 825
+    })
+
+    toast.success(`Added ${item.name}`, {
+      description: `Auto-filled ${smartQuantity} based on ${offerState.offer?.blocks.find(b => b.id === offerState.selectedBlockId)?.headcount || 'guest'} guests`
     })
 
     setSearchQuery('')
@@ -221,6 +267,15 @@ export function FastOfferBuilder({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '?' && e.shiftKey) {
+        e.preventDefault()
+        setShowShortcutsModal(true)
+      }
+
+      if (e.key === 'Escape') {
+        setShowShortcutsModal(false)
+      }
+
       if (e.key === '/' && document.activeElement !== searchInputRef.current) {
         e.preventDefault()
         searchInputRef.current?.focus()
@@ -258,9 +313,62 @@ export function FastOfferBuilder({
     setSelectedResultIndex(0)
   }, [searchQuery])
 
+  useEffect(() => {
+    const currentTotal = offerState.calculateTotals().totalCents
+    if (previousTotal !== null && previousTotal !== currentTotal) {
+      if (currentTotal > previousTotal) {
+        setPriceChangeDirection('up')
+      } else if (currentTotal < previousTotal) {
+        setPriceChangeDirection('down')
+      }
+
+      if (priceChangeTimeoutRef.current) {
+        clearTimeout(priceChangeTimeoutRef.current)
+      }
+
+      priceChangeTimeoutRef.current = setTimeout(() => {
+        setPriceChangeDirection(null)
+      }, 2000)
+    }
+    setPreviousTotal(currentTotal)
+  }, [offerState.offer])
+
+  const minSwipeDistance = 50
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null)
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX)
+  }
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+    const distance = touchStart - touchEnd
+    const isRightSwipe = distance < -minSwipeDistance
+
+    if (isRightSwipe && !isSidebarOpen) {
+      setIsSidebarOpen(true)
+    } else if (distance > minSwipeDistance && isSidebarOpen) {
+      setIsSidebarOpen(false)
+    }
+  }
+
+  const handleUndoAdjustment = (adjustmentId: string) => {
+    setAdjustments(prev => prev.filter(a => a.id !== adjustmentId))
+    setLastAdjustmentId(null)
+    if (undoTimeoutRef.current) {
+      clearTimeout(undoTimeoutRef.current)
+    }
+    toast.info('Adjustment removed')
+  }
+
   const handleAddAdjustment = (
     targetType: 'block' | 'item',
     targetId: string,
+    targetName: string,
     message: string
   ) => {
     if (!offerState.offer) return
@@ -282,7 +390,23 @@ export function FastOfferBuilder({
     }
 
     setAdjustments(prev => [...prev, newAdjustment])
-    toast.success('Adjustment added')
+    setLastAdjustmentId(newAdjustment.id)
+
+    if (undoTimeoutRef.current) {
+      clearTimeout(undoTimeoutRef.current)
+    }
+
+    undoTimeoutRef.current = setTimeout(() => {
+      setLastAdjustmentId(null)
+    }, 5000)
+
+    toast.success('✓ Adjustment sent to caterer!', {
+      description: 'They typically respond within 2-4 hours',
+      action: {
+        label: 'Undo',
+        onClick: () => handleUndoAdjustment(newAdjustment.id)
+      }
+    })
   }
 
   const handleAddComment = (adjustmentId: string, message: string) => {
@@ -327,20 +451,172 @@ export function FastOfferBuilder({
   }
 
   return (
-    <div className="flex h-full max-h-full bg-gray-50 dark:bg-gray-900 relative overflow-hidden">
+    <>
+      {/* Print-optimized styles */}
+      <style jsx global>{`
+        @media print {
+          @page {
+            size: A4;
+            margin: 1.5cm;
+          }
+
+          body {
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+          }
+
+          /* Hide UI elements */
+          nav,
+          button,
+          aside,
+          [class*="fixed"],
+          header {
+            display: none !important;
+          }
+
+          /* Show print-only elements */
+          .print\\:block {
+            display: block !important;
+          }
+
+          .print\\:hidden {
+            display: none !important;
+          }
+
+          /* Prevent page breaks inside blocks */
+          .print\\:break-inside-avoid {
+            break-inside: avoid;
+            page-break-inside: avoid;
+          }
+
+          /* Reset positioning for print */
+          .print\\:static {
+            position: static !important;
+          }
+
+          .print\\:pt-0 {
+            padding-top: 0 !important;
+          }
+
+          .print\\:pb-0 {
+            padding-bottom: 0 !important;
+          }
+
+          .print\\:max-w-none {
+            max-width: none !important;
+          }
+
+          .print\\:shadow-none {
+            box-shadow: none !important;
+          }
+
+          .print\\:rounded-lg {
+            border-radius: 0.5rem !important;
+          }
+
+          .print\\:mb-6 {
+            margin-bottom: 1.5rem !important;
+          }
+
+          .print\\:mt-8 {
+            margin-top: 2rem !important;
+          }
+
+          .print\\:border {
+            border-width: 1px !important;
+          }
+
+          .print\\:border-gray-900 {
+            border-color: #111827 !important;
+          }
+
+          .print\\:bg-white {
+            background-color: white !important;
+          }
+
+          .print\\:overflow-visible {
+            overflow: visible !important;
+          }
+
+          /* Preserve backgrounds and colors */
+          .bg-gradient-to-br {
+            background: #f9fafb !important;
+          }
+
+          .bg-white\\/50 {
+            background: #ffffff !important;
+            border: 1px solid #e5e7eb !important;
+          }
+        }
+      `}</style>
+
+    <div className="flex h-full max-h-full bg-gray-50 dark:bg-gray-900 relative overflow-hidden print:bg-white print:overflow-visible">
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden pb-16 min-w-0">
         {/* Header with Block Pills */}
         <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-3 sm:p-4">
-          {/* Block Pills - Horizontal Scroll - Airbnb Style */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            <button
-              onClick={() => setIsAddBlockModalOpen(true)}
-              className="flex-shrink-0 px-3 sm:px-5 py-2 sm:py-2.5 rounded-full border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-gray-900 dark:hover:border-white hover:shadow-sm transition-all text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-            >
-              <span className="hidden sm:inline">+ Add Block</span>
-              <span className="sm:hidden">+</span>
-            </button>
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+              {offerState.offer.title}
+            </h2>
+
+            {/* View Mode Toggle & Actions */}
+            <div className="flex items-center gap-2">
+              {/* Share Preview Button - Only in Preview Mode */}
+              {viewMode === 'preview' && (
+                <button
+                  onClick={() => {
+                    const previewUrl = `${window.location.origin}/en/offers/${offerState.offer.id}/preview`
+                    window.open(previewUrl, '_blank')
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-full text-sm font-semibold transition-all shadow-md hover:shadow-lg active:scale-95 print:hidden"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                  </svg>
+                  <span className="hidden sm:inline">Open Customer View</span>
+                  <span className="sm:hidden">Share</span>
+                </button>
+              )}
+
+              {/* View Mode Toggle */}
+              <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-full p-1 print:hidden">
+                <button
+                  onClick={() => setViewMode('edit')}
+                  className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all ${
+                    viewMode === 'edit'
+                      ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                  }`}
+                >
+                  <span>✏️</span>
+                  <span className="hidden sm:inline">Edit</span>
+                </button>
+                <button
+                  onClick={() => setViewMode('preview')}
+                  className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all ${
+                    viewMode === 'preview'
+                      ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                  }`}
+                >
+                  <span>👁️</span>
+                  <span className="hidden sm:inline">Preview</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Block Pills - Horizontal Scroll - Airbnb Style - Only in Edit Mode */}
+          {viewMode === 'edit' && (
+            <div className="flex items-center gap-2 sm:gap-3">
+              <button
+                onClick={() => setIsAddBlockModalOpen(true)}
+                className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-2.5 rounded-full border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-gray-900 dark:hover:border-white hover:shadow-sm transition-all text-sm sm:text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white min-h-[44px] active:scale-95"
+              >
+                <span className="hidden sm:inline">+ Add Block</span>
+                <span className="sm:hidden">+</span>
+              </button>
 
             <div
               ref={blockScrollRef}
@@ -349,7 +625,7 @@ export function FastOfferBuilder({
               {offerState.offer.blocks.map((block, idx) => (
                 <div
                   key={block.id}
-                  className={`flex-shrink-0 px-3 sm:px-5 py-2 sm:py-2.5 rounded-full border transition-all group ${
+                  className={`flex-shrink-0 px-4 sm:px-5 py-3 sm:py-2.5 rounded-full border transition-all group min-h-[44px] ${
                     offerState.selectedBlockId === block.id
                       ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-gray-900 dark:border-white shadow-md'
                       : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 hover:border-gray-900 dark:hover:border-white hover:shadow-sm'
@@ -430,12 +706,14 @@ export function FastOfferBuilder({
                       </button>
                       <button
                         onClick={() => {
-                          setSelectedAdjustmentTarget({
+                          setIsSidebarOpen(true)
+                          setSidebarTab('adjustments')
+                          setActiveCommentBox({
                             type: 'block',
                             id: block.id,
                             name: block.name
                           })
-                          setIsAdjustmentModalOpen(true)
+                          setCommentText('')
                         }}
                         className={`p-1 rounded-full transition-all ${
                           offerState.selectedBlockId === block.id
@@ -491,10 +769,11 @@ export function FastOfferBuilder({
               ))}
             </div>
           </div>
+          )}
         </div>
 
-        {/* Request Info Pills */}
-        {request && (
+        {/* Request Info Pills - Only in Edit Mode */}
+        {viewMode === 'edit' && request && (
           <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 sm:px-4 py-2">
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
               <span className="text-xs font-semibold text-gray-500 flex-shrink-0">Request:</span>
@@ -528,7 +807,8 @@ export function FastOfferBuilder({
           </div>
         )}
 
-        {/* Quick Search */}
+        {/* Quick Search - Only in Edit Mode */}
+        {viewMode === 'edit' && (
         <div className="sticky top-0 z-20 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-3 sm:p-4">
           <div className="relative">
             <Input
@@ -578,11 +858,38 @@ export function FastOfferBuilder({
                 )}
               </div>
             )}
+
+            {/* Smart Suggestions - Event-based */}
+            {!searchQuery && request?.eventType && availableItems.length > 0 && (
+              <div className="mt-4 p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/10 dark:to-blue-900/10 rounded-2xl border border-purple-200 dark:border-purple-800">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-lg">✨</span>
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    Suggested for {request.eventType}
+                  </h4>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {availableItems.slice(0, 4).map(item => (
+                    <button
+                      key={item.id}
+                      onClick={() => handleAddItem(item)}
+                      className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/20 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 rounded-lg transition-all text-xs font-medium"
+                    >
+                      <span>➕</span>
+                      <span>{item.name}</span>
+                      <span className="text-gray-500">${(item.priceCents / 100).toFixed(2)}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
+        )}
 
-        {/* Block Content - Organized Sections */}
-        <div className="flex-1 overflow-y-auto pt-3 sm:pt-4 pb-24 sm:pb-20">
+        {/* Block Content - Organized Sections - Only in Edit Mode */}
+        {viewMode === 'edit' && (
+        <div className="flex-1 overflow-y-auto pt-3 sm:pt-4 pb-24 sm:pb-20 bg-transparent">
           {selectedBlock ? (
             <div className="space-y-4 sm:space-y-6">
               {(() => {
@@ -623,9 +930,17 @@ export function FastOfferBuilder({
                                     i => i.id === item.id
                                   )
                                   return (
-                                    <div
-                                      key={item.id}
-                                      draggable
+                                    <div key={item.id} className="relative">
+                                      {/* Drop Indicator */}
+                                      {dragOverIndex === itemIndex && draggedItem?.index !== itemIndex && (
+                                        <div className="absolute -top-1 left-0 right-0 h-0.5 bg-brand-500 rounded-full animate-pulse">
+                                          <div className="absolute left-0 -top-1.5 w-3 h-3 bg-brand-500 rounded-full"></div>
+                                          <div className="absolute right-0 -top-1.5 w-3 h-3 bg-brand-500 rounded-full"></div>
+                                        </div>
+                                      )}
+
+                                      <div
+                                        draggable
                                       onDragStart={e =>
                                         handleItemDragStart(e, item.id, itemIndex)
                                       }
@@ -635,9 +950,11 @@ export function FastOfferBuilder({
                                       }
                                       onDrop={e => handleItemDrop(e, itemIndex)}
                                       className={`rounded-xl sm:rounded-2xl p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-all cursor-move border-2 ${
-                                        dragOverIndex === itemIndex &&
-                                        draggedItem?.index !== itemIndex
-                                          ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
+                                        draggedItem?.id === item.id
+                                          ? 'opacity-40 scale-95 border-dashed border-gray-400 dark:border-gray-500'
+                                          : dragOverIndex === itemIndex &&
+                                            draggedItem?.index !== itemIndex
+                                          ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20 shadow-lg'
                                           : 'border-gray-200 dark:border-gray-700'
                                       }`}
                                     >
@@ -728,11 +1045,14 @@ export function FastOfferBuilder({
                                           </span>
                                           <button
                                             onClick={() => {
-                                              setSelectedAdjustmentTarget({
+                                              setIsSidebarOpen(true)
+                                              setSidebarTab('adjustments')
+                                              setActiveCommentBox({
                                                 type: 'item',
-                                                id: item.id
+                                                id: item.id,
+                                                name: item.itemName
                                               })
-                                              setIsAdjustmentModalOpen(true)
+                                              setCommentText('')
                                             }}
                                             className="p-1.5 rounded-full text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors"
                                             title="Add adjustment"
@@ -775,6 +1095,7 @@ export function FastOfferBuilder({
                                             </svg>
                                           </button>
                                         </div>
+                                      </div>
                                       </div>
                                     </div>
                                   )
@@ -1326,11 +1647,259 @@ export function FastOfferBuilder({
             </div>
           )}
         </div>
+        )}
+
+        {/* Preview Mode - Customer View */}
+        {viewMode === 'preview' && (
+          <div className="flex-1 overflow-y-auto pt-4 sm:pt-6 pb-24 sm:pb-20 px-4 sm:px-6 bg-transparent print:pt-0 print:pb-0">
+            <div className="max-w-4xl mx-auto space-y-6 print:max-w-none">
+              {/* PDF Header - Only visible when printing */}
+              <div className="hidden print:block mb-8">
+                <div className="border-b-4 border-gray-900 pb-6 mb-6">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                        Catering Proposal
+                      </h1>
+                      <p className="text-lg text-gray-600">{offerState.offer.title}</p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm text-gray-600 mb-1">Proposal ID</div>
+                      <div className="font-mono text-sm font-semibold">{offerState.offer.id}</div>
+                      <div className="text-sm text-gray-600 mt-2">
+                        Generated: {new Date().toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
+                  {request && (
+                    <div className="mt-4 grid grid-cols-3 gap-4 pt-4 border-t border-gray-200">
+                      <div>
+                        <div className="text-xs text-gray-500 mb-1">Event Type</div>
+                        <div className="font-semibold">{request.eventType}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500 mb-1">Event Date</div>
+                        <div className="font-semibold">{request.eventDate}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500 mb-1">Guest Count</div>
+                        <div className="font-semibold">{request.guestCount} guests</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+              {offerState.offer.blocks.map((block, index) => {
+                const blockTotal = block.items.reduce((sum, item) => sum + item.lineItemTotal, 0)
+                const groups = groupItemsByCategory(block.items)
+
+                return (
+                  <div key={block.id} className="relative print:break-inside-avoid">
+                    {/* Timeline Connector */}
+                    {index < offerState.offer.blocks.length - 1 && (
+                      <div className="absolute left-6 top-full h-6 w-0.5 bg-gradient-to-b from-gray-300 to-transparent dark:from-gray-600 z-0 print:hidden" />
+                    )}
+
+                    {/* Block Card */}
+                    <div className="bg-white dark:bg-gray-800 rounded-3xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow print:shadow-none print:rounded-lg print:mb-6">
+                      {/* Block Header */}
+                      <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 border-b-2 border-gray-200 dark:border-gray-700 p-6">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center text-xl font-bold text-gray-900 dark:text-gray-100">
+                                {index + 1}
+                              </div>
+                              <div>
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                                  {block.name}
+                                </h3>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                  {block.description}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                              ${(blockTotal / 100).toFixed(2)}
+                            </div>
+                            <div className="text-xs text-gray-500">subtotal</div>
+                          </div>
+                        </div>
+
+                        {/* Event Details */}
+                        <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                          <div className="bg-white/50 dark:bg-gray-800/50 rounded-xl px-3 py-2 border border-gray-200 dark:border-gray-700">
+                            <div className="text-xs text-gray-500 mb-0.5">Date</div>
+                            <div className="font-semibold text-sm">{block.date}</div>
+                          </div>
+                          <div className="bg-white/50 dark:bg-gray-800/50 rounded-xl px-3 py-2 border border-gray-200 dark:border-gray-700">
+                            <div className="text-xs text-gray-500 mb-0.5">Service Time</div>
+                            <div className="font-semibold text-sm">{block.startTime} - {block.endTime}</div>
+                          </div>
+                          <div className="bg-white/50 dark:bg-gray-800/50 rounded-xl px-3 py-2 border border-gray-200 dark:border-gray-700">
+                            <div className="text-xs text-gray-500 mb-0.5">Guests</div>
+                            <div className="font-semibold text-sm">{block.headcount || 'TBD'}</div>
+                          </div>
+                          <div className="bg-white/50 dark:bg-gray-800/50 rounded-xl px-3 py-2 border border-gray-200 dark:border-gray-700">
+                            <div className="text-xs text-gray-500 mb-0.5">Location</div>
+                            <div className="font-semibold text-sm truncate">{block.location || 'TBD'}</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Block Items - Grouped */}
+                      <div className="p-6 space-y-6">
+                        {/* Food Items */}
+                        {groups.food.length > 0 && (
+                          <div>
+                            <div className="flex items-center gap-2 mb-3">
+                              <span className="text-2xl">🍽️</span>
+                              <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wide">Menu Items</h4>
+                            </div>
+                            <div className="space-y-2">
+                              {groups.food.map(item => (
+                                <div key={item.id} className="flex items-start justify-between gap-3 py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                                  <div className="flex-1">
+                                    <div className="font-semibold text-gray-900 dark:text-gray-100">{item.itemName}</div>
+                                    {item.itemDescription && (
+                                      <div className="text-sm text-gray-500">{item.itemDescription}</div>
+                                    )}
+                                  </div>
+                                  <div className="text-right flex-shrink-0">
+                                    <div className="text-sm text-gray-500">×{item.quantity}</div>
+                                    <div className="font-semibold text-gray-900 dark:text-gray-100">
+                                      ${(item.lineItemTotal / 100).toFixed(2)}
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Equipment */}
+                        {groups.equipment.length > 0 && (
+                          <div>
+                            <div className="flex items-center gap-2 mb-3">
+                              <span className="text-2xl">🔧</span>
+                              <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wide">Equipment & Rentals</h4>
+                            </div>
+                            <div className="space-y-2">
+                              {groups.equipment.map(item => (
+                                <div key={item.id} className="flex items-start justify-between gap-3 py-2">
+                                  <div className="flex-1">
+                                    <div className="font-medium text-gray-900 dark:text-gray-100">{item.itemName}</div>
+                                    {item.itemDescription && (
+                                      <div className="text-sm text-gray-500">{item.itemDescription}</div>
+                                    )}
+                                  </div>
+                                  <div className="text-right flex-shrink-0">
+                                    <div className="text-sm text-gray-500">×{item.quantity}</div>
+                                    <div className="font-medium text-gray-900 dark:text-gray-100">
+                                      ${(item.lineItemTotal / 100).toFixed(2)}
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Service */}
+                        {groups.service.length > 0 && (
+                          <div>
+                            <div className="flex items-center gap-2 mb-3">
+                              <span className="text-2xl">👔</span>
+                              <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wide">Service & Staff</h4>
+                            </div>
+                            <div className="space-y-2">
+                              {groups.service.map(item => (
+                                <div key={item.id} className="flex items-start justify-between gap-3 py-2">
+                                  <div className="flex-1">
+                                    <div className="font-medium text-gray-900 dark:text-gray-100">{item.itemName}</div>
+                                    {item.itemDescription && (
+                                      <div className="text-sm text-gray-500">{item.itemDescription}</div>
+                                    )}
+                                  </div>
+                                  <div className="text-right flex-shrink-0">
+                                    <div className="text-sm text-gray-500">×{item.quantity}</div>
+                                    <div className="font-medium text-gray-900 dark:text-gray-100">
+                                      ${(item.lineItemTotal / 100).toFixed(2)}
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Delivery */}
+                        {groups.delivery.length > 0 && (
+                          <div>
+                            <div className="flex items-center gap-2 mb-3">
+                              <span className="text-2xl">🚚</span>
+                              <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wide">Delivery & Setup</h4>
+                            </div>
+                            <div className="space-y-2">
+                              {groups.delivery.map(item => (
+                                <div key={item.id} className="flex items-start justify-between gap-3 py-2">
+                                  <div className="flex-1">
+                                    <div className="font-medium text-gray-900 dark:text-gray-100">{item.itemName}</div>
+                                    {item.itemDescription && (
+                                      <div className="text-sm text-gray-500">{item.itemDescription}</div>
+                                    )}
+                                  </div>
+                                  <div className="text-right flex-shrink-0">
+                                    <div className="font-medium text-gray-900 dark:text-gray-100">
+                                      ${(item.lineItemTotal / 100).toFixed(2)}
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+
+              {/* Total Summary */}
+              <div className="sticky bottom-0 bg-white dark:bg-gray-800 rounded-3xl border-2 border-gray-900 dark:border-white shadow-xl p-6 print:static print:border print:border-gray-900 print:shadow-none print:mt-8">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between text-gray-600 dark:text-gray-400">
+                    <span>Subtotal</span>
+                    <span className="font-semibold">${(totals.subtotalCents / 100).toFixed(2)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-gray-600 dark:text-gray-400">
+                    <span>Tax</span>
+                    <span className="font-semibold">${(totals.taxCents / 100).toFixed(2)}</span>
+                  </div>
+                  {totals.discountCents > 0 && (
+                    <div className="flex items-center justify-between text-green-600">
+                      <span>Discount</span>
+                      <span className="font-semibold">-${(totals.discountCents / 100).toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="border-t-2 border-gray-200 dark:border-gray-700 pt-3 flex items-center justify-between">
+                    <span className="text-xl font-bold text-gray-900 dark:text-gray-100">Total</span>
+                    <span className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                      ${(totals.totalCents / 100).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Fixed Bottom Bar - Airbnb Style - Constrained */}
+      {/* Fixed Bottom Bar - Mobile Optimized */}
       <div className="fixed bottom-0 left-0 right-0 sm:left-6 sm:right-6 z-50 pb-0 sm:pb-6 pointer-events-none">
-        <div className="max-w-7xl mx-auto bg-white dark:bg-gray-800 border-t sm:border border-gray-200 dark:border-gray-700 sm:rounded-3xl px-4 sm:px-8 py-3 sm:py-5 shadow-2xl pointer-events-auto">
+        <div className="max-w-7xl mx-auto bg-white/95 dark:bg-gray-800/95 backdrop-blur-lg border-t sm:border border-gray-200 dark:border-gray-700 sm:rounded-3xl px-3 sm:px-8 py-3 sm:py-5 shadow-2xl pointer-events-auto">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-8">
             <div className="flex items-center justify-between sm:justify-start gap-3 sm:gap-6 overflow-x-auto">
               <div className="flex items-baseline gap-2">
@@ -1383,10 +1952,55 @@ export function FastOfferBuilder({
                 <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   Total
                 </span>
-                <span className="font-bold text-xl sm:text-2xl text-gray-900 dark:text-white">
-                  ${(totals.totalCents / 100).toFixed(2)}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-xl sm:text-2xl text-gray-900 dark:text-white">
+                    ${(totals.totalCents / 100).toFixed(2)}
+                  </span>
+                  {priceChangeDirection && (
+                    <span className={`text-sm font-semibold animate-bounce ${
+                      priceChangeDirection === 'up' ? 'text-red-500' : 'text-green-500'
+                    }`}>
+                      {priceChangeDirection === 'up' ? '↑' : '↓'}
+                    </span>
+                  )}
+                </div>
               </div>
+
+              {/* Budget Gauge */}
+              {request?.budgetMin && request?.budgetMax && (
+                <div className="hidden md:flex flex-col gap-1 min-w-[120px]">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-500">Budget</span>
+                    <span className={`font-semibold ${
+                      totals.totalCents / 100 > request.budgetMax
+                        ? 'text-red-600 dark:text-red-400'
+                        : totals.totalCents / 100 < request.budgetMin
+                        ? 'text-orange-600 dark:text-orange-400'
+                        : 'text-green-600 dark:text-green-400'
+                    }`}>
+                      {totals.totalCents / 100 > request.budgetMax
+                        ? `+$${((totals.totalCents / 100) - request.budgetMax).toFixed(0)} over`
+                        : totals.totalCents / 100 < request.budgetMin
+                        ? `$${(request.budgetMin - (totals.totalCents / 100)).toFixed(0)} under`
+                        : '✓ In range'}
+                    </span>
+                  </div>
+                  <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full transition-all duration-300 ${
+                        totals.totalCents / 100 > request.budgetMax
+                          ? 'bg-red-500'
+                          : totals.totalCents / 100 < request.budgetMin
+                          ? 'bg-orange-500'
+                          : 'bg-green-500'
+                      }`}
+                      style={{
+                        width: `${Math.min(100, ((totals.totalCents / 100) / request.budgetMax) * 100)}%`
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
 
               <div className="hidden sm:block text-xs text-gray-500">
                 {offerState.getTotalItems()} items •{' '}
@@ -1399,7 +2013,7 @@ export function FastOfferBuilder({
                 variant="outline"
                 onClick={onCancel}
                 size="sm"
-                className="hidden sm:flex rounded-full px-4 sm:px-6 hover:shadow-sm"
+                className="hidden sm:flex rounded-full px-4 sm:px-6 hover:shadow-sm min-h-[44px]"
               >
                 Cancel
               </Button>
@@ -1408,7 +2022,7 @@ export function FastOfferBuilder({
                 onClick={handleSave}
                 disabled={isSaving}
                 size="sm"
-                className="flex-1 sm:flex-none rounded-full px-4 sm:px-6 hover:shadow-sm text-xs sm:text-sm"
+                className="flex-1 sm:flex-none rounded-full px-4 sm:px-6 hover:shadow-sm text-sm sm:text-sm min-h-[44px] font-medium active:scale-95 transition-transform"
               >
                 {isSaving ? 'Saving...' : 'Save'}
               </Button>
@@ -1417,7 +2031,7 @@ export function FastOfferBuilder({
                 onClick={handleSave}
                 disabled={isSaving}
                 size="sm"
-                className="flex-1 sm:flex-none rounded-full px-6 sm:px-8 shadow-md hover:shadow-lg bg-gray-900 hover:bg-gray-800 dark:bg:white dark:hover:bg-gray-100 text-white dark:text-gray-900 text-xs sm:text-sm"
+                className="flex-1 sm:flex-none rounded-full px-6 sm:px-8 shadow-md hover:shadow-lg bg-gray-900 hover:bg-gray-800 dark:bg:white dark:hover:bg-gray-100 text-white dark:text-gray-900 text-sm sm:text-sm min-h-[44px] font-semibold active:scale-95 transition-transform"
               >
                 {isSaving ? 'Sending...' : 'Send'}
               </Button>
@@ -1435,37 +2049,133 @@ export function FastOfferBuilder({
         />
       )}
 
-      {/* Right Drawer */}
+      {/* Right Drawer - Full Screen on Mobile with Swipe Support */}
       {request && (
-        <div className={`fixed inset-y-0 right-0 w-full sm:w-96 lg:w-[28rem] bg-white dark:bg-gray-800 shadow-2xl z-999999 transform transition-transform duration-300 ${
-          isSidebarOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}>
+        <div
+          className={`fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-auto w-full sm:w-96 lg:w-[28rem] bg-white dark:bg-gray-800 shadow-2xl z-999999 transform transition-transform duration-300 ${
+            isSidebarOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
           <div className="h-full flex flex-col">
-            {/* Drawer Header */}
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-              <h3 className="font-bold text-xl">Request Details</h3>
-              <button
-                onClick={() => setIsSidebarOpen(false)}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+            {/* Drawer Header with Tabs */}
+            <div className="border-b border-gray-200 dark:border-gray-700">
+              <div className="px-6 pt-6 pb-0 flex items-center justify-between">
+                <h3 className="font-bold text-xl">Details</h3>
+                <button
+                  onClick={() => setIsSidebarOpen(false)}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Tabs */}
+              <div className="flex px-6 mt-4">
+                <button
+                  onClick={() => setSidebarTab('request')}
+                  className={`flex-1 pb-3 text-sm font-medium border-b-2 transition-colors ${
+                    sidebarTab === 'request'
+                      ? 'border-blue-600 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
+                >
+                  Request Info
+                </button>
+                <button
+                  onClick={() => setSidebarTab('adjustments')}
+                  className={`flex-1 pb-3 text-sm font-medium border-b-2 transition-colors flex items-center justify-center gap-2 ${
+                    sidebarTab === 'adjustments'
+                      ? 'border-blue-600 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
+                >
+                  Adjustments
+                  {adjustments.filter(a => a.status === 'pending').length > 0 && (
+                    <span className="bg-orange-500 text-white text-xs rounded-full px-2 py-0.5">
+                      {adjustments.filter(a => a.status === 'pending').length}
+                    </span>
+                  )}
+                </button>
+              </div>
             </div>
 
             {/* Drawer Content */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {sidebarTab === 'request' ? (
+                <>
+              {/* Primary Action Card */}
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-2 border-green-200 dark:border-green-800 rounded-2xl p-5">
+                <div className="space-y-4">
+                  {/* Price & Status */}
+                  <div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Price</div>
+                    <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                      ${((offerState.offer?.totalCents || 0) / 100).toFixed(2)}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                      Including ${((offerState.offer?.taxCents || 0) / 100).toFixed(2)} tax
+                    </div>
+                  </div>
+
+                  {/* Urgency Indicator */}
+                  {offerState.offer?.validUntil && (
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="text-orange-600 dark:text-orange-400">⏰</span>
+                      <span className="text-gray-600 dark:text-gray-400">
+                        Expires {new Date(offerState.offer.validUntil).toLocaleDateString()}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Primary CTA */}
+                  <button
+                    className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3.5 px-4 rounded-xl transition-all shadow-md hover:shadow-lg active:scale-95"
+                    onClick={() => {
+                      toast.success('✓ Offer accepted!', {
+                        description: 'The caterer will receive your confirmation'
+                      })
+                    }}
+                  >
+                    ✓ Accept Offer
+                  </button>
+
+                  {/* Secondary Actions */}
+                  <div className="flex gap-2">
+                    <button
+                      className="flex-1 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium py-2.5 px-4 rounded-xl border border-gray-300 dark:border-gray-600 transition-all text-sm"
+                      onClick={() => {
+                        toast.info('Offer declined')
+                      }}
+                    >
+                      Decline
+                    </button>
+                    <button
+                      className="flex-1 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium py-2.5 px-4 rounded-xl border border-gray-300 dark:border-gray-600 transition-all text-sm"
+                      onClick={() => {
+                        window.print()
+                      }}
+                    >
+                      Print
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               {/* Request Info Section */}
               <div className="space-y-4">
                 <div>
@@ -1549,45 +2259,6 @@ export function FastOfferBuilder({
                 )}
               </div>
 
-              {/* Adjustments Section */}
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Adjustments & Comments
-                  </h4>
-                  {unresolvedAdjustments.length > 0 && (
-                    <Badge variant="light" color="warning" size="sm" className="rounded-full">
-                      {unresolvedAdjustments.length} pending
-                    </Badge>
-                  )}
-                </div>
-
-                {adjustments.length === 0 ? (
-                  <div className="bg-gray-50 dark:bg-gray-900/50 rounded-2xl p-4 border border-gray-200 dark:border-gray-700 text-center">
-                    <div className="text-2xl mb-2 text-gray-400">💬</div>
-                    <p className="text-xs text-gray-500">No adjustments yet</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      Click the chat icon on items to request changes
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {adjustments.map(adjustment => (
-                      <AdjustmentThread
-                        key={adjustment.id}
-                        adjustment={adjustment}
-                        onAddComment={message =>
-                          handleAddComment(adjustment.id, message)
-                        }
-                        onResolve={() =>
-                          handleResolveAdjustment(adjustment.id)
-                        }
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-
               {/* PDF Attachments Section */}
               <div>
                 <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
@@ -1642,6 +2313,211 @@ export function FastOfferBuilder({
                   )}
                 </div>
               </div>
+                </>
+              ) : (
+                /* Adjustments Tab Content */
+                <div className="space-y-6">
+                  {/* Comment Input for Active Item/Block */}
+                  {activeCommentBox && (
+                    <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-2xl p-4">
+                      <div className="text-sm font-semibold mb-3 text-gray-900 dark:text-gray-100">
+                        Request adjustment for "{activeCommentBox.name}"
+                      </div>
+                      <div className="flex gap-3 items-start">
+                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm">
+                          👤
+                        </div>
+                        <div className="flex-1">
+                          <textarea
+                            value={commentText}
+                            onChange={(e) => setCommentText(e.target.value)}
+                            placeholder="Describe what needs to be adjusted..."
+                            rows={3}
+                            className="w-full px-4 py-3 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                            autoFocus
+                          />
+
+                          {/* Quick Reply Templates */}
+                          {!commentText && (
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {[
+                                { icon: '➕', text: 'Can we add 10 more servings?', label: 'Add servings' },
+                                { icon: '⏰', text: 'Need this 30 minutes earlier', label: 'Earlier time' },
+                                { icon: '🥗', text: 'Any vegetarian options available?', label: 'Vegetarian' },
+                                { icon: '🌾', text: 'Do you have gluten-free alternatives?', label: 'Gluten-free' },
+                                { icon: '💰', text: 'Can we reduce the price by 10%?', label: 'Price adjust' },
+                              ].map((template, idx) => (
+                                <button
+                                  key={idx}
+                                  onClick={() => setCommentText(template.text)}
+                                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-gray-100 hover:bg-blue-50 dark:bg-gray-700 dark:hover:bg-blue-900/20 text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-400 rounded-lg transition-colors border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-700"
+                                >
+                                  <span>{template.icon}</span>
+                                  <span className="font-medium">{template.label}</span>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Helpful Hint */}
+                          <div className="mt-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-100 dark:border-blue-800/50">
+                            <p className="text-xs text-blue-700 dark:text-blue-300">
+                              💡 <span className="font-medium">Tip:</span> Be specific about quantities, times, or dietary needs for faster responses (typically 2-4 hours)
+                            </p>
+                          </div>
+
+                          {/* Photo Attachments */}
+                          {commentPhotos.length > 0 && (
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              {commentPhotos.map((photo, idx) => (
+                                <div key={idx} className="relative group">
+                                  <img
+                                    src={URL.createObjectURL(photo)}
+                                    alt={`Attachment ${idx + 1}`}
+                                    className="w-20 h-20 object-cover rounded-lg border border-gray-200 dark:border-gray-600"
+                                  />
+                                  <button
+                                    onClick={() => setCommentPhotos(prev => prev.filter((_, i) => i !== idx))}
+                                    className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          <div className="flex gap-2 mt-3 justify-between items-center">
+                            <button
+                              onClick={() => {
+                                const input = document.createElement('input')
+                                input.type = 'file'
+                                input.accept = 'image/*'
+                                input.multiple = true
+                                input.onchange = (e) => {
+                                  const files = Array.from((e.target as HTMLInputElement).files || [])
+                                  setCommentPhotos(prev => [...prev, ...files])
+                                }
+                                input.click()
+                              }}
+                              className="flex items-center gap-1.5 text-xs text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                            >
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                              Add Photo
+                            </button>
+
+                            <div className="flex gap-2">
+                            <button
+                              onClick={() => {
+                                setActiveCommentBox(null)
+                                setCommentText('')
+                                setCommentPhotos([])
+                              }}
+                              className="text-xs text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (commentText.trim()) {
+                                  handleAddAdjustment(activeCommentBox.type, activeCommentBox.id, activeCommentBox.name, commentText)
+                                  setActiveCommentBox(null)
+                                  setCommentText('')
+                                  setCommentPhotos([])
+                                  if (commentPhotos.length > 0) {
+                                    toast.success('Photos attached!', {
+                                      description: `${commentPhotos.length} photo(s) sent with adjustment`
+                                    })
+                                  }
+                                }
+                              }}
+                              disabled={!commentText.trim()}
+                              className="text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed px-4 py-1.5 rounded-lg transition-colors"
+                            >
+                              Send to Caterer
+                              {commentPhotos.length > 0 && (
+                                <span className="ml-1.5 bg-white/20 px-1.5 py-0.5 rounded-full text-xs">
+                                  +{commentPhotos.length}
+                                </span>
+                              )}
+                            </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Adjustments List Grouped by Item/Block */}
+                  {adjustments.length === 0 ? (
+                    <div className="text-center py-12 px-6">
+                      <div className="text-5xl mb-4">✨</div>
+                      <p className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                        Everything looks good!
+                      </p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 max-w-sm mx-auto leading-relaxed">
+                        If you need any changes, click the <span className="inline-flex items-center justify-center w-5 h-5 text-xs">💬</span> icon next to any item to request adjustments.
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-3">
+                        Caterers typically respond within 2-4 hours
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {(() => {
+                        // Group adjustments by target
+                        const grouped = adjustments.reduce((acc, adj) => {
+                          const key = `${adj.targetEntity}-${adj.targetEntityId}`
+                          if (!acc[key]) {
+                            acc[key] = {
+                              name: adj.targetEntity === 'block'
+                                ? offerState.offer?.blocks.find(b => b.id === adj.targetEntityId)?.name || 'Block'
+                                : offerState.offer?.blocks.flatMap(b => b.items).find(i => i.id === adj.targetEntityId)?.itemName || 'Item',
+                              type: adj.targetEntity,
+                              adjustments: []
+                            }
+                          }
+                          acc[key].adjustments.push(adj)
+                          return acc
+                        }, {} as Record<string, { name: string; type: string; adjustments: typeof adjustments }>)
+
+                        return Object.entries(grouped).map(([key, group]) => (
+                          <div key={key} className="border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden">
+                            <div className="bg-gray-50 dark:bg-gray-900/50 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                  {group.name}
+                                </span>
+                                <Badge variant="light" color="info" size="sm">
+                                  {group.type}
+                                </Badge>
+                                {group.adjustments.some(a => a.status === 'pending') && (
+                                  <Badge variant="light" color="warning" size="sm">
+                                    {group.adjustments.filter(a => a.status === 'pending').length} pending
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                            <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                              {group.adjustments.map(adjustment => (
+                                <div key={adjustment.id} className="p-4">
+                                  <AdjustmentThread
+                                    adjustment={adjustment}
+                                    onAddComment={message => handleAddComment(adjustment.id, message)}
+                                    onResolve={() => handleResolveAdjustment(adjustment.id)}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))
+                      })()}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -1687,35 +2563,132 @@ export function FastOfferBuilder({
         }}
       />
 
-      <AddAdjustmentModal
-        isOpen={isAdjustmentModalOpen}
-        onClose={() => {
-          setIsAdjustmentModalOpen(false)
-          setSelectedAdjustmentTarget(null)
-        }}
-        onAdd={message => {
-          if (selectedAdjustmentTarget) {
-            handleAddAdjustment(
-              selectedAdjustmentTarget.type,
-              selectedAdjustmentTarget.id,
-              message
-            )
-          }
-        }}
-        targetName={
-          selectedAdjustmentTarget
-            ? selectedAdjustmentTarget.type === 'block'
-              ? offerState.offer?.blocks.find(
-                  b => b.id === selectedAdjustmentTarget.id
-                )?.name || 'Block'
-              : offerState.offer?.blocks
-                  .flatMap(b => b.items)
-                  .find(i => i.id === selectedAdjustmentTarget.id)?.itemName ||
-                'Item'
-            : ''
-        }
-        targetType={selectedAdjustmentTarget?.type || 'item'}
-      />
+      {/* Keyboard Shortcuts Modal */}
+      {showShortcutsModal && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-gray-900/75 z-99999 transition-opacity backdrop-blur-sm"
+            onClick={() => setShowShortcutsModal(false)}
+          />
+
+          {/* Modal */}
+          <div className="fixed inset-0 z-999999 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4">
+              <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-2xl w-full border border-gray-200 dark:border-gray-700 overflow-hidden">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 px-6 py-5 border-b border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                        ⌨️ Keyboard Shortcuts
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        Boost your productivity with these shortcuts
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setShowShortcutsModal(false)}
+                      className="p-2 hover:bg-white/50 dark:hover:bg-gray-700/50 rounded-lg transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="p-6 space-y-6">
+                  {/* Navigation */}
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                      <span className="text-lg">🧭</span>
+                      Navigation
+                    </h4>
+                    <div className="space-y-2">
+                      {[
+                        { keys: ['Alt', '1-9'], description: 'Switch between blocks' },
+                        { keys: ['/'], description: 'Focus search bar' },
+                        { keys: ['Esc'], description: 'Close modal or unfocus' },
+                      ].map((shortcut, i) => (
+                        <div key={i} className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 dark:bg-gray-900/50">
+                          <span className="text-sm text-gray-600 dark:text-gray-400">{shortcut.description}</span>
+                          <div className="flex gap-1">
+                            {shortcut.keys.map((key, j) => (
+                              <kbd key={j} className="px-2 py-1 text-xs font-semibold text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded shadow-sm">
+                                {key}
+                              </kbd>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Search */}
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                      <span className="text-lg">🔍</span>
+                      Search & Add Items
+                    </h4>
+                    <div className="space-y-2">
+                      {[
+                        { keys: ['↑', '↓'], description: 'Navigate search results' },
+                        { keys: ['Enter'], description: 'Add selected item' },
+                      ].map((shortcut, i) => (
+                        <div key={i} className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 dark:bg-gray-900/50">
+                          <span className="text-sm text-gray-600 dark:text-gray-400">{shortcut.description}</span>
+                          <div className="flex gap-1">
+                            {shortcut.keys.map((key, j) => (
+                              <kbd key={j} className="px-2 py-1 text-xs font-semibold text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded shadow-sm">
+                                {key}
+                              </kbd>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* General */}
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                      <span className="text-lg">⚡</span>
+                      General
+                    </h4>
+                    <div className="space-y-2">
+                      {[
+                        { keys: ['?'], description: 'Show this help dialog' },
+                      ].map((shortcut, i) => (
+                        <div key={i} className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 dark:bg-gray-900/50">
+                          <span className="text-sm text-gray-600 dark:text-gray-400">{shortcut.description}</span>
+                          <div className="flex gap-1">
+                            {shortcut.keys.map((key, j) => (
+                              <kbd key={j} className="px-2 py-1 text-xs font-semibold text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded shadow-sm">
+                                {key}
+                              </kbd>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+                  <p className="text-xs text-gray-500 dark:text-gray-500 text-center">
+                    💡 Tip: These shortcuts work anywhere in the offer builder
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
     </div>
+    </>
   )
 }

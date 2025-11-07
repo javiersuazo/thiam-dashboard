@@ -51,6 +51,12 @@ export function FastOfferBuilder({
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [adjustments, setAdjustments] = useState<OfferAdjustment[]>(initialAdjustments)
   const [sidebarTab, setSidebarTab] = useState<'request' | 'adjustments'>('request')
+  const [selectedAdjustmentTarget, setSelectedAdjustmentTarget] = useState<{
+    type: 'block' | 'item'
+    id: string
+    name: string
+  } | null>(null)
+  const [isAdjustmentModalOpen, setIsAdjustmentModalOpen] = useState(false)
   const [activeCommentBox, setActiveCommentBox] = useState<{
     type: 'block' | 'item'
     id: string
@@ -65,6 +71,7 @@ export function FastOfferBuilder({
   const [previousTotal, setPreviousTotal] = useState<number | null>(null)
   const [priceChangeDirection, setPriceChangeDirection] = useState<'up' | 'down' | null>(null)
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit')
+  const [showCatalogBrowser, setShowCatalogBrowser] = useState(false)
   const undoTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const priceChangeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -182,7 +189,7 @@ export function FastOfferBuilder({
     const smartQuantity = calculateSmartQuantity(item)
 
     offerState.addItemToBlock(offerState.selectedBlockId, {
-      itemType: 'menu_item',
+      itemType: item.type || 'menu_item',
       itemName: item.name,
       itemDescription: item.description,
       menuItemId: item.id,
@@ -567,7 +574,7 @@ export function FastOfferBuilder({
         <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-3 sm:p-4">
           <div className="flex items-center justify-between gap-3 mb-3">
             <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-              {offerState.offer.title}
+              {offerState.offer?.title}
             </h2>
 
             {/* View Mode Toggle & Actions */}
@@ -576,8 +583,10 @@ export function FastOfferBuilder({
               {viewMode === 'preview' && (
                 <button
                   onClick={() => {
-                    const previewUrl = `${window.location.origin}/en/offers/${offerState.offer.id}/preview`
-                    window.open(previewUrl, '_blank')
+                    if (offerState.offer) {
+                      const previewUrl = `${window.location.origin}/en/offers/${offerState.offer.id}/preview`
+                      window.open(previewUrl, '_blank')
+                    }
                   }}
                   className="flex items-center gap-2 px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-full text-sm font-semibold transition-all shadow-md hover:shadow-lg active:scale-95 print:hidden"
                 >
@@ -820,22 +829,35 @@ export function FastOfferBuilder({
         {/* Quick Search - Only in Edit Mode */}
         {viewMode === 'edit' && (
         <div className="sticky top-0 z-20 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-3 sm:p-4">
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Input
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search items to add... (Press /)"
+                autoFocus
+                className="rounded-full border-gray-300 dark:border-gray-600 shadow-sm hover:shadow-md transition-shadow pl-4 sm:pl-5 pr-4 sm:pr-32 text-sm w-full"
+              />
+              {selectedBlock && (
+                <div className="hidden sm:block absolute right-3 top-1/2 -translate-y-1/2">
+                  <Badge variant="light" color="primary" size="sm" className="rounded-full">
+                    → {selectedBlock.name}
+                  </Badge>
+                </div>
+              )}
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowCatalogBrowser(!showCatalogBrowser)}
+              className="whitespace-nowrap"
+            >
+              {showCatalogBrowser ? 'Hide' : 'Browse All'}
+            </Button>
+          </div>
+
           <div className="relative">
-            <Input
-              ref={searchInputRef}
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search items to add... (Press /)"
-              autoFocus
-              className="rounded-full border-gray-300 dark:border-gray-600 shadow-sm hover:shadow-md transition-shadow pl-4 sm:pl-5 pr-4 sm:pr-32 text-sm w-full"
-            />
-            {selectedBlock && (
-              <div className="hidden sm:block absolute right-3 top-1/2 -translate-y-1/2">
-                <Badge variant="light" color="primary" size="sm" className="rounded-full">
-                  → {selectedBlock.name}
-                </Badge>
-              </div>
-            )}
 
             {searchQuery && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl max-h-60 overflow-y-auto z-30">
@@ -870,7 +892,7 @@ export function FastOfferBuilder({
             )}
 
             {/* Show All Catalog Sections */}
-            {!searchQuery && (
+            {!searchQuery && showCatalogBrowser && (
               <div className="mt-4 space-y-6">
                 {/* Food & Beverage Section */}
                 {foodItems.length > 0 && (
@@ -1364,7 +1386,8 @@ export function FastOfferBuilder({
                                       onClick={() => {
                                         setSelectedAdjustmentTarget({
                                           type: 'item',
-                                          id: item.id
+                                          id: item.id,
+                                          name: item.itemName
                                         })
                                         setIsAdjustmentModalOpen(true)
                                       }}
@@ -1534,7 +1557,8 @@ export function FastOfferBuilder({
                                       onClick={() => {
                                         setSelectedAdjustmentTarget({
                                           type: 'item',
-                                          id: item.id
+                                          id: item.id,
+                                          name: item.itemName
                                         })
                                         setIsAdjustmentModalOpen(true)
                                       }}
@@ -1704,7 +1728,8 @@ export function FastOfferBuilder({
                                       onClick={() => {
                                         setSelectedAdjustmentTarget({
                                           type: 'item',
-                                          id: item.id
+                                          id: item.id,
+                                          name: item.itemName
                                         })
                                         setIsAdjustmentModalOpen(true)
                                       }}
@@ -1829,14 +1854,14 @@ export function FastOfferBuilder({
                   )}
                 </div>
               </div>
-              {offerState.offer.blocks.map((block, index) => {
+              {offerState.offer?.blocks.map((block, index) => {
                 const blockTotal = block.items.reduce((sum, item) => sum + item.lineItemTotal, 0)
                 const groups = groupItemsByCategory(block.items)
 
                 return (
                   <div key={block.id} className="relative print:break-inside-avoid">
                     {/* Timeline Connector */}
-                    {index < offerState.offer.blocks.length - 1 && (
+                    {offerState.offer && index < offerState.offer.blocks.length - 1 && (
                       <div className="absolute left-6 top-full h-6 w-0.5 bg-gradient-to-b from-gray-300 to-transparent dark:from-gray-600 z-0 print:hidden" />
                     )}
 
@@ -2014,10 +2039,10 @@ export function FastOfferBuilder({
                     <span>{t('subtotal')}</span>
                     <span className="font-semibold">${(totals.subtotalCents / 100).toFixed(2)}</span>
                   </div>
-                  {totals.discountCents > 0 && (
+                  {(totals.discountCents ?? 0) > 0 && (
                     <div className="flex items-center justify-between text-green-600">
                       <span>{t('discount')}</span>
-                      <span className="font-semibold">-${(totals.discountCents / 100).toFixed(2)}</span>
+                      <span className="font-semibold">-${((totals.discountCents ?? 0) / 100).toFixed(2)}</span>
                     </div>
                   )}
                   <div className="border-t-2 border-gray-200 dark:border-gray-700 pt-3 flex items-center justify-between">
@@ -2057,7 +2082,7 @@ export function FastOfferBuilder({
                   </span>
                   <input
                     type="number"
-                    value={(totals.discountCents / 100).toFixed(2)}
+                    value={((totals.discountCents ?? 0) / 100).toFixed(2)}
                     onChange={e => {
                       if (offerState.offer) {
                         offerState.setOffer({

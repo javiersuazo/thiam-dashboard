@@ -146,6 +146,7 @@ export interface MenuItem {
   name: string
   description?: string
   category: string
+  type?: OfferItemType
   dietaryTags?: string[]
   ingredients?: string[]
   priceCents: number

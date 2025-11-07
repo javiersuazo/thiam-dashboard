@@ -26,7 +26,7 @@ export function useOfferBuilderState({ initialOffer, onUpdate }: UseOfferBuilder
   )
 
   const addBlock = useCallback(
-    (block: Omit<OfferBlock, 'id' | 'offerId'>) => {
+    (block: Omit<OfferBlock, 'id' | 'offerId' | 'items' | 'subtotalCents' | 'position'>) => {
       if (!offer) return
 
       const newBlock: OfferBlock = {

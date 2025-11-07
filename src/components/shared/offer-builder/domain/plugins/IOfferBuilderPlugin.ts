@@ -103,6 +103,14 @@ export interface IOfferBuilderPlugin {
   supportsAttachments: boolean
 
   metadata?: Record<string, any>
+
+  getItemTypeConfig(type: string): ItemTypeConfig | undefined
+
+  validateOffer(offer: Offer): string[]
+
+  validateBlock(block: OfferBlock): string[]
+
+  validateItem(item: OfferItem): string[]
 }
 
 export abstract class OfferBuilderPlugin implements IOfferBuilderPlugin {

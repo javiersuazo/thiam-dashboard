@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { FastOfferBuilder } from '@/components/domains/offers/offer-builder/components/FastOfferBuilder'
+import { FastOfferBuilder } from '../components/FastOfferBuilder'
 import type { IOfferBuilderPlugin } from '../domain/plugins/IOfferBuilderPlugin'
 import type { Offer as PluginOffer, OfferBlock as PluginBlock, OfferItem as PluginItem } from '../core/types'
 import type { CatalogItem } from '../infrastructure/repositories/ICatalogRepository'
@@ -11,7 +11,7 @@ import type {
   OfferBlock as LegacyBlock,
   OfferBlockItem,
   OfferAdjustment
-} from '@/components/domains/offers/offer-builder/types/domain.types'
+} from '../types/domain.types'
 
 interface FastOfferBuilderAdapterProps {
   offerId: string
@@ -68,7 +68,7 @@ export function FastOfferBuilderAdapter({
 
   const handleSave = async (updatedLegacyOffer: LegacyOffer) => {
     try {
-      const originalBlockIds = new Set(pluginOffer.blocks.map(b => b.id))
+      const originalBlockIds = new Set(pluginOffer.blocks.map((b: PluginBlock) => b.id))
       const updatedBlockIds = new Set(updatedLegacyOffer.blocks.map(b => b.id))
 
       for (const legacyBlock of updatedLegacyOffer.blocks) {
@@ -120,7 +120,7 @@ export function FastOfferBuilderAdapter({
           })
 
           const originalBlock = pluginOffer.blocks.find(b => b.id === legacyBlock.id)
-          const originalItemIds = new Set(originalBlock?.items.map(i => i.id) || [])
+          const originalItemIds = new Set(originalBlock?.items.map((i: PluginItem) => i.id) || [])
           const updatedItemIds = new Set(legacyBlock.items.map(i => i.id))
 
           for (const legacyItem of legacyBlock.items) {
@@ -253,6 +253,7 @@ function convertCatalogItemsToLegacy(catalogItems: CatalogItem[]): MenuItem[] {
     name: item.name,
     description: item.description,
     category: item.category || '',
+    type: item.type,
     dietaryTags: item.tags,
     priceCents: item.priceCents,
     currency: 'USD',

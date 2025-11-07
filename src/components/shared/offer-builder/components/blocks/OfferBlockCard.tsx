@@ -3,13 +3,12 @@
 import type { OfferBlock, OfferBlockItem } from '../../types'
 import Button from '@/components/shared/ui/button/Button'
 import Input from '@/components/shared/form/input/InputField'
-import { OfferItemRow } from '../items/OfferItemRow'
 
 interface OfferBlockCardProps {
   block: OfferBlock
   isSelected: boolean
   onSelect: () => void
-  onUpdate: (updates: Partial<OfferBlock>) => void
+  onUpdate: (updates: any) => void
   onDelete: () => void
   onAddItem: () => void
   onUpdateItem: (itemId: string, updates: Partial<OfferBlockItem>) => void
@@ -93,12 +92,17 @@ export function OfferBlockCard({
         ) : (
           <div className="space-y-2">
             {block.items.map((item) => (
-              <OfferItemRow
-                key={item.id}
-                item={item}
-                onUpdate={(updates) => onUpdateItem(item.id, updates)}
-                onDelete={() => onDeleteItem(item.id)}
-              />
+              <div key={item.id} className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-900 rounded">
+                <div className="flex-1">
+                  <div className="font-medium text-sm">{item.itemName}</div>
+                  <div className="text-xs text-gray-500">
+                    ${(item.unitPriceCents / 100).toFixed(2)} × {item.quantity}
+                  </div>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => onDeleteItem(item.id)}>
+                  Remove
+                </Button>
+              </div>
             ))}
 
             <Button variant="outline" size="sm" className="w-full mt-3" onClick={onAddItem}>

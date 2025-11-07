@@ -115,10 +115,10 @@ export function AdjustmentThread({ adjustment, onAddComment, onResolve }: Adjust
                   Cancel
                 </Button>
                 <Button
-                  variant="success"
+                  variant="primary"
                   size="sm"
                   onClick={onResolve}
-                  className="rounded-full px-4 text-xs ml-auto"
+                  className="rounded-full px-4 text-xs ml-auto bg-green-600 hover:bg-green-700"
                 >
                   ✓ Resolve
                 </Button>
@@ -135,10 +135,10 @@ export function AdjustmentThread({ adjustment, onAddComment, onResolve }: Adjust
                 💬 Reply
               </Button>
               <Button
-                variant="success"
+                variant="primary"
                 size="sm"
                 onClick={onResolve}
-                className="rounded-full px-4 text-xs"
+                className="rounded-full px-4 text-xs bg-green-600 hover:bg-green-700"
               >
                 ✓ Resolve
               </Button>

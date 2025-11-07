@@ -38,7 +38,7 @@ export function TableHeaderCell<TRow>({
               className={`flex items-center gap-1 ${
                 header.column.getCanSort() ? 'cursor-pointer select-none' : ''
               }`}
-              onClick={header.column.getToggleSortingHandler()}
+              onClick={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
             >
               <div className="font-medium text-gray-700 text-theme-xs dark:text-gray-400">
                 {flexRender(

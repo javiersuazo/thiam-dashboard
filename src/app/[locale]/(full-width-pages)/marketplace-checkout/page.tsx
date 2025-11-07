@@ -60,11 +60,11 @@ export default function MarketplaceCheckoutPage() {
 
   if (cart.items.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-4">
         <div className="text-center">
-          <ShoppingBag className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h1 className="text-2xl font-semibold text-gray-900 mb-2">Your cart is empty</h1>
-          <p className="text-gray-600 mb-6">Add some items to your cart before checking out.</p>
+          <ShoppingBag className="w-16 h-16 text-gray-300 dark:text-gray-700 mx-auto mb-4" />
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Your cart is empty</h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">Add some items to your cart before checking out.</p>
           <Button onClick={() => router.push('/en/marketplace-enhanced')}>
             Browse Marketplace
           </Button>
@@ -74,13 +74,13 @@ export default function MarketplaceCheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       {/* Header */}
-      <div className="bg-white border-b">
+      <div className="bg-white dark:bg-gray-900 border-b dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+            className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
             <span>Back to Marketplace</span>
@@ -92,13 +92,13 @@ export default function MarketplaceCheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left: Checkout Form */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8">
-              <h1 className="text-2xl font-semibold text-gray-900 mb-6">Checkout</h1>
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 md:p-8">
+              <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Checkout</h1>
 
               <form onSubmit={handleSubmit} className="space-y-8">
                 {/* Contact Information */}
                 <section>
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h2>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Contact Information</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="firstName">First Name *</Label>
@@ -156,7 +156,7 @@ export default function MarketplaceCheckoutPage() {
 
                 {/* Billing Address */}
                 <section>
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Billing Address</h2>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Billing Address</h2>
                   <div className="space-y-4">
                     <div>
                       <Label htmlFor="billingAddress">Street Address *</Label>
@@ -206,13 +206,13 @@ export default function MarketplaceCheckoutPage() {
                 {/* Delivery Address */}
                 <section>
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold text-gray-900">Delivery Address</h2>
-                    <label className="flex items-center gap-2 text-sm text-gray-600">
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Delivery Address</h2>
+                    <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                       <input
                         type="checkbox"
                         checked={formData.sameAsBilling}
                         onChange={(e) => handleChange('sameAsBilling', e.target.checked)}
-                        className="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                        className="rounded border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus:ring-gray-900 dark:focus:ring-gray-100"
                       />
                       Same as billing
                     </label>
@@ -268,7 +268,7 @@ export default function MarketplaceCheckoutPage() {
 
                 {/* Delivery Details */}
                 <section>
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Delivery Details</h2>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Delivery Details</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="deliveryDate">Preferred Delivery Date *</Label>
@@ -298,7 +298,7 @@ export default function MarketplaceCheckoutPage() {
 
                 {/* Special Instructions */}
                 <section>
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
                     Special Instructions
                   </h2>
                   <Textarea
@@ -328,14 +328,14 @@ export default function MarketplaceCheckoutPage() {
 
           {/* Right: Cart Summary */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl border border-gray-200 p-6 sticky top-4">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h2>
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 sticky top-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Order Summary</h2>
 
               {/* Cart Items */}
               <div className="space-y-4 mb-6 max-h-[400px] overflow-y-auto">
                 {cart.items.map((item) => (
-                  <div key={item.product.id} className="flex gap-3 pb-4 border-b">
-                    <div className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+                  <div key={item.product.id} className="flex gap-3 pb-4 border-b dark:border-gray-800">
+                    <div className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
                       {item.product.imageUrl ? (
                         <Image
                           src={item.product.imageUrl}
@@ -345,16 +345,16 @@ export default function MarketplaceCheckoutPage() {
                         />
                       ) : (
                         <div className="flex items-center justify-center h-full">
-                          <ShoppingBag className="w-6 h-6 text-gray-300" />
+                          <ShoppingBag className="w-6 h-6 text-gray-300 dark:text-gray-700" />
                         </div>
                       )}
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-semibold text-gray-900 truncate">
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
                         {item.product.name}
                       </h3>
-                      <p className="text-xs text-gray-500">{item.product.catererName}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{item.product.catererName}</p>
                       <div className="flex items-center justify-between mt-2">
                         <div className="flex items-center gap-2">
                           <button
@@ -364,30 +364,30 @@ export default function MarketplaceCheckoutPage() {
                                 Math.max(item.product.minOrder || 1, item.quantity - 1)
                               )
                             }
-                            className="w-6 h-6 rounded border border-gray-300 flex items-center justify-center hover:bg-gray-50 text-sm"
+                            className="w-6 h-6 rounded border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-800 text-sm dark:text-gray-300"
                             disabled={item.quantity <= (item.product.minOrder || 1)}
                           >
                             −
                           </button>
-                          <span className="text-sm font-medium w-6 text-center">
+                          <span className="text-sm font-medium w-6 text-center dark:text-gray-300">
                             {item.quantity}
                           </span>
                           <button
                             onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                            className="w-6 h-6 rounded border border-gray-300 flex items-center justify-center hover:bg-gray-50 text-sm"
+                            className="w-6 h-6 rounded border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-800 text-sm dark:text-gray-300"
                           >
                             +
                           </button>
                         </div>
                         <button
                           onClick={() => removeFromCart(item.product.id)}
-                          className="p-1 rounded hover:bg-red-50 hover:text-red-600 transition-colors"
+                          className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                           title="Remove"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
-                      <p className="text-sm font-medium text-gray-900 mt-1">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mt-1">
                         {item.product.currency} {item.subtotal?.toFixed(2)}
                       </p>
                     </div>
@@ -398,26 +398,26 @@ export default function MarketplaceCheckoutPage() {
               {/* Totals */}
               <div className="space-y-2 text-sm mb-4">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Subtotal</span>
-                  <span className="font-medium">
+                  <span className="text-gray-600 dark:text-gray-400">Subtotal</span>
+                  <span className="font-medium dark:text-gray-200">
                     {cart.items[0]?.product.currency || 'EUR'} {cart.subtotal.toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Tax (19%)</span>
-                  <span className="font-medium">
+                  <span className="text-gray-600 dark:text-gray-400">Tax (19%)</span>
+                  <span className="font-medium dark:text-gray-200">
                     {cart.items[0]?.product.currency || 'EUR'} {cart.tax.toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Delivery Fee</span>
-                  <span className="font-medium">
+                  <span className="text-gray-600 dark:text-gray-400">Delivery Fee</span>
+                  <span className="font-medium dark:text-gray-200">
                     {cart.items[0]?.product.currency || 'EUR'} {cart.deliveryFee.toFixed(2)}
                   </span>
                 </div>
-                <div className="flex justify-between pt-2 border-t text-base font-semibold">
-                  <span>Total</span>
-                  <span>
+                <div className="flex justify-between pt-2 border-t dark:border-gray-800 text-base font-semibold">
+                  <span className="dark:text-gray-100">Total</span>
+                  <span className="dark:text-gray-100">
                     {cart.items[0]?.product.currency || 'EUR'} {cart.total.toFixed(2)}
                   </span>
                 </div>
@@ -436,8 +436,8 @@ export default function MarketplaceCheckoutPage() {
               </div>
 
               {/* Trust Badges */}
-              <div className="mt-4 pt-4 border-t">
-                <div className="flex items-center gap-2 text-xs text-gray-500">
+              <div className="mt-4 pt-4 border-t dark:border-gray-800">
+                <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                     <path
                       fillRule="evenodd"

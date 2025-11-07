@@ -23,14 +23,36 @@ export function useTableColumns<TRow>({
     if (features.rowSelection) {
       cols.push({
         id: 'select',
-        header: ({ table }: any) => (
-          <Checkbox
-            checked={table.getIsAllPageRowsSelected()}
-            onChange={(checked) => {
-              table.toggleAllPageRowsSelected(checked)
-            }}
-          />
-        ),
+        header: ({ table }: any) => {
+          const isAllSelected = table.getIsAllPageRowsSelected()
+
+          return (
+            <div className="flex items-center justify-center">
+              <input
+                type="checkbox"
+                className="w-5 h-5 appearance-none cursor-pointer dark:border-gray-700 border border-gray-300 checked:border-transparent rounded-md checked:bg-brand-500"
+                checked={isAllSelected}
+                onChange={table.getToggleAllPageRowsSelectedHandler()}
+              />
+              {isAllSelected && (
+                <svg
+                  className="absolute w-3.5 h-3.5 pointer-events-none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                >
+                  <path
+                    d="M11.6666 3.5L5.24992 9.91667L2.33325 7"
+                    stroke="white"
+                    strokeWidth="1.94437"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              )}
+            </div>
+          )
+        },
         cell: ({ row }: any) => (
           <Checkbox
             checked={row.getIsSelected()}

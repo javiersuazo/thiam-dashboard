@@ -130,7 +130,7 @@ export default function MarketplaceEnhancedPage() {
   const gutters = 'px-4'
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       {/* Mini-cart pill */}
       <MiniCart
         cart={cart}
@@ -159,10 +159,10 @@ export default function MarketplaceEnhancedPage() {
         <div className="flex flex-col gap-4 mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900">
+              <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
                 {searchQuery ? `Results for "${searchQuery}"` : viewMode === 'products' ? 'All Dishes' : 'All Caterers'}
               </h1>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                 {viewMode === 'products'
                   ? `${totalProducts} dish${totalProducts !== 1 ? 'es' : ''} available`
                   : `${totalCaterers} caterer${totalCaterers !== 1 ? 's' : ''} • ${totalProducts} dishes total`
@@ -173,7 +173,7 @@ export default function MarketplaceEnhancedPage() {
             {/* View mode and density toggles */}
             <div className="flex items-center gap-4">
               {/* View mode toggle */}
-              <div className="flex items-center gap-2 border border-gray-200 rounded-lg p-1">
+              <div className="flex items-center gap-2 border border-gray-200 dark:border-gray-800 rounded-lg p-1">
                 <Button
                   variant={viewMode === 'products' ? 'default' : 'ghost'}
                   size="sm"
@@ -231,7 +231,7 @@ export default function MarketplaceEnhancedPage() {
         {(viewMode === 'products' ? totalProducts : totalCaterers) === 0 ? (
           <div className="text-center py-24">
             <svg
-              className="w-20 h-20 mx-auto text-gray-300 mb-4"
+              className="w-20 h-20 mx-auto text-gray-300 dark:text-gray-700 mb-4"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -243,8 +243,8 @@ export default function MarketplaceEnhancedPage() {
                 d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">No results found</h2>
-            <p className="text-sm text-gray-500 mb-6 max-w-md mx-auto">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">No results found</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
               Try adjusting your search or filters to find what you're looking for
             </p>
             <div className="flex items-center justify-center gap-3">
@@ -322,16 +322,16 @@ export default function MarketplaceEnhancedPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t mt-16 py-6">
+      <footer className="bg-white dark:bg-gray-900 border-t dark:border-gray-800 mt-16 py-6">
         <div className={`${maxWidth} mx-auto ${gutters}`}>
           <div className="flex items-center justify-between text-sm">
-            <div className="text-gray-500">
+            <div className="text-gray-500 dark:text-gray-400">
               © 2025 Thiago Marketplace · Made with care
             </div>
-            <div className="flex items-center gap-4 text-gray-500">
-              <button className="hover:text-gray-900 transition-colors">Support</button>
-              <button className="hover:text-gray-900 transition-colors">Terms</button>
-              <button className="hover:text-gray-900 transition-colors">Privacy</button>
+            <div className="flex items-center gap-4 text-gray-500 dark:text-gray-400">
+              <button className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors">Support</button>
+              <button className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors">Terms</button>
+              <button className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors">Privacy</button>
             </div>
           </div>
         </div>

@@ -81,27 +81,27 @@ export function FilterChipRail({
   }
 
   return (
-    <div className="sticky top-0 z-30 bg-white border-b">
+    <div className="sticky top-0 z-30 bg-white dark:bg-gray-900 border-b dark:border-gray-800">
       <div className="max-w-[1360px] mx-auto px-4 py-3">
         {/* Search + Filter Chips */}
         <div className="flex items-center gap-2 mb-3">
           {/* Search field */}
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
             <input
               ref={searchRef}
               type="text"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Search products... (Press /)"
-              className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
             />
             {searchQuery && (
               <button
                 onClick={() => onSearchChange('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-100 rounded-full transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
               >
-                <X className="w-3.5 h-3.5 text-gray-500" />
+                <X className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />
               </button>
             )}
           </div>
@@ -114,13 +114,13 @@ export function FilterChipRail({
                 onClick={() => setActivePopover(activePopover === 'cuisine' ? null : 'cuisine')}
                 className={`px-3 py-1.5 text-sm rounded-full border transition-colors flex items-center gap-1.5 ${
                   filters.categories && filters.categories.length > 0
-                    ? 'bg-gray-900 text-white border-gray-900'
-                    : 'bg-white border-gray-300 hover:border-gray-900'
+                    ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-gray-900 dark:border-gray-100'
+                    : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 hover:border-gray-900 dark:hover:border-gray-100 text-gray-900 dark:text-gray-100'
                 }`}
               >
                 Cuisine
                 {filters.categories && filters.categories.length > 0 && (
-                  <Badge variant="secondary" className="bg-white text-gray-900 h-4 px-1 text-xs">
+                  <Badge variant="secondary" className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 h-4 px-1 text-xs">
                     {filters.categories.length}
                   </Badge>
                 )}
@@ -128,22 +128,22 @@ export function FilterChipRail({
               </button>
 
               {activePopover === 'cuisine' && (
-                <div className="absolute top-full mt-2 w-64 bg-white border rounded-2xl shadow-lg py-2 z-50">
-                  <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase">
+                <div className="absolute top-full mt-2 w-64 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-2xl shadow-lg py-2 z-50">
+                  <div className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
                     Cuisine Types
                   </div>
                   {availableCategories.map((cat) => (
                     <label
                       key={cat}
-                      className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                      className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
                     >
                       <input
                         type="checkbox"
                         checked={filters.categories?.includes(cat) || false}
                         onChange={() => toggleCategory(cat)}
-                        className="rounded border-gray-300"
+                        className="rounded border-gray-300 dark:border-gray-600"
                       />
-                      <span className="text-sm">{cat}</span>
+                      <span className="text-sm text-gray-900 dark:text-gray-100">{cat}</span>
                     </label>
                   ))}
                 </div>
@@ -156,8 +156,8 @@ export function FilterChipRail({
                 onClick={() => setActivePopover(activePopover === 'price' ? null : 'price')}
                 className={`px-3 py-1.5 text-sm rounded-full border transition-colors flex items-center gap-1.5 ${
                   filters.minPrice || filters.maxPrice
-                    ? 'bg-gray-900 text-white border-gray-900'
-                    : 'bg-white border-gray-300 hover:border-gray-900'
+                    ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-gray-900 dark:border-gray-100'
+                    : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 hover:border-gray-900 dark:hover:border-gray-100 text-gray-900 dark:text-gray-100'
                 }`}
               >
                 Price
@@ -165,13 +165,13 @@ export function FilterChipRail({
               </button>
 
               {activePopover === 'price' && (
-                <div className="absolute top-full mt-2 w-64 bg-white border rounded-2xl shadow-lg p-4 z-50">
-                  <div className="text-xs font-semibold text-gray-500 uppercase mb-3">
+                <div className="absolute top-full mt-2 w-64 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-2xl shadow-lg p-4 z-50">
+                  <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-3">
                     Price Range
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs text-gray-600 mb-1 block">Min</label>
+                      <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Min</label>
                       <input
                         type="number"
                         value={filters.minPrice || ''}
@@ -182,11 +182,11 @@ export function FilterChipRail({
                           })
                         }
                         placeholder="0"
-                        className="w-full px-3 py-1.5 text-sm border rounded-lg"
+                        className="w-full px-3 py-1.5 text-sm border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                       />
                     </div>
                     <div>
-                      <label className="text-xs text-gray-600 mb-1 block">Max</label>
+                      <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Max</label>
                       <input
                         type="number"
                         value={filters.maxPrice || ''}
@@ -197,7 +197,7 @@ export function FilterChipRail({
                           })
                         }
                         placeholder="500"
-                        className="w-full px-3 py-1.5 text-sm border rounded-lg"
+                        className="w-full px-3 py-1.5 text-sm border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                       />
                     </div>
                   </div>
@@ -211,8 +211,8 @@ export function FilterChipRail({
                 onClick={() => setActivePopover(activePopover === 'rating' ? null : 'rating')}
                 className={`px-3 py-1.5 text-sm rounded-full border transition-colors flex items-center gap-1.5 ${
                   filters.minRating
-                    ? 'bg-gray-900 text-white border-gray-900'
-                    : 'bg-white border-gray-300 hover:border-gray-900'
+                    ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-gray-900 dark:border-gray-100'
+                    : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 hover:border-gray-900 dark:hover:border-gray-100 text-gray-900 dark:text-gray-100'
                 }`}
               >
                 Rating
@@ -220,7 +220,7 @@ export function FilterChipRail({
               </button>
 
               {activePopover === 'rating' && (
-                <div className="absolute top-full mt-2 w-48 bg-white border rounded-2xl shadow-lg py-2 z-50">
+                <div className="absolute top-full mt-2 w-48 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-2xl shadow-lg py-2 z-50">
                   {[4.5, 4.0, 3.5, 3.0].map((rating) => (
                     <button
                       key={rating}
@@ -228,7 +228,7 @@ export function FilterChipRail({
                         onFiltersChange({ ...filters, minRating: rating })
                         setActivePopover(null)
                       }}
-                      className="w-full px-3 py-2 text-sm text-left hover:bg-gray-50 flex items-center gap-2"
+                      className="w-full px-3 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 text-gray-900 dark:text-gray-100"
                     >
                       <span>⭐ {rating}+</span>
                     </button>
@@ -243,13 +243,13 @@ export function FilterChipRail({
                 onClick={() => setActivePopover(activePopover === 'tags' ? null : 'tags')}
                 className={`px-3 py-1.5 text-sm rounded-full border transition-colors flex items-center gap-1.5 ${
                   filters.tags && filters.tags.length > 0
-                    ? 'bg-gray-900 text-white border-gray-900'
-                    : 'bg-white border-gray-300 hover:border-gray-900'
+                    ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-gray-900 dark:border-gray-100'
+                    : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 hover:border-gray-900 dark:hover:border-gray-100 text-gray-900 dark:text-gray-100'
                 }`}
               >
                 Tags
                 {filters.tags && filters.tags.length > 0 && (
-                  <Badge variant="secondary" className="bg-white text-gray-900 h-4 px-1 text-xs">
+                  <Badge variant="secondary" className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 h-4 px-1 text-xs">
                     {filters.tags.length}
                   </Badge>
                 )}
@@ -257,22 +257,22 @@ export function FilterChipRail({
               </button>
 
               {activePopover === 'tags' && (
-                <div className="absolute top-full mt-2 w-64 bg-white border rounded-2xl shadow-lg py-2 z-50">
-                  <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase">
+                <div className="absolute top-full mt-2 w-64 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-2xl shadow-lg py-2 z-50">
+                  <div className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
                     Dietary & Features
                   </div>
                   {availableTags.map((tag) => (
                     <label
                       key={tag}
-                      className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                      className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
                     >
                       <input
                         type="checkbox"
                         checked={filters.tags?.includes(tag) || false}
                         onChange={() => toggleTag(tag)}
-                        className="rounded border-gray-300"
+                        className="rounded border-gray-300 dark:border-gray-600"
                       />
-                      <span className="text-sm">{tag}</span>
+                      <span className="text-sm text-gray-900 dark:text-gray-100">{tag}</span>
                     </label>
                   ))}
                 </div>
@@ -286,8 +286,8 @@ export function FilterChipRail({
               }
               className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
                 filters.availableOnly
-                  ? 'bg-gray-900 text-white border-gray-900'
-                  : 'bg-white border-gray-300 hover:border-gray-900'
+                  ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-gray-900 dark:border-gray-100'
+                  : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 hover:border-gray-900 dark:hover:border-gray-100 text-gray-900 dark:text-gray-100'
               }`}
             >
               Available
@@ -298,18 +298,18 @@ export function FilterChipRail({
         {/* Active filter chips */}
         {activeFilterCount > 0 && (
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-gray-500 font-medium">{activeFilterCount} active:</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">{activeFilterCount} active:</span>
 
             {filters.categories?.map((cat) => (
               <Badge
                 key={cat}
                 variant="secondary"
-                className="pl-2 pr-1 py-1 gap-1 text-xs bg-gray-100"
+                className="pl-2 pr-1 py-1 gap-1 text-xs bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               >
                 {cat}
                 <button
                   onClick={() => toggleCategory(cat)}
-                  className="hover:bg-gray-200 rounded-full p-0.5"
+                  className="hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full p-0.5"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -320,12 +320,12 @@ export function FilterChipRail({
               <Badge
                 key={tag}
                 variant="secondary"
-                className="pl-2 pr-1 py-1 gap-1 text-xs bg-gray-100"
+                className="pl-2 pr-1 py-1 gap-1 text-xs bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               >
                 {tag}
                 <button
                   onClick={() => toggleTag(tag)}
-                  className="hover:bg-gray-200 rounded-full p-0.5"
+                  className="hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full p-0.5"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -333,11 +333,11 @@ export function FilterChipRail({
             ))}
 
             {(filters.minPrice || filters.maxPrice) && (
-              <Badge variant="secondary" className="pl-2 pr-1 py-1 gap-1 text-xs bg-gray-100">
+              <Badge variant="secondary" className="pl-2 pr-1 py-1 gap-1 text-xs bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100">
                 €{filters.minPrice || 0} - €{filters.maxPrice || '∞'}
                 <button
                   onClick={() => clearFilter('price')}
-                  className="hover:bg-gray-200 rounded-full p-0.5"
+                  className="hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full p-0.5"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -345,11 +345,11 @@ export function FilterChipRail({
             )}
 
             {filters.minRating && (
-              <Badge variant="secondary" className="pl-2 pr-1 py-1 gap-1 text-xs bg-gray-100">
+              <Badge variant="secondary" className="pl-2 pr-1 py-1 gap-1 text-xs bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100">
                 ⭐ {filters.minRating}+
                 <button
                   onClick={() => clearFilter('rating')}
-                  className="hover:bg-gray-200 rounded-full p-0.5"
+                  className="hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full p-0.5"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -357,11 +357,11 @@ export function FilterChipRail({
             )}
 
             {filters.availableOnly && (
-              <Badge variant="secondary" className="pl-2 pr-1 py-1 gap-1 text-xs bg-gray-100">
+              <Badge variant="secondary" className="pl-2 pr-1 py-1 gap-1 text-xs bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100">
                 Available only
                 <button
                   onClick={() => clearFilter('availability')}
-                  className="hover:bg-gray-200 rounded-full p-0.5"
+                  className="hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full p-0.5"
                 >
                   <X className="w-3 h-3" />
                 </button>

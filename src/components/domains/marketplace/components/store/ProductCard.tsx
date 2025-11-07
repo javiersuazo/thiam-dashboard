@@ -46,10 +46,10 @@ export function ProductCard({
   return (
     <div
       onClick={handleCardClick}
-      className="group cursor-pointer bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-200"
+      className="group cursor-pointer bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden hover:shadow-lg transition-all duration-200"
     >
       {/* Image */}
-      <div className={`relative ${imageHeight} w-full overflow-hidden bg-gray-100`}>
+      <div className={`relative ${imageHeight} w-full overflow-hidden bg-gray-100 dark:bg-gray-800`}>
         {product.imageUrl ? (
           <Image
             src={product.imageUrl}
@@ -58,7 +58,7 @@ export function ProductCard({
             className="object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
-          <div className="flex items-center justify-center h-full text-gray-300">
+          <div className="flex items-center justify-center h-full text-gray-300 dark:text-gray-700">
             <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
@@ -73,12 +73,12 @@ export function ProductCard({
         {/* Top overlays */}
         <div className="absolute top-3 left-3 flex gap-1.5">
           {isLimited && (
-            <Badge className="bg-white text-gray-900 text-xs h-6 px-2 shadow-sm">
+            <Badge className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs h-6 px-2 shadow-sm">
               Limited today
             </Badge>
           )}
           {product.rating && product.rating >= 4.5 && (
-            <Badge className="bg-white text-gray-900 text-xs h-6 px-2 shadow-sm">
+            <Badge className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs h-6 px-2 shadow-sm">
               Guest favorite
             </Badge>
           )}
@@ -90,10 +90,10 @@ export function ProductCard({
             e.stopPropagation()
             setIsFavorite(!isFavorite)
           }}
-          className="absolute top-3 right-3 p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white hover:scale-110 transition-all"
+          className="absolute top-3 right-3 p-2 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-800 hover:scale-110 transition-all"
         >
           <Heart
-            className={`w-4 h-4 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-700'}`}
+            className={`w-4 h-4 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-700 dark:text-gray-300'}`}
           />
         </button>
 
@@ -110,24 +110,24 @@ export function ProductCard({
       {/* Content */}
       <div className="p-3">
         {/* Title & Provider */}
-        <h3 className="font-semibold text-[16px] leading-tight line-clamp-1 mb-0.5 text-gray-900">
+        <h3 className="font-semibold text-[16px] leading-tight line-clamp-1 mb-0.5 text-gray-900 dark:text-gray-100">
           {product.name}
         </h3>
         <a
           href="#"
           onClick={(e) => e.stopPropagation()}
-          className="text-sm text-gray-500 hover:text-gray-900 hover:underline inline-block mb-2"
+          className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:underline inline-block mb-2"
         >
           {product.catererName}
         </a>
 
         {/* Availability info */}
         {product.leadTime && (
-          <p className="text-xs text-gray-500 mb-2">Lead {product.leadTime}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Lead {product.leadTime}</p>
         )}
 
         {/* Meta chips */}
-        <div className="flex items-center gap-1.5 mb-2 flex-wrap text-xs text-gray-600">
+        <div className="flex items-center gap-1.5 mb-2 flex-wrap text-xs text-gray-600 dark:text-gray-400">
           {product.rating && (
             <span className="inline-flex items-center gap-0.5">
               ⭐ {product.rating.toFixed(1)}
@@ -158,10 +158,10 @@ export function ProductCard({
         {/* Price & Add button */}
         <div className="flex items-center justify-between">
           <div>
-            <span className="font-semibold text-base text-gray-900">
+            <span className="font-semibold text-base text-gray-900 dark:text-gray-100">
               {product.currency} {product.price.toFixed(2)}
             </span>
-            <span className="text-xs text-gray-500 ml-1">· per serving</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">· per serving</span>
           </div>
 
           {isAvailable && (
@@ -169,7 +169,7 @@ export function ProductCard({
               <Button
                 onClick={handleAddClick}
                 size="sm"
-                className="h-8 px-3 text-xs font-medium group-hover:bg-gray-900 transition-colors"
+                className="h-8 px-3 text-xs font-medium group-hover:bg-gray-900 dark:group-hover:bg-gray-100 transition-colors"
               >
                 <Plus className="w-3.5 h-3.5 mr-1" />
                 Add
@@ -185,7 +185,7 @@ export function ProductCard({
                       setShowQuantityPicker(false)
                     }}
                   />
-                  <div className="absolute bottom-full right-0 mb-2 bg-white border rounded-lg shadow-lg py-2 z-50 whitespace-nowrap">
+                  <div className="absolute bottom-full right-0 mb-2 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg shadow-lg py-2 z-50 whitespace-nowrap">
                     {[10, 20, 30, 50].map((qty) => (
                       <button
                         key={qty}
@@ -193,18 +193,18 @@ export function ProductCard({
                           e.stopPropagation()
                           handleQuickAdd(qty)
                         }}
-                        className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-50 transition-colors"
+                        className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100"
                       >
                         {qty} servings
                       </button>
                     ))}
-                    <div className="border-t my-1" />
+                    <div className="border-t dark:border-gray-700 my-1" />
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
                         handleQuickAdd(product.minOrder || 1)
                       }}
-                      className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-50 transition-colors text-gray-600"
+                      className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-400"
                     >
                       Custom amount
                     </button>

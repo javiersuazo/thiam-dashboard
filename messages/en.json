@@ -1161,5 +1161,49 @@
     "pending": "Pending",
     "archived": "Archived",
     "draft": "Draft"
+  },
+  "offers": {
+    "builder": {
+      "title": "Offer Builder",
+      "addBlock": "Add Block",
+      "addBlockShort": "+ Add Block",
+      "subtotal": "Subtotal",
+      "discount": "Discount",
+      "total": "Total",
+      "items": "items",
+      "totalPrice": "Total Price",
+      "browseCatalog": "Browse Catalog",
+      "searchItems": "Search items...",
+      "noResults": "No items found",
+      "block": {
+        "addTitle": "Add Service Block",
+        "addDescription": "Create a new time slot for your offer",
+        "name": "Block Name",
+        "namePlaceholder": "e.g., Breakfast Service, Lunch Service",
+        "description": "Description",
+        "descriptionPlaceholder": "Brief description of this service block",
+        "date": "Date",
+        "timingSchedule": "Timing Schedule",
+        "timingFlow": "Timing Flow: Delivery → Service Start → Service End → Pickup",
+        "delivery": "Delivery",
+        "start": "Start",
+        "end": "End",
+        "pickup": "Pickup",
+        "cancel": "Cancel",
+        "add": "Add Block",
+        "blockSubtotal": "Block Subtotal"
+      },
+      "categories": {
+        "appetizer": "Appetizer",
+        "mainCourse": "Main Course",
+        "side": "Side",
+        "dessert": "Dessert",
+        "beverage": "Beverage",
+        "equipment": "Equipment",
+        "service": "Service",
+        "delivery": "Delivery",
+        "other": "Other"
+      }
+    }
   }
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import type {
   Offer,
@@ -34,6 +35,7 @@ export function FastOfferBuilder({
   onSave,
   onCancel
 }: FastOfferBuilderProps) {
+  const t = useTranslations('offers.builder')
   const offerState = useOfferBuilderState({
     initialOffer,
     onUpdate: () => {}
@@ -614,7 +616,7 @@ export function FastOfferBuilder({
                 onClick={() => setIsAddBlockModalOpen(true)}
                 className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-2.5 rounded-full border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-gray-900 dark:hover:border-white hover:shadow-sm transition-all text-sm sm:text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white min-h-[44px] active:scale-95"
               >
-                <span className="hidden sm:inline">+ Add Block</span>
+                <span className="hidden sm:inline">{t('addBlockShort')}</span>
                 <span className="sm:hidden">+</span>
               </button>
 
@@ -856,31 +858,6 @@ export function FastOfferBuilder({
                     No items found
                   </div>
                 )}
-              </div>
-            )}
-
-            {/* Smart Suggestions - Event-based */}
-            {!searchQuery && request?.eventType && availableItems.length > 0 && (
-              <div className="mt-4 p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/10 dark:to-blue-900/10 rounded-2xl border border-purple-200 dark:border-purple-800">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-lg">✨</span>
-                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                    Suggested for {request.eventType}
-                  </h4>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {availableItems.slice(0, 4).map(item => (
-                    <button
-                      key={item.id}
-                      onClick={() => handleAddItem(item)}
-                      className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/20 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 rounded-lg transition-all text-xs font-medium"
-                    >
-                      <span>➕</span>
-                      <span>{item.name}</span>
-                      <span className="text-gray-500">${(item.priceCents / 100).toFixed(2)}</span>
-                    </button>
-                  ))}
-                </div>
               </div>
             )}
           </div>
@@ -1871,21 +1848,17 @@ export function FastOfferBuilder({
               <div className="sticky bottom-0 bg-white dark:bg-gray-800 rounded-3xl border-2 border-gray-900 dark:border-white shadow-xl p-6 print:static print:border print:border-gray-900 print:shadow-none print:mt-8">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between text-gray-600 dark:text-gray-400">
-                    <span>Subtotal</span>
+                    <span>{t('subtotal')}</span>
                     <span className="font-semibold">${(totals.subtotalCents / 100).toFixed(2)}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-gray-600 dark:text-gray-400">
-                    <span>Tax</span>
-                    <span className="font-semibold">${(totals.taxCents / 100).toFixed(2)}</span>
                   </div>
                   {totals.discountCents > 0 && (
                     <div className="flex items-center justify-between text-green-600">
-                      <span>Discount</span>
+                      <span>{t('discount')}</span>
                       <span className="font-semibold">-${(totals.discountCents / 100).toFixed(2)}</span>
                     </div>
                   )}
                   <div className="border-t-2 border-gray-200 dark:border-gray-700 pt-3 flex items-center justify-between">
-                    <span className="text-xl font-bold text-gray-900 dark:text-gray-100">Total</span>
+                    <span className="text-xl font-bold text-gray-900 dark:text-gray-100">{t('total')}</span>
                     <span className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                       ${(totals.totalCents / 100).toFixed(2)}
                     </span>
@@ -1899,12 +1872,12 @@ export function FastOfferBuilder({
 
       {/* Fixed Bottom Bar - Mobile Optimized */}
       <div className="fixed bottom-0 left-0 right-0 sm:left-6 sm:right-6 z-50 pb-0 sm:pb-6 pointer-events-none">
-        <div className="max-w-7xl mx-auto bg-white/95 dark:bg-gray-800/95 backdrop-blur-lg border-t sm:border border-gray-200 dark:border-gray-700 sm:rounded-3xl px-3 sm:px-8 py-3 sm:py-5 shadow-2xl pointer-events-auto">
+        <div className="max-w-4xl mx-auto bg-white/95 dark:bg-gray-800/95 backdrop-blur-lg border-t sm:border border-gray-200 dark:border-gray-700 sm:rounded-3xl px-3 sm:px-8 py-3 sm:py-5 shadow-2xl pointer-events-auto">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-8">
-            <div className="flex items-center justify-between sm:justify-start gap-3 sm:gap-6 overflow-x-auto">
+            <div className="flex items-center justify-between sm:justify-start gap-3 sm:gap-6 flex-wrap">
               <div className="flex items-baseline gap-2">
                 <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Subtotal
+                  {t('subtotal')}
                 </span>
                 <span className="font-bold text-lg">
                   ${(totals.subtotalCents / 100).toFixed(2)}
@@ -1913,7 +1886,7 @@ export function FastOfferBuilder({
 
               <div className="hidden md:flex items-baseline gap-2">
                 <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Discount
+                  {t('discount')}
                 </span>
                 <div className="relative">
                   <span className="absolute left-2 top-1/2 -translate-y-1/2 text-sm text-gray-500">
@@ -1937,20 +1910,9 @@ export function FastOfferBuilder({
                 </div>
               </div>
 
-              <div className="hidden sm:flex items-baseline gap-2">
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Tax
-                </span>
-                <span className="font-semibold text-sm sm:text-base">
-                  ${(totals.taxCents / 100).toFixed(2)}
-                </span>
-              </div>
-
-              <div className="hidden sm:block h-8 w-px bg-gray-300 dark:bg-gray-600"></div>
-
               <div className="flex items-baseline gap-2">
                 <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Total
+                  {t('total')}
                 </span>
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-xl sm:text-2xl text-gray-900 dark:text-white">
@@ -2003,7 +1965,7 @@ export function FastOfferBuilder({
               )}
 
               <div className="hidden sm:block text-xs text-gray-500">
-                {offerState.getTotalItems()} items •{' '}
+                {offerState.getTotalItems()} {t('items')} •{' '}
                 {offerState.offer?.blocks.length || 0} blocks
               </div>
             </div>
@@ -2123,12 +2085,9 @@ export function FastOfferBuilder({
                 <div className="space-y-4">
                   {/* Price & Status */}
                   <div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Price</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">{t('totalPrice')}</div>
                     <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                       ${((offerState.offer?.totalCents || 0) / 100).toFixed(2)}
-                    </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                      Including ${((offerState.offer?.taxCents || 0) / 100).toFixed(2)} tax
                     </div>
                   </div>
 

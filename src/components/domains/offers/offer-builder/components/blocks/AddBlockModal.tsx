@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import type { OfferBlock } from '../../types'
 import Button from '@/components/shared/ui/button/Button'
 import Input from '@/components/shared/form/input/InputField'
@@ -13,6 +14,7 @@ interface AddBlockModalProps {
 }
 
 export function AddBlockModal({ isOpen, onClose, onAdd }: AddBlockModalProps) {
+  const t = useTranslations('offers.builder.block')
   const today = new Date().toISOString().split('T')[0]
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -21,7 +23,6 @@ export function AddBlockModal({ isOpen, onClose, onAdd }: AddBlockModalProps) {
   const [startTime, setStartTime] = useState('08:30')
   const [endTime, setEndTime] = useState('10:00')
   const [pickupTime, setPickupTime] = useState('10:30')
-  const [headcount, setHeadcount] = useState<number | undefined>(undefined)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -38,7 +39,6 @@ export function AddBlockModal({ isOpen, onClose, onAdd }: AddBlockModalProps) {
       startTime,
       endTime,
       pickupTime,
-      headcount,
     })
 
     // Reset form
@@ -49,7 +49,6 @@ export function AddBlockModal({ isOpen, onClose, onAdd }: AddBlockModalProps) {
     setStartTime('08:30')
     setEndTime('10:00')
     setPickupTime('10:30')
-    setHeadcount(undefined)
   }
 
   if (!isOpen) return null
@@ -60,66 +59,52 @@ export function AddBlockModal({ isOpen, onClose, onAdd }: AddBlockModalProps) {
         <form onSubmit={handleSubmit}>
           {/* Header */}
           <div className="px-8 py-6 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-2xl font-bold">Add Service Block</h2>
+            <h2 className="text-2xl font-bold">{t('addTitle')}</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-              Create a new time slot for your offer
+              {t('addDescription')}
             </p>
           </div>
 
           {/* Content */}
           <div className="px-8 py-6 space-y-6">
             <div>
-              <label className="block text-sm font-semibold mb-2">Block Name *</label>
+              <label className="block text-sm font-semibold mb-2">{t('name')} *</label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g., Breakfast Service, Lunch Service"
+                placeholder={t('namePlaceholder')}
                 required
                 className="rounded-xl border-gray-300 dark:border-gray-600"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold mb-2">Description</label>
+              <label className="block text-sm font-semibold mb-2">{t('description')}</label>
               <TextArea
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Brief description of this service block"
+                onChange={(value) => setDescription(value)}
+                placeholder={t('descriptionPlaceholder')}
                 rows={2}
                 className="rounded-xl border-gray-300 dark:border-gray-600"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold mb-2">📅 Date *</label>
-                <Input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  required
-                  className="rounded-xl border-gray-300 dark:border-gray-600"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold mb-2">👥 Headcount</label>
-                <Input
-                  type="number"
-                  value={headcount || ''}
-                  onChange={(e) => setHeadcount(e.target.value ? Number(e.target.value) : undefined)}
-                  placeholder="Expected guests"
-                  min={1}
-                  className="rounded-xl border-gray-300 dark:border-gray-600"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2">📅 {t('date')} *</label>
+              <Input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                required
+                className="rounded-xl border-gray-300 dark:border-gray-600"
+              />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold mb-3">⏰ Timing Schedule</label>
+              <label className="block text-sm font-semibold mb-3">⏰ {t('timingSchedule')}</label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1.5">🚚 Delivery</label>
+                  <label className="block text-xs text-gray-500 mb-1.5">🚚 {t('delivery')}</label>
                   <Input
                     type="time"
                     value={deliveryTime}
@@ -130,7 +115,7 @@ export function AddBlockModal({ isOpen, onClose, onAdd }: AddBlockModalProps) {
                 </div>
 
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1.5">▶️ Start</label>
+                  <label className="block text-xs text-gray-500 mb-1.5">▶️ {t('start')}</label>
                   <Input
                     type="time"
                     value={startTime}
@@ -141,7 +126,7 @@ export function AddBlockModal({ isOpen, onClose, onAdd }: AddBlockModalProps) {
                 </div>
 
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1.5">⏹️ End</label>
+                  <label className="block text-xs text-gray-500 mb-1.5">⏹️ {t('end')}</label>
                   <Input
                     type="time"
                     value={endTime}
@@ -152,7 +137,7 @@ export function AddBlockModal({ isOpen, onClose, onAdd }: AddBlockModalProps) {
                 </div>
 
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1.5">📦 Pickup</label>
+                  <label className="block text-xs text-gray-500 mb-1.5">📦 {t('pickup')}</label>
                   <Input
                     type="time"
                     value={pickupTime}
@@ -165,7 +150,7 @@ export function AddBlockModal({ isOpen, onClose, onAdd }: AddBlockModalProps) {
             </div>
 
             <div className="bg-blue-50 dark:bg-blue-500/10 rounded-2xl p-4 text-sm text-blue-700 dark:text-blue-400">
-              <strong>Timing Flow:</strong> Delivery → Service Start → Service End → Pickup
+              {t('timingFlow')}
             </div>
           </div>
 
@@ -177,14 +162,14 @@ export function AddBlockModal({ isOpen, onClose, onAdd }: AddBlockModalProps) {
               onClick={onClose}
               className="rounded-full px-6 hover:shadow-sm"
             >
-              Cancel
+              {t('cancel')}
             </Button>
             <Button
               type="submit"
               variant="primary"
               className="rounded-full px-8 shadow-md hover:shadow-lg bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900"
             >
-              Add Block
+              {t('add')}
             </Button>
           </div>
         </form>

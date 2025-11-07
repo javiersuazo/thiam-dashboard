@@ -86,18 +86,9 @@ export function useOfferBuilderState({ initialOffer, onUpdate }: UseOfferBuilder
       const blocks = offer.blocks.map((block) => {
         if (block.id !== blockId) return block
 
-        const alreadyExists = block.items.some(
-          (i) => i.menuItemId === item.menuItemId || i.menuId === item.menuId
-        )
-
-        if (alreadyExists) {
-          toast.info('Item already in this block')
-          return block
-        }
-
         const newItem: OfferBlockItem = {
           ...item,
-          id: `item-${Date.now()}`,
+          id: `item-${Date.now()}-${Math.random()}`,
           blockId,
           position: block.items.length,
           lineItemTotal: item.quantity * item.unitPriceCents,

@@ -14,10 +14,7 @@ export function useTableSelection<TRow>(
   const rowSelectionState = useMemo(() => {
     const state: Record<string, boolean> = {}
     tableState.selection.forEach((id) => {
-      const index = data.findIndex(row => getRowId(row) === id)
-      if (index !== -1) {
-        state[index] = true
-      }
+      state[id] = true
     })
     return state
   }, [tableState.selection, data, getRowId])
@@ -34,10 +31,9 @@ export function useTableSelection<TRow>(
       : updater
 
     const selectedIds = new Set<string>()
-    Object.keys(newSelection).forEach((indexStr) => {
-      const index = parseInt(indexStr, 10)
-      if (newSelection[indexStr] && currentData[index]) {
-        selectedIds.add(rowIdGetter(currentData[index]))
+    Object.keys(newSelection).forEach((rowId) => {
+      if (newSelection[rowId]) {
+        selectedIds.add(rowId)
       }
     })
 

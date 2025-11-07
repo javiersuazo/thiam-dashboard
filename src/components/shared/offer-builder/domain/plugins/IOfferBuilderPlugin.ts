@@ -1,6 +1,8 @@
 import type { Offer, OfferBlock, OfferItem } from '../../core/types'
 import type { IOfferRepository } from '../../infrastructure/repositories/IOfferRepository'
 import type { ICatalogRepository } from '../../infrastructure/repositories/ICatalogRepository'
+import type { IAdjustmentRepository } from '../../infrastructure/repositories/IAdjustmentRepository'
+import type { IAttachmentRepository } from '../../infrastructure/repositories/IAttachmentRepository'
 import type { CatalogItem } from '../../infrastructure/repositories/ICatalogRepository'
 
 export interface ItemTypeConfig {
@@ -85,6 +87,10 @@ export interface IOfferBuilderPlugin {
   offerRepository: IOfferRepository
 
   catalogRepository: ICatalogRepository
+
+  adjustmentRepository?: IAdjustmentRepository
+
+  attachmentRepository?: IAttachmentRepository
 
   defaultBlockName: string
 

@@ -173,6 +173,7 @@ export function FastOfferBuilderAdapter({
     <FastOfferBuilder
       offer={legacyOffer}
       availableItems={legacyItems}
+      plugin={plugin}
       request={request}
       initialAdjustments={adjustments}
       onSave={handleSave}

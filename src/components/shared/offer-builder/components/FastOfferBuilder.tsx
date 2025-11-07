@@ -21,6 +21,7 @@ import { AdjustmentThread } from './AdjustmentThread'
 interface FastOfferBuilderProps {
   offer: Offer
   availableItems: MenuItem[]
+  plugin: any
   request?: any
   initialAdjustments?: OfferAdjustment[]
   onSave?: (offer: Offer) => Promise<void>
@@ -30,6 +31,7 @@ interface FastOfferBuilderProps {
 export function FastOfferBuilder({
   offer: initialOffer,
   availableItems,
+  plugin,
   request,
   initialAdjustments = [],
   onSave,
@@ -84,39 +86,26 @@ export function FastOfferBuilder({
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  // Group items by sections
-  const foodItems = availableItems.filter(item =>
-    item.type === 'menu_item' && ['Appetizer', 'Main Course', 'Side', 'Dessert', 'Beverage'].includes(item.category || '')
-  )
-  const equipmentItems = availableItems.filter(item => item.type === 'equipment')
-  const serviceItems = availableItems.filter(item => item.type === 'service')
-  const deliveryItems = availableItems.filter(item => item.type === 'delivery')
+  // Group items by sections using plugin configuration
+  const itemTypeGroups = plugin.itemTypes.reduce((acc: any, typeConfig: any) => {
+    acc[typeConfig.type] = availableItems.filter((item: MenuItem) => item.type === typeConfig.type)
+    return acc
+  }, {})
+
+  // Legacy variable names for compatibility
+  const foodItems = itemTypeGroups['menu_item'] || []
+  const equipmentItems = itemTypeGroups['equipment'] || []
+  const serviceItems = itemTypeGroups['service'] || []
+  const deliveryItems = itemTypeGroups['delivery'] || []
 
   const getItemIcon = (itemType: string) => {
-    switch (itemType) {
-      case 'menu':
-        return '🍽️'
-      case 'menu_item':
-        return '🍕'
-      case 'equipment':
-        return '⚙️'
-      case 'service':
-        return '👔'
-      case 'delivery':
-        return '🚚'
-      case 'custom':
-        return '✏️'
-      default:
-        return '📦'
-    }
+    const config = plugin.getItemTypeConfig(itemType)
+    return config?.icon || '📦'
   }
 
   const getItemCategory = (itemType: string) => {
-    if (['menu', 'menu_item', 'custom'].includes(itemType)) return 'Food'
-    if (itemType === 'equipment') return 'Equipment'
-    if (itemType === 'service') return 'Service'
-    if (itemType === 'delivery') return 'Delivery'
-    return 'Other'
+    const config = plugin.getItemTypeConfig(itemType)
+    return config?.label || 'Other'
   }
 
   const groupItemsByCategory = (items: OfferBlockItem[]) => {
@@ -196,7 +185,7 @@ export function FastOfferBuilder({
       quantity: smartQuantity,
       unitPriceCents: item.priceCents,
       isOptional: false,
-      taxRateBps: 825
+      taxRateBps: plugin.taxRateBps
     })
 
     toast.success(`Added ${item.name}`, {

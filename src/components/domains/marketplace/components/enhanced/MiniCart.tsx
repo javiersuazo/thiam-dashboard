@@ -52,14 +52,14 @@ export function MiniCart({
       {/* Mini-cart pill (collapsed state) */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-20 right-6 z-40 bg-gray-900 text-white px-4 py-2.5 rounded-full shadow-lg hover:shadow-xl transition-all flex items-center gap-2.5 text-sm font-medium"
+        className="fixed top-20 right-6 z-40 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-4 py-2.5 rounded-full shadow-lg hover:shadow-xl transition-all flex items-center gap-2.5 text-sm font-medium"
         aria-label={`Cart: ${itemCount} items, total ${cart.total.toFixed(2)}`}
       >
         <ShoppingBag className="w-4 h-4" />
         {hasItems && (
           <>
             <span className="inline-flex items-center gap-1.5">
-              <Badge variant="secondary" className="bg-white text-gray-900 h-5 px-1.5 text-xs">
+              <Badge variant="secondary" className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 h-5 px-1.5 text-xs">
                 {itemCount}
               </Badge>
               <span className="hidden sm:inline">
@@ -81,16 +81,16 @@ export function MiniCart({
 
           {/* Drawer */}
           <div
-            className="fixed top-0 right-0 h-full w-[360px] sm:w-[400px] bg-white shadow-2xl z-50 flex flex-col animate-slide-in"
+            className="fixed top-0 right-0 h-full w-[360px] sm:w-[400px] bg-white dark:bg-gray-900 shadow-2xl z-50 flex flex-col animate-slide-in"
             onScroll={handleScroll}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <h2 className="text-lg font-semibold">Cart</h2>
+            <div className="flex items-center justify-between px-6 py-4 border-b dark:border-gray-800">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Cart</h2>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsPinned(!isPinned)}
-                  className={`p-1.5 rounded hover:bg-gray-100 transition-colors ${isPinned ? 'text-gray-900' : 'text-gray-400'}`}
+                  className={`p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${isPinned ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400 dark:text-gray-500'}`}
                   title={isPinned ? 'Unpin drawer' : 'Keep open'}
                 >
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -99,7 +99,7 @@ export function MiniCart({
                 </button>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-1.5 rounded hover:bg-gray-100 transition-colors"
+                  className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-900 dark:text-gray-100"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -110,8 +110,8 @@ export function MiniCart({
             <div className="flex-1 overflow-y-auto px-6 py-4">
               {!hasItems ? (
                 <div className="flex flex-col items-center justify-center h-full text-center">
-                  <ShoppingBag className="w-16 h-16 text-gray-300 mb-4" />
-                  <p className="text-sm text-gray-500">Your cart is empty</p>
+                  <ShoppingBag className="w-16 h-16 text-gray-300 dark:text-gray-700 mb-4" />
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Your cart is empty</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -121,7 +121,7 @@ export function MiniCart({
                     return (
                       <div
                         key={item.product.id}
-                        className={`flex gap-3 pb-4 border-b transition-colors ${
+                        className={`flex gap-3 pb-4 border-b dark:border-gray-800 transition-colors ${
                           isLastAdded ? 'animate-flash' : ''
                         }`}
                       >
@@ -135,10 +135,10 @@ export function MiniCart({
                         </div>
 
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-sm font-semibold mb-0.5 truncate">
+                          <h3 className="text-sm font-semibold mb-0.5 truncate text-gray-900 dark:text-gray-100">
                             {item.product.name}
                           </h3>
-                          <p className="text-xs text-gray-500 mb-2">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
                             {item.product.catererName}
                           </p>
 
@@ -151,19 +151,19 @@ export function MiniCart({
                                     Math.max(item.product.minOrder || 1, item.quantity - 1)
                                   )
                                 }
-                                className="w-7 h-7 rounded-md border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors text-sm"
+                                className="w-7 h-7 rounded-md border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm text-gray-900 dark:text-gray-100"
                                 disabled={item.quantity <= (item.product.minOrder || 1)}
                               >
                                 −
                               </button>
-                              <span className="text-sm font-medium w-8 text-center">
+                              <span className="text-sm font-medium w-8 text-center text-gray-900 dark:text-gray-100">
                                 {item.quantity}
                               </span>
                               <button
                                 onClick={() =>
                                   onUpdateQuantity(item.product.id, item.quantity + 1)
                                 }
-                                className="w-7 h-7 rounded-md border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors text-sm"
+                                className="w-7 h-7 rounded-md border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm text-gray-900 dark:text-gray-100"
                               >
                                 +
                               </button>
@@ -171,14 +171,14 @@ export function MiniCart({
 
                             <button
                               onClick={() => onRemoveItem(item.product.id)}
-                              className="p-1.5 rounded hover:bg-red-50 hover:text-red-600 transition-colors"
+                              className="p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                               title="Remove"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
 
-                          <p className="text-sm font-medium mt-2">
+                          <p className="text-sm font-medium mt-2 text-gray-900 dark:text-gray-100">
                             {item.product.currency} {item.subtotal?.toFixed(2)}
                           </p>
                         </div>
@@ -191,31 +191,31 @@ export function MiniCart({
 
             {/* Footer */}
             {hasItems && (
-              <div className="border-t px-6 py-4 space-y-3">
+              <div className="border-t dark:border-gray-800 px-6 py-4 space-y-3">
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Subtotal</span>
-                    <span className="font-medium">
+                    <span className="text-gray-600 dark:text-gray-400">Subtotal</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">
                       {cart.items[0].product.currency} {cart.subtotal.toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Tax (19%)</span>
-                    <span className="font-medium">
+                    <span className="text-gray-600 dark:text-gray-400">Tax (19%)</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">
                       {cart.items[0].product.currency} {cart.tax.toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Delivery</span>
-                    <span className="font-medium">
+                    <span className="text-gray-600 dark:text-gray-400">Delivery</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">
                       {cart.items[0].product.currency} {cart.deliveryFee.toFixed(2)}
                     </span>
                   </div>
                 </div>
 
-                <div className="flex justify-between pt-3 border-t text-base font-semibold">
-                  <span>Total</span>
-                  <span>
+                <div className="flex justify-between pt-3 border-t dark:border-gray-800 text-base font-semibold">
+                  <span className="text-gray-900 dark:text-gray-100">Total</span>
+                  <span className="text-gray-900 dark:text-gray-100">
                     {cart.items[0].product.currency} {cart.total.toFixed(2)}
                   </span>
                 </div>

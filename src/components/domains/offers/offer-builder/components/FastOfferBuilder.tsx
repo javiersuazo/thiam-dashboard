@@ -77,6 +77,14 @@ export function FastOfferBuilder({
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
+  // Group items by sections
+  const foodItems = availableItems.filter(item =>
+    item.type === 'menu_item' && ['Appetizer', 'Main Course', 'Side', 'Dessert', 'Beverage'].includes(item.category || '')
+  )
+  const equipmentItems = availableItems.filter(item => item.type === 'equipment')
+  const serviceItems = availableItems.filter(item => item.type === 'service')
+  const deliveryItems = availableItems.filter(item => item.type === 'delivery')
+
   const getItemIcon = (itemType: string) => {
     switch (itemType) {
       case 'menu':
@@ -856,6 +864,161 @@ export function FastOfferBuilder({
                 ) : (
                   <div className="px-5 py-6 text-center text-sm text-gray-500">
                     No items found
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Show All Catalog Sections */}
+            {!searchQuery && (
+              <div className="mt-4 space-y-6">
+                {/* Food & Beverage Section */}
+                {foodItems.length > 0 && (
+                  <div id="catalog-food" className="scroll-mt-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-2xl">🍽️</span>
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Food & Beverage</h3>
+                    </div>
+                    <div className="space-y-3">
+                      {['Appetizer', 'Main Course', 'Side', 'Dessert', 'Beverage'].map(category => {
+                        const categoryItems = foodItems.filter(item => item.category === category)
+                        if (categoryItems.length === 0) return null
+
+                        return (
+                          <div key={category} className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3">
+                            <h4 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2">
+                              {category}
+                            </h4>
+                            <div className="space-y-1">
+                              {categoryItems.map(item => (
+                                <button
+                                  key={item.id}
+                                  onClick={() => handleAddItem(item)}
+                                  className="w-full flex items-center justify-between px-3 py-2 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-all text-left group"
+                                >
+                                  <div className="flex-1">
+                                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.name}</div>
+                                    {item.description && (
+                                      <div className="text-xs text-gray-500 mt-0.5 line-clamp-1">{item.description}</div>
+                                    )}
+                                  </div>
+                                  <div className="flex items-center gap-2 ml-3">
+                                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                      ${(item.priceCents / 100).toFixed(2)}
+                                    </span>
+                                    <span className="text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      ➕
+                                    </span>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Equipment Section */}
+                {equipmentItems.length > 0 && (
+                  <div id="catalog-equipment" className="scroll-mt-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-2xl">⚙️</span>
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Equipment</h3>
+                    </div>
+                    <div className="space-y-2">
+                      {equipmentItems.map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => handleAddItem(item)}
+                          className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-all text-left group border border-gray-200 dark:border-gray-700"
+                        >
+                          <div className="flex-1">
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.name}</div>
+                            {item.description && (
+                              <div className="text-xs text-gray-500 mt-0.5">{item.description}</div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-3 ml-4">
+                            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                              ${(item.priceCents / 100).toFixed(2)}
+                            </span>
+                            <span className="text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                              ➕
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Service Section */}
+                {serviceItems.length > 0 && (
+                  <div id="catalog-service" className="scroll-mt-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-2xl">👔</span>
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Service</h3>
+                    </div>
+                    <div className="space-y-2">
+                      {serviceItems.map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => handleAddItem(item)}
+                          className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-all text-left group border border-gray-200 dark:border-gray-700"
+                        >
+                          <div className="flex-1">
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.name}</div>
+                            {item.description && (
+                              <div className="text-xs text-gray-500 mt-0.5">{item.description}</div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-3 ml-4">
+                            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                              ${(item.priceCents / 100).toFixed(2)}
+                            </span>
+                            <span className="text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                              ➕
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Delivery Section */}
+                {deliveryItems.length > 0 && (
+                  <div id="catalog-delivery" className="scroll-mt-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-2xl">🚚</span>
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Delivery</h3>
+                    </div>
+                    <div className="space-y-2">
+                      {deliveryItems.map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => handleAddItem(item)}
+                          className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-all text-left group border border-gray-200 dark:border-gray-700"
+                        >
+                          <div className="flex-1">
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.name}</div>
+                            {item.description && (
+                              <div className="text-xs text-gray-500 mt-0.5">{item.description}</div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-3 ml-4">
+                            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                              ${(item.priceCents / 100).toFixed(2)}
+                            </span>
+                            <span className="text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                              ➕
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>

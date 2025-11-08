@@ -13,7 +13,7 @@ export default defineConfig({
     requestTimeout: 10000,
     responseTimeout: 10000,
     env: {
-      API_URL: 'http://localhost:8080/v1',
+      API_URL: 'http://localhost:8080/api/v1',
       MOCK_API: false, // Set to true to mock API responses, false to hit real backend
     },
     setupNodeEvents(on, config) {

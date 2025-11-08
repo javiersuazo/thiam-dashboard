@@ -24,6 +24,10 @@ const PUBLIC_ROUTES = [
   '/signup',
   '/forgot-password',
   '/reset-password',
+  '/passwordless',
+  '/check-email',
+  '/verify-email',
+  '/email-verified',
   '/two-step-verification',
   '/oauth-callback',
   '/success',
@@ -38,6 +42,7 @@ const PUBLIC_ROUTES = [
   '/marketplace-checkout',
   '/offers/builder/demo',
   '/offers',
+  '/omni-chat-test'
 ]
 
 /**

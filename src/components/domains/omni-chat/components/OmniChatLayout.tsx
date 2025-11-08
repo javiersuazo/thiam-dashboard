@@ -21,10 +21,16 @@ export function OmniChatLayout({
   })
 
   const isFullscreen = chatState.mode === 'fullscreen'
+  const isSidebarOpen = chatState.mode === 'sidebar'
 
   return (
-    <div className="relative w-full h-full">
-      <div style={{ display: isFullscreen ? 'none' : undefined }}>
+    <div className="relative w-full h-full flex">
+      <div
+        className={`flex-1 transition-all duration-300 ease-in-out ${
+          isSidebarOpen ? 'mr-[500px] md:mr-[600px] lg:mr-[700px]' : 'mr-0'
+        }`}
+        style={{ display: isFullscreen ? 'none' : undefined }}
+      >
         {children}
       </div>
 

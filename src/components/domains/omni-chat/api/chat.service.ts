@@ -38,19 +38,7 @@ export const chatService = {
   async getMessageHistory(): Promise<ApiMessage[]> {
     await new Promise(resolve => setTimeout(resolve, 500))
 
-    return [
-      {
-        id: 'msg_1',
-        role: 'assistant',
-        content: [
-          {
-            type: 'text',
-            text: 'Hello! I\'m your TASTY LABS AI assistant. How can I help you today?',
-          }
-        ],
-        created_at: new Date(Date.now() - 60000).toISOString(),
-      }
-    ]
+    return []
   },
 
   async streamMessage(

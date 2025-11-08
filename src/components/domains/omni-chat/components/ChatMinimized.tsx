@@ -20,6 +20,7 @@ export function ChatMinimized({ position, onClick }: ChatMinimizedProps) {
       <button
         onClick={onClick}
         className="relative w-16 h-16 rounded-full bg-gradient-to-br from-brand-500 via-brand-600 to-brand-700 shadow-2xl hover:shadow-brand-500/50 transition-all duration-300 hover:scale-110 flex items-center justify-center group animate-[breath_4s_ease-in-out_infinite]"
+        title="Open TASTY LABS AI"
       >
         {/* Shimmer effect */}
         <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-[shimmer_2s_linear_infinite]"></div>

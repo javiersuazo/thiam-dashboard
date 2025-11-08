@@ -1,4 +1,4 @@
-export type ChatMode = 'minimized' | 'floating' | 'fullscreen'
+export type ChatMode = 'minimized' | 'floating' | 'sidebar' | 'fullscreen'
 
 export type MessageRole = 'user' | 'assistant' | 'system'
 

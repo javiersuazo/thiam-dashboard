@@ -4251,7 +4251,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.IngredientListResponse"];
+                        "application/json": components["schemas"]["inventory_response.IngredientListResponse"];
                     };
                 };
                 /** @description Invalid request parameters */
@@ -4260,7 +4260,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
                 /** @description Missing or invalid authentication token */
@@ -4269,7 +4269,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
                 /** @description Internal server error */
@@ -4278,7 +4278,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
             };
@@ -4321,7 +4321,7 @@ export interface paths {
             /** @description Ingredient data (category is tag slug) */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["request.CreateIngredientRequest"];
+                    "application/json": components["schemas"]["inventory_request.CreateIngredientRequest"];
                 };
             };
             responses: {
@@ -4331,7 +4331,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.IngredientResponse"];
+                        "application/json": components["schemas"]["inventory_response.IngredientResponse"];
                     };
                 };
                 /** @description Invalid input or missing required fields */
@@ -4340,7 +4340,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
                 /** @description Unauthorized */
@@ -4349,7 +4349,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
             };
@@ -4394,7 +4394,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.IngredientResponse"];
+                        "application/json": components["schemas"]["inventory_response.IngredientResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -4403,7 +4403,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
                 /** @description Not Found */
@@ -4412,7 +4412,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
             };
@@ -4450,7 +4450,7 @@ export interface paths {
             /** @description Updated data */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["request.UpdateIngredientRequest"];
+                    "application/json": components["schemas"]["inventory_request.UpdateIngredientRequest"];
                 };
             };
             responses: {
@@ -4460,7 +4460,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.IngredientResponse"];
+                        "application/json": components["schemas"]["inventory_response.IngredientResponse"];
                     };
                 };
                 /** @description Bad Request */
@@ -4469,7 +4469,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
                 /** @description Unauthorized */
@@ -4478,7 +4478,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
                 /** @description Not Found */
@@ -4487,7 +4487,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
             };
@@ -4522,7 +4522,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
                 /** @description Not Found */
@@ -4531,7 +4531,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
             };
@@ -4570,7 +4570,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.BatchListResponse"];
+                        "application/json": components["schemas"]["inventory_response.BatchListResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -4579,7 +4579,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
                 /** @description Not Found */
@@ -4588,7 +4588,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
             };
@@ -4627,7 +4627,7 @@ export interface paths {
             /** @description Consumption data */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["request.ConsumeStockRequest"];
+                    "application/json": components["schemas"]["inventory_request.ConsumeStockRequest"];
                 };
             };
             responses: {
@@ -4644,7 +4644,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
                 /** @description Unauthorized */
@@ -4653,7 +4653,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
             };
@@ -4693,7 +4693,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.StockListResponse"];
+                        "application/json": components["schemas"]["inventory_response.StockListResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -4702,7 +4702,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
             };
@@ -4772,7 +4772,7 @@ export interface paths {
             /** @description Map of ingredient IDs to their updates */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["request.BatchUpdateIngredients"];
+                    "application/json": components["schemas"]["inventory_request.BatchUpdateIngredients"];
                 };
             };
             responses: {
@@ -4782,7 +4782,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.BatchUpdateResponse"];
+                        "application/json": components["schemas"]["inventory_response.BatchUpdateResponse"];
                     };
                 };
                 /** @description Bad Request */
@@ -4791,7 +4791,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
                 /** @description Unauthorized */
@@ -4800,7 +4800,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
                 /** @description Internal Server Error */
@@ -4809,7 +4809,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
             };
@@ -4839,7 +4839,7 @@ export interface paths {
             /** @description Batch data */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["request.CreateBatchRequest"];
+                    "application/json": components["schemas"]["inventory_request.CreateBatchRequest"];
                 };
             };
             responses: {
@@ -4849,7 +4849,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.BatchResponse"];
+                        "application/json": components["schemas"]["inventory_response.BatchResponse"];
                     };
                 };
                 /** @description Bad Request */
@@ -4858,7 +4858,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
                 /** @description Unauthorized */
@@ -4867,7 +4867,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
             };
@@ -4903,7 +4903,7 @@ export interface paths {
             /** @description Quality status */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["request.UpdateQualityStatusRequest"];
+                    "application/json": components["schemas"]["inventory_request.UpdateQualityStatusRequest"];
                 };
             };
             responses: {
@@ -4920,7 +4920,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
                 /** @description Unauthorized */
@@ -4929,7 +4929,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
             };
@@ -4968,7 +4968,7 @@ export interface paths {
             /** @description Ingredient IDs to delete */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["request.BulkDeleteIngredients"];
+                    "application/json": components["schemas"]["inventory_request.BulkDeleteIngredients"];
                 };
             };
             responses: {
@@ -4978,7 +4978,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.BulkOperationResponse"];
+                        "application/json": components["schemas"]["inventory_response.BulkOperationResponse"];
                     };
                 };
                 /** @description Bad Request */
@@ -4987,7 +4987,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
                 /** @description Unauthorized */
@@ -4996,7 +4996,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
                 /** @description Internal Server Error */
@@ -5005,7 +5005,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
             };
@@ -5038,7 +5038,7 @@ export interface paths {
             /** @description Ingredients to import */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["request.BulkImportIngredientsRequest"];
+                    "application/json": components["schemas"]["inventory_request.BulkImportIngredientsRequest"];
                 };
             };
             responses: {
@@ -5048,7 +5048,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.BulkImportResponse"];
+                        "application/json": components["schemas"]["inventory_response.BulkImportResponse"];
                     };
                 };
                 /** @description Bad Request */
@@ -5057,7 +5057,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
                 /** @description Unauthorized */
@@ -5066,7 +5066,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
             };
@@ -5107,7 +5107,7 @@ export interface paths {
             /** @description Ingredient IDs and updates */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["request.BulkUpdateIngredients"];
+                    "application/json": components["schemas"]["inventory_request.BulkUpdateIngredients"];
                 };
             };
             responses: {
@@ -5117,7 +5117,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.BulkOperationResponse"];
+                        "application/json": components["schemas"]["inventory_response.BulkOperationResponse"];
                     };
                 };
                 /** @description Bad Request */
@@ -5126,7 +5126,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
                 /** @description Unauthorized */
@@ -5135,7 +5135,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
                 /** @description Internal Server Error */
@@ -5144,7 +5144,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
             };
@@ -5180,7 +5180,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.ExpiringBatchListResponse"];
+                        "application/json": components["schemas"]["inventory_response.ExpiringBatchListResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -5189,7 +5189,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
             };
@@ -5228,7 +5228,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.StockListResponse"];
+                        "application/json": components["schemas"]["inventory_response.StockListResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -5237,7 +5237,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["response.Error"];
+                        "application/json": components["schemas"]["inventory_response.Error"];
                     };
                 };
             };
@@ -16105,18 +16105,8 @@ export interface components {
             };
             value?: string;
         };
-        "entity.Translation": {
-            /** @example en */
-            destination?: string;
-            /** @example текст для перевода */
-            original?: string;
-            /** @example auto */
-            source?: string;
-            /** @example text for translation */
-            translation?: string;
-        };
         "entity.TranslationHistory": {
-            history?: components["schemas"]["entity.Translation"][];
+            history?: components["schemas"]["shared_entity.Translation"][];
         };
         "entity.UserSession": {
             createdAt?: string;
@@ -16140,6 +16130,202 @@ export interface components {
             minLength?: number;
             pattern?: string;
             step?: number;
+        };
+        /** @enum {string} */
+        "inventory_entity.IngredientUnit": "kg" | "g" | "l" | "ml" | "piece";
+        /** @enum {string} */
+        "inventory_entity.QualityStatus": "good" | "near_expiry" | "expired" | "damaged" | "recalled";
+        "inventory_request.BatchUpdateIngredients": {
+            updates: {
+                [key: string]: {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        "inventory_request.BulkDeleteIngredients": {
+            ids: string[];
+        };
+        "inventory_request.BulkImportIngredientsRequest": {
+            ingredients: components["schemas"]["inventory_request.CreateIngredientRequest"][];
+        };
+        "inventory_request.BulkUpdateIngredients": {
+            ids: string[];
+            updates: {
+                [key: string]: unknown;
+            };
+        };
+        "inventory_request.ConsumeStockRequest": {
+            locationId: string;
+            /** @enum {string} */
+            movementType: "consume_production" | "waste_adjustment" | "manual_adjustment";
+            quantity: number;
+            referenceId?: string;
+            referenceType?: string;
+        };
+        "inventory_request.CreateBatchRequest": {
+            batchNumber?: string;
+            currency?: string;
+            currentQuantity: number;
+            /** @description YYYY-MM-DD */
+            expirationDate?: string;
+            ingredientId: string;
+            locationId: string;
+            notes?: string;
+            purchaseOrderId?: string;
+            /** @description YYYY-MM-DD */
+            receivedDate: string;
+            receivedQuantity: number;
+            supplierName?: string;
+            unitCostCents?: number;
+        };
+        "inventory_request.CreateIngredientRequest": {
+            /** @enum {string} */
+            category: "vegetables" | "fruits" | "meat" | "seafood" | "dairy" | "grains" | "bakery" | "spices" | "oils" | "condiments" | "beverages" | "canned" | "frozen" | "supplies" | "other";
+            costPerUnitCents?: number;
+            currency?: string;
+            currentStock?: number;
+            description?: string;
+            isActive?: boolean;
+            name: string;
+            reorderLevel?: number;
+            supplier?: string;
+            /** @enum {string} */
+            unit: "kg" | "g" | "l" | "ml" | "piece";
+        };
+        "inventory_request.UpdateIngredientRequest": {
+            category?: string;
+            costPerUnitCents?: number;
+            currency?: string;
+            currentStock?: number;
+            description?: string;
+            isActive?: boolean;
+            name?: string;
+            reorderLevel?: number;
+            supplier?: string;
+            /** @enum {string} */
+            unit?: "kg" | "g" | "l" | "ml" | "piece";
+        };
+        "inventory_request.UpdateQualityStatusRequest": {
+            /** @enum {string} */
+            qualityStatus: "good" | "near_expiry" | "expired" | "damaged" | "recalled";
+        };
+        "inventory_response.BatchListResponse": {
+            data?: components["schemas"]["inventory_response.BatchResponse"][];
+        };
+        "inventory_response.BatchResponse": {
+            batchNumber?: string;
+            createdAt?: string;
+            currency?: string;
+            currentQuantity?: number;
+            expirationDate?: string;
+            id?: string;
+            ingredientId?: string;
+            locationId?: string;
+            notes?: string;
+            purchaseOrderId?: string;
+            qualityStatus?: components["schemas"]["inventory_entity.QualityStatus"];
+            receivedDate?: string;
+            receivedQuantity?: number;
+            reservedQuantity?: number;
+            supplierName?: string;
+            unitCostCents?: number;
+            updatedAt?: string;
+        };
+        "inventory_response.BatchUpdateError": {
+            error?: string;
+            id?: string;
+        };
+        "inventory_response.BatchUpdateResponse": {
+            failed?: components["schemas"]["inventory_response.BatchUpdateError"][];
+            failedCount?: number;
+            message?: string;
+            success?: boolean;
+            updatedCount?: number;
+        };
+        "inventory_response.BulkImportResponse": {
+            errors?: string[];
+            imported?: number;
+            skipped?: number;
+        };
+        "inventory_response.BulkOperationResponse": {
+            deletedCount?: number;
+            message?: string;
+            success?: boolean;
+            updatedCount?: number;
+            updates?: {
+                [key: string]: unknown;
+            };
+        };
+        "inventory_response.Error": {
+            /** @example 1001 */
+            code?: number;
+            /** @example INVALID_REQUEST */
+            key?: string;
+            /** @example invalid request body */
+            message?: string;
+        };
+        "inventory_response.ExpiringBatchListResponse": {
+            data?: components["schemas"]["inventory_response.ExpiringBatchResponse"][];
+        };
+        "inventory_response.ExpiringBatchResponse": {
+            batchId?: string;
+            batchNumber?: string;
+            category?: string;
+            currency?: string;
+            currentQuantity?: number;
+            daysUntilExpiry?: number;
+            expirationDate?: string;
+            expiryAlertLevel?: string;
+            ingredientId?: string;
+            ingredientName?: string;
+            locationId?: string;
+            locationName?: string;
+            qualityStatus?: components["schemas"]["entity.QualityStatus"];
+            supplierName?: string;
+            unitCostCents?: number;
+        };
+        /** @description Response format for ingredient list endpoint Ingredients have a single "category" field from the "categories" tag group Example response: { "data": [ { "id": "uuid", "name": "Chicken Breast", "category": "meat", "unit": "kg", "currentStock": 50.00, "reorderLevel": 20.00, "costPerUnitCents": 990, "currency": "USD" } ], "meta": { "total": 30, "page": 1, "limit": 10, "schema": { "fields": [ { "name": "category", "type": "enum", "options": ["meat", "seafood", "vegetables", "dairy", "grains", "oils", "spices", "condiments"] } ] } } } */
+        "inventory_response.IngredientListResponse": {
+            data?: components["schemas"]["inventory_response.IngredientResponse"][];
+            meta?: components["schemas"]["inventory_response.PaginationMeta"];
+        };
+        "inventory_response.IngredientResponse": {
+            category?: string;
+            catererId?: string;
+            costPerUnitCents?: number;
+            createdAt?: string;
+            currency?: string;
+            currentStock?: number;
+            description?: string;
+            id?: string;
+            isActive?: boolean;
+            name?: string;
+            reorderLevel?: number;
+            supplier?: string;
+            unit?: components["schemas"]["inventory_entity.IngredientUnit"];
+            updatedAt?: string;
+        };
+        "inventory_response.PaginationMeta": {
+            hasNextPage?: boolean;
+            hasPreviousPage?: boolean;
+            limit?: number;
+            page?: number;
+            schema?: components["schemas"]["entity.EntitySchema"];
+            total?: number;
+            totalPages?: number;
+        };
+        "inventory_response.StockListResponse": {
+            data?: components["schemas"]["inventory_response.StockResponse"][];
+        };
+        "inventory_response.StockResponse": {
+            id?: string;
+            ingredientId?: string;
+            locationId?: string;
+            onHand?: number;
+            parLevel?: number;
+            reorderLevel?: number;
+            reserved?: number;
+            updatedAt?: string;
         };
         "request.AcceptOffer": {
             /** @description Optional: for partial acceptance */
@@ -17222,6 +17408,7 @@ export interface components {
             tags?: string[];
             user_id?: string;
         };
+        /** @description Response format for ingredient list endpoint Ingredients have a single "category" field from the "categories" tag group Example response: { "data": [ { "id": "uuid", "name": "Chicken Breast", "category": "meat", "unit": "kg", "currentStock": 50.00, "reorderLevel": 20.00, "costPerUnitCents": 990, "currency": "USD" } ], "meta": { "total": 30, "page": 1, "limit": 10, "schema": { "fields": [ { "name": "category", "type": "enum", "options": ["meat", "seafood", "vegetables", "dairy", "grains", "oils", "spices", "condiments"] } ] } } } */
         "response.IngredientListResponse": {
             data?: components["schemas"]["response.IngredientResponse"][];
             meta?: components["schemas"]["response.PaginationMeta"];
@@ -17317,6 +17504,9 @@ export interface components {
             name?: string;
             orderableInMultiplesOf?: number;
             publishStatus?: string;
+            tags?: {
+                [key: string]: string[];
+            };
             updatedAt?: string;
             visibility?: string;
             visibleFrom?: string;
@@ -17366,6 +17556,9 @@ export interface components {
             proteinG?: number;
             singlePackaged?: boolean;
             sku?: string;
+            tags?: {
+                [key: string]: string[];
+            };
             updatedAt?: string;
             visibility?: string;
             visibleFrom?: string;
@@ -17395,6 +17588,9 @@ export interface components {
             proteinG?: number;
             singlePackaged?: boolean;
             sku?: string;
+            tags?: {
+                [key: string]: string[];
+            };
             updatedAt?: string;
             visibility?: string;
             visibleFrom?: string;
@@ -17407,15 +17603,12 @@ export interface components {
             quantityPerPortion?: number;
             unit?: string;
         };
+        /** @description Response format for menu items list endpoint Menu items have multiple tag groups (temperature, packaging-styles) Tags are returned as a grouped object where keys are tag group slugs Example response: { "data": [ { "id": "uuid", "name": "Artisan Cheese & Charcuterie Board", "priceCents": 1850, "tags": { "temperature": ["cold"], "packaging-styles": ["bulk-packaging", "premium-packaging"] } } ], "meta": { "total": 20, "page": 1, "limit": 10, "schema": { "fields": [ { "name": "tags.temperature", "type": "multi-enum", "options": ["hot-temperature", "cold", "warm", "frozen"] }, { "name": "tags.packaging-styles", "type": "multi-enum", "options": ["individual-packaging", "disposable-packaging", "bulk-packaging", "premium-packaging"] } ] } } } */
         "response.MenuItemListResponse": {
             data?: components["schemas"]["response.MenuItem"][];
+            meta?: components["schemas"]["response.PaginationMeta"];
             page?: number;
             pageSize?: number;
-            tags?: {
-                [key: string]: {
-                    [key: string]: components["schemas"]["response.TagInfo"][];
-                };
-            };
             total?: number;
             totalPages?: number;
         };
@@ -17452,15 +17645,12 @@ export interface components {
             visibleUntil?: string;
             weightG?: number;
         };
+        /** @description Response format for menus list endpoint Menus have multiple tag groups (meal-type, service-style, event-type) Tags are returned as a grouped object where keys are tag group slugs Example response: { "data": [ { "id": "uuid", "name": "Signature Lunch Menu", "visibility": "public", "publishStatus": "published", "tags": { "meal-type": ["lunch"], "service-style": ["buffet", "family-style"], "event-type": ["corporate", "meeting"] } } ], "meta": { "total": 3, "page": 1, "limit": 10, "schema": { "fields": [ { "name": "tags.meal-type", "type": "multi-enum", "options": ["breakfast", "lunch", "dinner"] }, { "name": "tags.service-style", "type": "multi-enum", "options": ["buffet", "plated", "family-style", "stations"] }, { "name": "tags.event-type", "type": "multi-enum", "options": ["corporate", "wedding", "meeting", "gala"] } ] } } } */
         "response.MenuListResponse": {
             data?: components["schemas"]["response.Menu"][];
+            meta?: components["schemas"]["response.PaginationMeta"];
             page?: number;
             pageSize?: number;
-            tags?: {
-                [key: string]: {
-                    [key: string]: components["schemas"]["response.TagInfo"][];
-                };
-            };
             total?: number;
             totalPages?: number;
         };
@@ -17685,10 +17875,6 @@ export interface components {
             key?: string;
             nameTranslations?: Record<string, never>;
         };
-        "response.TagInfo": {
-            name?: string;
-            slug?: string;
-        };
         "response.TicketWithComments": {
             comments?: components["schemas"]["response.SupportComment"][];
             ticket?: components["schemas"]["response.SupportTicket"];
@@ -17759,6 +17945,16 @@ export interface components {
             transports?: string[];
             userId?: string;
         };
+        "shared_entity.Translation": {
+            /** @example en */
+            destination?: string;
+            /** @example текст для перевода */
+            original?: string;
+            /** @example auto */
+            source?: string;
+            /** @example text for translation */
+            translation?: string;
+        };
         "v1.signedURLResponse": {
             expires_in?: string;
             url?: string;
@@ -17811,7 +18007,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["entity.Translation"];
+                    "application/json": components["schemas"]["shared_entity.Translation"];
                 };
             };
             /** @description Bad Request */

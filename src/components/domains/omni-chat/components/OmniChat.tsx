@@ -94,7 +94,7 @@ export function OmniChat({
     return (
       <ChatMinimized
         position={chatState.floatingPosition}
-        onClick={chatState.toggleMinimize}
+        onClick={chatState.toggleSidebar}
       />
     )
   }
@@ -126,7 +126,7 @@ export function OmniChat({
       isLoading={chatState.isLoading}
       onSendMessage={handleSendMessage}
       onInputChange={chatState.setInput}
-      onMinimize={chatState.toggleMinimize}
+      onClose={chatState.mode === 'sidebar' ? chatState.toggleSidebar : chatState.toggleMinimize}
       onFullscreen={chatState.toggleFullscreen}
     />
   )

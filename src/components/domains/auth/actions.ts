@@ -8,37 +8,9 @@
  */
 
 import { redirect } from 'next/navigation'
-import {
-  createServerClient,
-  createPublicClient,
-  clearServerAuthTokens
-} from '@/lib/api/server'
-import { debugToken } from '@/lib/auth/jwt'
+import { createServerClient, createPublicClient } from '@/lib/api/server'
 import type { ActionResult } from '@/types/actions'
 
-/**
- * Calculate token TTL in seconds from expiresAt timestamp
- * Handles both milliseconds and seconds timestamps
- */
-function calculateTokenTTL(expiresAt: string | number): number {
-  const expiresAtTimestamp = typeof expiresAt === 'string' ? parseInt(expiresAt, 10) : expiresAt
-  const nowMs = Date.now()
-  const nowSec = Math.floor(nowMs / 1000)
-
-  // Calculate TTL in seconds
-  // API might return expiresAt in milliseconds or seconds
-  if (expiresAtTimestamp > nowMs) {
-    // expiresAt is in milliseconds (future timestamp > current ms)
-    return Math.floor((expiresAtTimestamp - nowMs) / 1000)
-  } else if (expiresAtTimestamp > nowSec) {
-    // expiresAt is in seconds (Unix timestamp)
-    return expiresAtTimestamp - nowSec
-  } else {
-    // Token already expired or invalid format - default to 15 minutes
-    console.warn('⚠️ Invalid expiresAt, using default 15 min:', { expiresAtTimestamp, nowSec, nowMs })
-    return 900
-  }
-}
 import type {
   LoginCredentials,
   SignUpData,
@@ -69,17 +41,10 @@ import {
   resendVerificationSchema,
 } from './validation/authSchemas'
 
-/**
- * Login Action
- *
- * Handles user login with email/password.
- * Creates session and redirects to dashboard on success.
- */
 export async function loginAction(
   credentials: LoginCredentials
 ): Promise<ActionResult<{ requiresTwoFactor: boolean; challengeToken?: string; email?: string }>> {
   try {
-    // Validate input
     const validation = loginSchema.safeParse(credentials)
     if (!validation.success) {
       return {
@@ -89,145 +54,28 @@ export async function loginAction(
       }
     }
 
-    // Call API (public endpoint - no auth required)
-    const api = createPublicClient()
+    const { createLoginUseCase } = await import('./application/factory')
+    const loginUseCase = createLoginUseCase()
+    const result = await loginUseCase.execute(credentials)
 
-    console.log('🔐 Login Action - API Configuration:', {
-      apiUrl: process.env.NEXT_PUBLIC_API_URL,
-      endpoint: '/v1/auth/login',
-      fullUrl: 'http://localhost:8080/v1/auth/login',
-    })
-
-    const response = await api.POST('/v1/auth/login', {
-      body: {
-        email: credentials.email,
-        password: credentials.password,
-      },
-    })
-
-    console.log('🔐 Login Action - Full Response:', {
-      hasData: !!response.data,
-      hasError: !!response.error,
-      fullResponse: response,
-    })
-
-    console.log('🔐 Response Data Details:', JSON.stringify(response.data, null, 2))
-
-    // Handle API errors
-    if (response.error) {
-      console.error('Login API error:', response.error)
-
-      // Extract structured error if available
-      const apiError = response.error as Record<string, unknown>
-      const errorData = {
-        message: (apiError.message as string) || 'Invalid email or password',
-        key: apiError.key as string | undefined,
-        code: apiError.code as number | undefined,
-      }
-
+    if (result.type === 'error') {
       return {
         success: false,
-        error: errorData.message,
-        errorData, // Pass structured error for better error mapping
+        error: result.message,
       }
     }
 
-    if (!response.data) {
-      return {
-        success: false,
-        error: 'Login failed',
-      }
-    }
-
-    // API returns either:
-    // 1. Standard login: { token, refreshToken, expiresAt, totpEnabled, user }
-    // 2. 2FA challenge: { totpRequired: true, challengeToken, expiresAt }
-    const loginResponse = response.data as {
-      token?: string
-      refreshToken?: string
-      totpRequired?: boolean
-      challengeToken?: string
-      expiresAt?: string | number
-      totpEnabled?: boolean
-      user?: Record<string, unknown>
-      message?: string
-    }
-
-    console.log('🔐 Login Response:', {
-      hasToken: !!loginResponse.token,
-      hasChallengeToken: !!loginResponse.challengeToken,
-      totpRequired: loginResponse.totpRequired,
-      message: loginResponse.message,
-    })
-
-    // Check if 2FA challenge is required
-    if (loginResponse.totpRequired || loginResponse.challengeToken) {
-      console.log('✅ 2FA required - challengeToken received, returning to client')
-      // Return challengeToken to client so it can store in sessionStorage
-      // (Server Actions can't access sessionStorage - it's browser-only)
+    if (result.type === 'needs2FA') {
       return {
         success: true,
         data: {
           requiresTwoFactor: true,
-          challengeToken: loginResponse.challengeToken,
+          challengeToken: result.challengeToken,
           email: credentials.email,
         },
       }
     }
 
-    // Standard login - get token (not accessToken)
-    const { token: accessToken, refreshToken, expiresAt, user: apiUser } = loginResponse
-
-    if (!accessToken) {
-      return {
-        success: false,
-        error: 'No access token received from server',
-      }
-    }
-
-    if (!refreshToken) {
-      return {
-        success: false,
-        error: 'No refresh token received from server',
-      }
-    }
-
-    if (!expiresAt) {
-      return {
-        success: false,
-        error: 'No expiration time received from server',
-      }
-    }
-
-    if (!apiUser) {
-      return {
-        success: false,
-        error: 'No user data received from server',
-      }
-    }
-
-    console.log('✅ Login successful - storing tokens in Next.js httpOnly cookies')
-
-    // Debug: Log token in development
-    if (process.env.NODE_ENV === 'development') {
-      debugToken(accessToken)
-    }
-
-    // ✅ SECURITY: Store tokens in Next.js httpOnly cookies
-    // This works for both:
-    // 1. Next.js SSR/Server Actions (access via cookies() in server components)
-    // 2. Next.js client-side API calls (cookies sent automatically to Next.js API routes)
-    // 3. Server Actions can add Authorization header when calling Go API
-
-    // Calculate token TTL properly
-    const expiresInSeconds = calculateTokenTTL(expiresAt)
-    console.log('📅 Token TTL calculated:', expiresInSeconds, 'seconds')
-
-    const { setServerAuthTokens } = await import('@/lib/api/server')
-    await setServerAuthTokens(accessToken, refreshToken, expiresInSeconds)
-
-    // ✅ Return success - client will handle redirect
-    // This ensures cookies are set in response, browser stores them, THEN client navigates
     return {
       success: true,
       data: {
@@ -243,12 +91,6 @@ export async function loginAction(
   }
 }
 
-/**
- * Verify 2FA Login Action
- *
- * Verifies 2FA code after successful password authentication.
- * Completes login flow by returning access token.
- */
 export async function verify2FALoginAction(
   challengeToken: string,
   code: string
@@ -261,85 +103,17 @@ export async function verify2FALoginAction(
       }
     }
 
-    // Call API
-    const api = createPublicClient()
+    const { createVerify2FAUseCase } = await import('./application/factory')
+    const verify2FAUseCase = createVerify2FAUseCase()
+    const result = await verify2FAUseCase.execute(challengeToken, code)
 
-    console.log('🔐 Verifying 2FA code')
-
-    const response = await api.POST('/v1/auth/2fa/verify', {
-      body: {
-        challengeToken,
-        code,
-      },
-    })
-
-    console.log('🔐 2FA Verify Response:', {
-      hasData: !!response.data,
-      hasError: !!response.error,
-    })
-
-    // Handle API errors
-    if (response.error) {
-      console.error('2FA verify error:', response.error)
+    if (result.type === 'error') {
       return {
         success: false,
-        error: 'Invalid verification code',
+        error: result.message,
       }
     }
 
-    if (!response.data) {
-      return {
-        success: false,
-        error: '2FA verification failed',
-      }
-    }
-
-    // API returns: { token, refreshToken, expiresAt, user }
-    const verifyResponse = response.data as {
-      token?: string
-      refreshToken?: string
-      expiresAt?: number | string
-      user?: Record<string, unknown>
-    }
-
-    const { token: accessToken, refreshToken, expiresAt, user: apiUser } = verifyResponse
-
-    if (!accessToken) {
-      return {
-        success: false,
-        error: 'No access token received',
-      }
-    }
-
-    if (!refreshToken) {
-      return {
-        success: false,
-        error: 'No refresh token received',
-      }
-    }
-
-    if (!expiresAt) {
-      return {
-        success: false,
-        error: 'No expiration time received',
-      }
-    }
-
-    if (!apiUser) {
-      return {
-        success: false,
-        error: 'No user data received',
-      }
-    }
-
-    console.log('✅ 2FA verified successfully - storing tokens in Next.js httpOnly cookies')
-
-    // Store tokens in Next.js httpOnly cookies (same as regular login)
-    const expiresInSeconds = calculateTokenTTL(expiresAt)
-    const { setServerAuthTokens } = await import('@/lib/api/server')
-    await setServerAuthTokens(accessToken, refreshToken, expiresInSeconds)
-
-    // Return success - client will handle redirect
     return {
       success: true,
       data: {
@@ -363,9 +137,8 @@ export async function verify2FALoginAction(
  */
 export async function signupAction(
   data: SignUpData
-): Promise<ActionResult<{ userId: string; emailVerified: boolean }>> {
+): Promise<ActionResult<{ userId: string; accountId: string; email: string }>> {
   try {
-    // Validate input
     const validation = signupSchema.safeParse(data)
     if (!validation.success) {
       return {
@@ -375,62 +148,35 @@ export async function signupAction(
       }
     }
 
-    // Call API (public endpoint - no auth required)
-    const api = createPublicClient()
+    const accountName = data.accountName || `${data.firstName} ${data.lastName}'s Account`
 
-    // Step 1: Create the user
-    const createUserResponse = await api.POST('/v1/users/', {
-      body: {
-        email: data.email,
-        password: data.password,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        phone: data.phone || '',
-      },
+    const { createRegisterUseCase } = await import('./application/factory')
+    const registerUseCase = createRegisterUseCase()
+    const result = await registerUseCase.execute({
+      email: data.email,
+      password: data.password,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      ...(data.phone && { phone: data.phone }),
+      accountName,
+      accountType: data.accountType,
     })
 
-    // Handle user creation errors
-    if (createUserResponse.error) {
-      console.error('User creation error:', createUserResponse.error)
-
-      // Extract structured error if available
-      const apiError = createUserResponse.error as Record<string, unknown>
-      const errorData = {
-        message: (apiError.message as string) || 'Failed to create account',
-        key: apiError.key as string | undefined,
-        code: apiError.code as number | undefined,
-      }
-
+    if (result.type === 'error') {
       return {
         success: false,
-        error: errorData.message,
-        errorData, // Pass structured error for better error mapping
+        error: result.message,
       }
-    }
-
-    if (!createUserResponse.data) {
-      return {
-        success: false,
-        error: 'User creation failed',
-      }
-    }
-
-    // Get user data from registration response
-    const userData = createUserResponse.data as {
-      id?: string
-      email?: string
-      emailVerified?: boolean
     }
 
     console.log('✅ Signup successful - verification email sent')
 
-    // Return success with user data - NO AUTO-LOGIN
-    // User will be redirected to check their email
     return {
       success: true,
       data: {
-        userId: userData.id || 'unknown',
-        emailVerified: userData.emailVerified || false
+        userId: result.result.userId,
+        accountId: result.result.accountId,
+        email: result.result.email,
       },
     }
   } catch (error) {
@@ -449,22 +195,16 @@ export async function signupAction(
  */
 export async function logoutAction(): Promise<void> {
   try {
-    // Clear JWT tokens from cookies
-    await clearServerAuthTokens()
+    const { createLogoutUseCase } = await import('./application/factory')
+    const logoutUseCase = createLogoutUseCase()
+    await logoutUseCase.execute()
   } catch (error) {
     console.error('Logout action error:', error)
   }
 
-  // Always redirect to login, even if deletion failed
   redirect('/signin')
 }
 
-/**
- * Refresh Token Action
- *
- * Exchanges refresh token for new access token.
- * Returns new token data to update the session.
- */
 export async function refreshTokenAction(
   refreshToken: string
 ): Promise<
@@ -478,57 +218,23 @@ export async function refreshTokenAction(
       }
     }
 
-    const api = createPublicClient()
+    const { createRefreshTokenUseCase } = await import('./application/factory')
+    const refreshTokenUseCase = createRefreshTokenUseCase()
+    const result = await refreshTokenUseCase.execute(refreshToken)
 
-    console.log('🔄 Refreshing access token...')
-
-    const response = await api.POST('/v1/auth/refresh', {
-      body: {
-        refreshToken,
-      },
-    })
-
-    if (response.error) {
-      console.error('Token refresh error:', response.error)
+    if (result.type === 'error') {
       return {
         success: false,
-        error: 'Session expired. Please login again.',
+        error: result.message,
       }
     }
-
-    if (!response.data) {
-      return {
-        success: false,
-        error: 'Token refresh failed',
-      }
-    }
-
-    const refreshResponse = response.data as {
-      token?: string
-      refreshToken?: string
-      expiresAt?: number | string
-    }
-
-    const { token, refreshToken: newRefreshToken, expiresAt } = refreshResponse
-
-    if (!token || !newRefreshToken || !expiresAt) {
-      return {
-        success: false,
-        error: 'Invalid refresh response',
-      }
-    }
-
-    console.log('✅ Token refreshed successfully')
-
-    const expiresAtTimestamp =
-      typeof expiresAt === 'string' ? parseInt(expiresAt) : expiresAt
 
     return {
       success: true,
       data: {
-        token,
-        refreshToken: newRefreshToken,
-        expiresAt: expiresAtTimestamp,
+        token: result.token,
+        refreshToken: result.refreshToken,
+        expiresAt: result.expiresAt,
       },
     }
   } catch (error) {
@@ -1135,7 +841,6 @@ export async function verifyEmailAction(
   data: VerifyEmailData
 ): Promise<ActionResult<VerifyEmailResponse>> {
   try {
-    // Validate input
     const validation = verifyEmailSchema.safeParse(data)
     if (!validation.success) {
       return {
@@ -1144,49 +849,20 @@ export async function verifyEmailAction(
       }
     }
 
-    // TODO: Uncomment when backend API route is ready
-    /*
-    const api = await createServerClient()
-    if (!api) {
+    const { createEmailVerificationUseCase } = await import('./application/factory')
+    const emailVerificationUseCase = createEmailVerificationUseCase()
+    const result = await emailVerificationUseCase.verify(data.token)
+
+    if (result.type === 'error') {
       return {
         success: false,
-        error: 'Failed to initialize API client',
+        error: result.message,
       }
     }
-
-    const response = await api.POST('/v1/auth/email/verify', {
-      body: {
-        token: data.token,
-      },
-    })
-
-    if (response.error) {
-      console.error('Verify email API error:', response.error)
-      return {
-        success: false,
-        error: response.error.message || 'Invalid or expired verification token',
-      }
-    }
-
-    if (!response.data) {
-      return {
-        success: false,
-        error: 'Email verification failed',
-      }
-    }
-
-    const verifyResponse = response.data as unknown as VerifyEmailResponse
 
     return {
       success: true,
-      data: verifyResponse,
-    }
-    */
-
-    // Temporary mock response until backend is ready
-    return {
-      success: false,
-      error: 'Email verification API not yet implemented',
+      data: { message: 'Email verified successfully' },
     }
   } catch (error) {
     console.error('Verify email action error:', error)
@@ -1209,7 +885,6 @@ export async function resendVerificationAction(
   data: ResendVerificationData
 ): Promise<ActionResult> {
   try {
-    // Validate input
     const validation = resendVerificationSchema.safeParse(data)
     if (!validation.success) {
       return {
@@ -1218,32 +893,16 @@ export async function resendVerificationAction(
       }
     }
 
-    // TODO: Uncomment when backend API route is ready
-    /*
-    const api = await createServerClient()
-    if (!api) {
-      return {
-        success: false,
-        error: 'Failed to initialize API client',
-      }
-    }
+    const { createEmailVerificationUseCase } = await import('./application/factory')
+    const emailVerificationUseCase = createEmailVerificationUseCase()
+    await emailVerificationUseCase.resend(data.email)
 
-    await api.POST('/v1/auth/email/resend', {
-      body: {
-        email: data.email,
-      },
-    })
-    */
-
-    // Always return success to prevent email enumeration
-    // Even if the email doesn't exist or verification already sent
     return {
       success: true,
       data: undefined,
     }
   } catch (error) {
     console.error('Resend verification action error:', error)
-    // Still return success for security (prevent email enumeration)
     return {
       success: true,
       data: undefined,
@@ -1377,7 +1036,6 @@ export async function requestPasswordlessEmailAction(data: {
   email: string
 }): Promise<ActionResult> {
   try {
-    // Basic email validation
     if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
       return {
         success: false,
@@ -1387,23 +1045,18 @@ export async function requestPasswordlessEmailAction(data: {
 
     const api = createPublicClient()
 
-    // Send request but don't check response (always return success for security)
-    // @ts-expect-error - passwordless endpoints not yet in generated types
-    await api.POST('/v1/auth/passwordless/email', {
+    await api.POST('/api/v1/auth/passwordless/magic-link/send', {
       body: {
         email: data.email,
       },
     })
 
-    // Always return success to prevent email enumeration
-    // Even if there's an error or email doesn't exist
     return {
       success: true,
       data: undefined,
     }
   } catch (error) {
     console.error('Request passwordless email action error:', error)
-    // Still return success for security (prevent email enumeration)
     return {
       success: true,
       data: undefined,
@@ -1421,7 +1074,6 @@ export async function requestPasswordlessPhoneAction(data: {
   phone: string
 }): Promise<ActionResult> {
   try {
-    // Basic phone validation
     if (!data.phone || !/^\+[1-9]\d{1,14}$/.test(data.phone)) {
       return {
         success: false,
@@ -1431,22 +1083,18 @@ export async function requestPasswordlessPhoneAction(data: {
 
     const api = createPublicClient()
 
-    // Send request but don't check response (always return success for security)
-    // @ts-expect-error - passwordless endpoints not yet in generated types
-    await api.POST('/v1/auth/passwordless/phone', {
+    await api.POST('/api/v1/auth/passwordless/sms/send', {
       body: {
         phone: data.phone,
       },
     })
 
-    // Always return success to prevent phone enumeration
     return {
       success: true,
       data: undefined,
     }
   } catch (error) {
     console.error('Request passwordless phone action error:', error)
-    // Still return success for security (prevent phone enumeration)
     return {
       success: true,
       data: undefined,
@@ -1460,18 +1108,15 @@ export async function requestPasswordlessPhoneAction(data: {
  * Initiates passkey authentication flow.
  * Returns challenge options for the client to present to the authenticator.
  */
-export async function passkeyLoginBeginAction(): Promise<ActionResult<{ publicKey: unknown }>> {
+export async function passkeyLoginBeginAction(): Promise<ActionResult<{ publicKey: unknown; sessionId: string }>> {
   try {
     const api = createPublicClient()
 
-    console.log('🔐 Passkey Login Begin - Calling /passkey/login/begin')
+    console.log('🔐 Passkey Login Begin - Calling /api/v1/passkeys/login/begin')
 
-    // Passkey route not in generated OpenAPI schema - use any for now
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response = (await (api as any).POST('/v1/auth/passkey/login/begin')) as {
-      error?: Record<string, unknown>
-      data?: { publicKey: unknown }
-    }
+    const response = await api.POST('/api/v1/passkeys/login/begin', {
+      body: { email: '' },
+    })
 
     if (response.error) {
       console.error('Passkey login begin error:', response.error)
@@ -1488,11 +1133,14 @@ export async function passkeyLoginBeginAction(): Promise<ActionResult<{ publicKe
       }
     }
 
-    const challengeData = response.data
+    const challengeData = response.data as { options: unknown; session_id: string }
 
     return {
       success: true,
-      data: challengeData,
+      data: {
+        publicKey: challengeData.options,
+        sessionId: challengeData.session_id,
+      },
     }
   } catch (error) {
     console.error('Passkey login begin action error:', error)
@@ -1510,28 +1158,27 @@ export async function passkeyLoginBeginAction(): Promise<ActionResult<{ publicKe
  * Creates session and returns tokens.
  */
 export async function passkeyLoginFinishAction(
-  authResponse: unknown
+  authResponse: unknown,
+  sessionId?: string
 ): Promise<ActionResult<{ requiresTwoFactor: boolean }>> {
   try {
     const api = createPublicClient()
 
-    console.log('🔐 Passkey Login Finish - Calling /passkey/login/finish')
+    console.log('🔐 Passkey Login Finish - Calling /api/v1/passkeys/login/finish')
 
-    // Passkey route not in generated OpenAPI schema - use any for now
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response = (await (api as any).POST('/v1/auth/passkey/login/finish', {
-      body: {
-        response: authResponse,
-      },
-    })) as {
-      error?: Record<string, unknown>
-      data?: {
-        token?: string
-        refreshToken?: string
-        expiresAt?: string | number
-        user?: Record<string, unknown>
+    if (!sessionId) {
+      return {
+        success: false,
+        error: 'Session ID is required',
       }
     }
+
+    const response = await api.POST('/api/v1/passkeys/login/finish', {
+      body: {
+        credential: authResponse,
+        session_id: sessionId,
+      },
+    })
 
     if (response.error) {
       console.error('Passkey login finish error:', response.error)
@@ -1548,11 +1195,17 @@ export async function passkeyLoginFinishAction(
       }
     }
 
-    const authResult = response.data
+    const authResult = response.data as {
+      access_token?: string
+      refresh_token?: string
+      expires_at?: number
+      user_id?: string
+      email?: string
+    }
 
-    const { token: accessToken, refreshToken, expiresAt, user: apiUser } = authResult
+    const { access_token: accessToken, refresh_token: refreshToken, expires_at: expiresAt } = authResult
 
-    if (!accessToken || !refreshToken || !expiresAt || !apiUser) {
+    if (!accessToken || !refreshToken || !expiresAt) {
       return {
         success: false,
         error: 'Invalid authentication response',
@@ -1561,12 +1214,10 @@ export async function passkeyLoginFinishAction(
 
     console.log('✅ Passkey authentication successful - storing tokens in Next.js httpOnly cookies')
 
-    // Store tokens in Next.js httpOnly cookies (same as regular login)
-    const expiresInSeconds = calculateTokenTTL(expiresAt)
+    const expiresInSeconds = expiresAt - Math.floor(Date.now() / 1000)
     const { setServerAuthTokens } = await import('@/lib/api/server')
     await setServerAuthTokens(accessToken, refreshToken, expiresInSeconds)
 
-    // Return success - client will handle redirect
     return {
       success: true,
       data: {
@@ -1810,31 +1461,16 @@ export async function verifyPasswordlessLoginAction(data: {
 
     const api = createPublicClient()
 
-    const response: {
-      error?: Record<string, unknown>
-      data?: {
-        totpRequired?: boolean
-        challengeToken?: string
-        user?: { email?: string; id?: string; firstName?: string; lastName?: string }
-        token?: string
-        refreshToken?: string
-        expiresAt?: number
-      }
-    } = await api.POST(
-      // @ts-expect-error - passwordless endpoints not yet in generated types
-      '/v1/auth/passwordless/verify',
-      {
-        body: {
-          token: data.token,
-        },
-      }
-    )
+    const response = await api.POST('/api/v1/auth/passwordless/magic-link/verify', {
+      body: {
+        token: data.token,
+      },
+    })
 
-    // Handle API errors
     if (response.error) {
       console.error('Passwordless verify API error:', response.error)
-      const apiError = response.error
-      const errorMessage = (apiError.message as string) || 'Invalid or expired token'
+      const apiError = response.error as any
+      const errorMessage = apiError.message || 'Invalid or expired token'
       return {
         success: false,
         error: errorMessage,
@@ -1853,22 +1489,15 @@ export async function verifyPasswordlessLoginAction(data: {
       }
     }
 
-    const responseData = response.data
-
-    // Check if 2FA is required
-    if (responseData.totpRequired || responseData.challengeToken) {
-      return {
-        success: true,
-        data: {
-          requiresTwoFactor: true,
-          challengeToken: responseData.challengeToken,
-          email: responseData.user?.email,
-        },
-      }
+    const responseData = response.data as {
+      access_token?: string
+      refresh_token?: string
+      expires_at?: number
+      user_id?: string
+      email?: string
     }
 
-    // Login successful - create session
-    if (!responseData.token || !responseData.refreshToken || !responseData.user) {
+    if (!responseData.access_token || !responseData.refresh_token || !responseData.expires_at) {
       return {
         success: false,
         error: 'Invalid response from server',
@@ -1877,10 +1506,9 @@ export async function verifyPasswordlessLoginAction(data: {
 
     console.log('✅ Passwordless login successful - storing tokens in Next.js httpOnly cookies')
 
-    // Store tokens in Next.js httpOnly cookies (same as regular login)
-    const expiresInSeconds = calculateTokenTTL(responseData.expiresAt)
+    const expiresInSeconds = responseData.expires_at - Math.floor(Date.now() / 1000)
     const { setServerAuthTokens } = await import('@/lib/api/server')
-    await setServerAuthTokens(responseData.token, responseData.refreshToken, expiresInSeconds)
+    await setServerAuthTokens(responseData.access_token, responseData.refresh_token, expiresInSeconds)
 
     return {
       success: true,

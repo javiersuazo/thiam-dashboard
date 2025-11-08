@@ -4,9 +4,9 @@ import { useSidebar } from "@/context/SidebarContext";
 import AppHeader from "@/layout/AppHeader";
 import AppSidebar from "@/layout/AppSidebar";
 import Backdrop from "@/layout/Backdrop";
-import React, { useState } from "react";
+import React from "react";
 import { usePathname } from "next/navigation";
-import { OmniChat, type ChatStateInfo } from "@/components/domains/omni-chat";
+import { OmniChatLayout } from "@/components/domains/omni-chat";
 
 /**
  * Admin Layout Client Component
@@ -21,10 +21,6 @@ export default function AdminLayoutClient({
 }) {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
   const pathname = usePathname();
-  const [chatState, setChatState] = useState<ChatStateInfo>({
-    mode: 'minimized',
-    isExpanded: false,
-  });
 
   const getRouteSpecificStyles = () => {
     switch (pathname) {
@@ -47,31 +43,23 @@ export default function AdminLayoutClient({
     ? "xl:ml-[290px]"
     : "xl:ml-[90px]";
 
-  const isFullscreen = chatState.mode === 'fullscreen'
-
   return (
     <div className="min-h-screen xl:flex">
       {/* Sidebar and Backdrop */}
       <AppSidebar />
       <Backdrop />
 
-      {/* Main Content Area */}
-      <div
-        className={`flex-1 transition-all duration-300 ease-in-out ${mainContentMargin}`}
-        style={{
-          display: isFullscreen ? 'none' : undefined,
-        }}
-      >
-        {/* Header */}
-        <AppHeader />
-        {/* Page Content */}
-        <div className={getRouteSpecificStyles()}>{children}</div>
-      </div>
-
-      <OmniChat
-        initialMode="minimized"
-        onStateChange={setChatState}
-      />
+      {/* Main Content Area with OmniChat Layout */}
+      <OmniChatLayout initialMode="minimized">
+        <div
+          className={`flex-1 transition-all duration-300 ease-in-out ${mainContentMargin}`}
+        >
+          {/* Header */}
+          <AppHeader />
+          {/* Page Content */}
+          <div className={getRouteSpecificStyles()}>{children}</div>
+        </div>
+      </OmniChatLayout>
     </div>
   );
 }

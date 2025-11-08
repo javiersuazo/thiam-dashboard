@@ -8,6 +8,7 @@
 
 // Import commands
 import './commands'
+import './commands/auth.commands'
 
 // Hide fetch/XHR requests in command log for cleaner output
 const app = window.top

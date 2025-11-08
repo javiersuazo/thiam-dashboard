@@ -37,7 +37,7 @@ export function useChatState({
     setMode(newMode)
     if (newMode === 'minimized') {
       setIsExpanded(false)
-    } else if (newMode === 'floating' || newMode === 'fullscreen') {
+    } else if (newMode === 'floating' || newMode === 'fullscreen' || newMode === 'sidebar') {
       setIsExpanded(true)
     }
     onModeChange?.(newMode)
@@ -51,9 +51,17 @@ export function useChatState({
     }
   }, [mode, changeMode])
 
+  const toggleSidebar = useCallback(() => {
+    if (mode === 'minimized') {
+      changeMode('sidebar')
+    } else {
+      changeMode('minimized')
+    }
+  }, [mode, changeMode])
+
   const toggleFullscreen = useCallback(() => {
     if (mode === 'fullscreen') {
-      changeMode('floating')
+      changeMode('sidebar')
     } else {
       changeMode('fullscreen')
     }
@@ -151,6 +159,7 @@ export function useChatState({
     ...chatState,
     changeMode,
     toggleMinimize,
+    toggleSidebar,
     toggleFullscreen,
     startDrag,
     onDrag,

@@ -629,7 +629,7 @@ export async function forgotPasswordAction(
     const api = createPublicClient()
 
     // Intentionally ignoring response to prevent email enumeration
-    await api.POST('/v1/auth/password/forgot', {
+    await api.POST('/v1/auth/password-reset/request', {
       body: {
         email: data.email,
       },
@@ -717,23 +717,16 @@ export async function resetPasswordAction(
 
     const api = createPublicClient()
 
-    // Note: API only accepts 'token' and 'password' fields
-    // We must NOT send confirmPassword or newPassword fields
-    const requestBody: { token: string; newPassword: string } = {
+    // Note: API accepts 'token' and 'new_password' fields (snake_case)
+    const requestBody = {
       token: data.token,
-      newPassword: data.newPassword,
+      new_password: data.newPassword,
     }
 
     console.log('🔐 Reset Password - Request Body:', JSON.stringify(requestBody))
 
-    // Cast to match OpenAPI schema type (even though we're sending different fields)
-    // Schema expects: { token: string, newPassword: string }
-    // API actually wants: { token: string, password: string }
-    const response = await api.POST('/v1/auth/password/reset', {
-      body: {
-        token: requestBody.token,
-        newPassword: requestBody.newPassword,
-      },
+    const response = await api.POST('/v1/auth/password-reset/reset', {
+      body: requestBody as any, // Type cast to bypass OpenAPI strict typing
     })
 
     console.log('🔐 Reset Password - Full Response:', {
@@ -760,16 +753,27 @@ export async function resetPasswordAction(
 
     console.log('🔐 Reset Password - Response Data:', JSON.stringify(response.data, null, 2))
 
-    // API returns: { token, refreshToken, expiresAt, user }
+    // API returns: { access_token, refresh_token, user_id, email, first_name, last_name, session_id, expires_at }
     const resetResponse = response.data as {
-      token?: string
-      refreshToken?: string
-      expiresAt?: number | string
-      totpEnabled?: boolean
-      user?: Record<string, unknown>
+      access_token?: string
+      refresh_token?: string
+      expires_at?: number
+      user_id?: string
+      email?: string
+      first_name?: string
+      last_name?: string
+      phone?: string
+      session_id?: string
     }
 
-    const { token: accessToken, refreshToken, expiresAt, user: apiUser } = resetResponse
+    const { access_token: accessToken, refresh_token: refreshToken, expires_at: expiresAt } = resetResponse
+    const apiUser = resetResponse ? {
+      id: resetResponse.user_id,
+      email: resetResponse.email,
+      firstName: resetResponse.first_name,
+      lastName: resetResponse.last_name,
+      phone: resetResponse.phone,
+    } : undefined
 
     console.log('🔐 Reset Password - Token Check:', {
       hasToken: !!accessToken,
@@ -793,12 +797,8 @@ export async function resetPasswordAction(
       }
     }
 
-    if (!expiresAt) {
-      return {
-        success: false,
-        error: 'No expiration time received',
-      }
-    }
+    // Calculate expiresAt from AccessTokenDuration (15 minutes = 900 seconds) if not provided
+    const calculatedExpiresAt = expiresAt || Math.floor(Date.now() / 1000) + 900
 
     if (!apiUser) {
       return {
@@ -810,7 +810,7 @@ export async function resetPasswordAction(
     console.log('✅ Password reset successful - storing tokens in Next.js httpOnly cookies')
 
     // Store tokens in Next.js httpOnly cookies (same as regular login)
-    const expiresInSeconds = calculateTokenTTL(expiresAt)
+    const expiresInSeconds = calculatedExpiresAt - Math.floor(Date.now() / 1000)
     const { setServerAuthTokens } = await import('@/lib/api/server')
     await setServerAuthTokens(accessToken, refreshToken, expiresInSeconds)
 
@@ -1518,6 +1518,174 @@ export async function verifyPasswordlessLoginAction(data: {
     }
   } catch (error) {
     console.error('Verify passwordless login action error:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unexpected error occurred',
+    }
+  }
+}
+
+/**
+ * Send Phone Verification OTP
+ *
+ * Sends an OTP code to the user's phone number for verification.
+ * Requires the user to be authenticated and have a phone number in their profile.
+ */
+export async function sendPhoneVerificationAction(data: {
+  phone: string
+}): Promise<ActionResult<void>> {
+  try {
+    const api = await createServerClient()
+    if (!api) {
+      return {
+        success: false,
+        error: 'Not authenticated',
+      }
+    }
+
+    const { data: profileData, error: profileError } = await api.PUT('/v1/users/profile', {
+      body: {
+        phone: data.phone,
+      },
+    })
+
+    if (profileError) {
+      console.error('Update profile error:', profileError)
+      return {
+        success: false,
+        error: 'Failed to update phone number',
+      }
+    }
+
+    const { error } = await api.POST('/v1/auth/phone-verification/send', {})
+
+    if (error) {
+      console.error('Send phone verification error:', error)
+      return {
+        success: false,
+        error: error.message || 'Failed to send verification code',
+      }
+    }
+
+    return {
+      success: true,
+      data: undefined,
+    }
+  } catch (error) {
+    console.error('Send phone verification action error:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unexpected error occurred',
+    }
+  }
+}
+
+/**
+ * Verify Phone OTP
+ *
+ * Verifies the OTP code sent to the user's phone.
+ */
+export async function verifyPhoneOTPAction(data: {
+  otp: string
+}): Promise<ActionResult<void>> {
+  try {
+    const api = await createServerClient()
+    if (!api) {
+      return {
+        success: false,
+        error: 'Not authenticated',
+      }
+    }
+
+    const { data: profileData, error: profileError } = await api.GET('/v1/users/profile', {})
+    
+    if (profileError || !profileData) {
+      console.error('Get profile error:', profileError)
+      return {
+        success: false,
+        error: 'Failed to get user profile',
+      }
+    }
+
+    const userId = (profileData as { ID: string }).ID
+
+    const publicClient = createPublicClient()
+    const { error } = await publicClient.POST('/v1/auth/phone-verification/verify', {
+      body: {
+        user_id: userId,
+        otp: data.otp,
+      },
+    })
+
+    if (error) {
+      console.error('Verify phone OTP error:', error)
+      return {
+        success: false,
+        error: error.message || 'Invalid verification code',
+      }
+    }
+
+    return {
+      success: true,
+      data: undefined,
+    }
+  } catch (error) {
+    console.error('Verify phone OTP action error:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unexpected error occurred',
+    }
+  }
+}
+
+/**
+ * Resend Phone Verification OTP
+ *
+ * Resends the OTP code to the user's phone.
+ */
+export async function resendPhoneOTPAction(): Promise<ActionResult<void>> {
+  try {
+    const api = await createServerClient()
+    if (!api) {
+      return {
+        success: false,
+        error: 'Not authenticated',
+      }
+    }
+
+    const { data: profileData, error: profileError } = await api.GET('/v1/users/profile', {})
+    
+    if (profileError || !profileData) {
+      console.error('Get profile error:', profileError)
+      return {
+        success: false,
+        error: 'Failed to get user profile',
+      }
+    }
+
+    const userId = (profileData as { ID: string }).ID
+
+    const publicClient = createPublicClient()
+    const { error } = await publicClient.POST('/v1/auth/phone-verification/resend', {
+      body: {
+        user_id: userId,
+      },
+    })
+
+    if (error) {
+      console.error('Resend phone OTP error:', error)
+      return {
+        success: false,
+        error: error.message || 'Failed to resend verification code',
+      }
+    }
+
+    return {
+      success: true,
+      data: undefined,
+    }
+  } catch (error) {
+    console.error('Resend phone OTP action error:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unexpected error occurred',

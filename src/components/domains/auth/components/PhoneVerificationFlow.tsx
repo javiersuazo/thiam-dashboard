@@ -51,9 +51,12 @@ export default function PhoneVerificationFlow({
   }
 
   const handleResendCode = async () => {
-    // Re-send code to the same phone number
-    // In a real implementation, this would call the API again
-    return Promise.resolve()
+    const { resendPhoneOTPAction } = await import('../actions')
+    const result = await resendPhoneOTPAction()
+
+    if (!result.success) {
+      throw new Error(result.error)
+    }
   }
 
   return (

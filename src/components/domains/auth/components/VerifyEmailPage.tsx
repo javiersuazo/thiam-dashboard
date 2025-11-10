@@ -42,7 +42,7 @@ export default function VerifyEmailPage() {
           // The server automatically sets the cookies in the response
 
           toast.success('Email verified successfully!')
-          // Redirect to email-verified page with passkey prompt
+          // Redirect immediately to /email-verified page with countdown
           router.push('/email-verified')
         } else {
           const errorMessage = 'error' in result ? result.error : 'Failed to verify email'

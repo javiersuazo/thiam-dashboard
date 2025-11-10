@@ -98,6 +98,7 @@
     "cypress": "^15.5.0",
     "eslint": "^9",
     "eslint-config-next": "15.1.3",
+    "hi-base32": "^0.5.1",
     "openapi-fetch": "^0.15.0",
     "openapi-typescript": "^7.10.1",
     "postcss": "^8",

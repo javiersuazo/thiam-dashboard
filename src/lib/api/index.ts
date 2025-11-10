@@ -40,7 +40,7 @@ import {
   contentTypeMiddleware,
 } from './middleware'
 
-const API_BASE_URL = 'http://localhost:8080'
+const API_BASE_URL = 'http://localhost:8080/api'
 
 // Log API configuration in development
 if (process.env.NODE_ENV === 'development') {

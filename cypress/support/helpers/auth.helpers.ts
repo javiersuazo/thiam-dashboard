@@ -27,6 +27,6 @@ export function generateTestUser(suffix?: string) {
     lastName: 'User',
     accountName: `Test Company ${uniqueSuffix}`,
     accountType: 'customer' as const,
-    phone: '+1234567890',
+    phone: `+1${String(timestamp).slice(-10)}`,
   }
 }

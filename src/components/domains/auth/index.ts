@@ -166,6 +166,7 @@ export { default as PhoneVerificationRequest } from './components/PhoneVerificat
 export { default as PhoneVerificationCode } from './components/PhoneVerificationCode'
 export { default as PhoneVerificationFlow } from './components/PhoneVerificationFlow'
 export { default as PasskeyEnrollmentPrompt } from './components/PasskeyEnrollmentPrompt'
+export { default as MagicLinkPage } from './components/MagicLinkPage'
 
 // Hooks will be exported when created
 // export { useAuthForm } from './hooks/useAuthForm'

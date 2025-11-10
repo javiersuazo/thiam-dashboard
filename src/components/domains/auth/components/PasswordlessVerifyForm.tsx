@@ -70,14 +70,9 @@ export default function PasswordlessVerifyForm() {
         }
 
         // Success - session is saved on server
-        setState('success')
         toast.success(t('success'))
-
-        // Redirect to home after a brief delay
-        setTimeout(() => {
-          router.push('/')
-          router.refresh()
-        }, 1500)
+        // Redirect immediately to dashboard
+        router.push('/dashboard')
       } catch (error) {
         console.error('Passwordless verification error:', error)
         setState('error')

@@ -82,10 +82,16 @@ Cypress.Commands.add('loginViaUI', (email: string, password: string) => {
   cy.get('input[name="email"]').type(email)
   cy.get('input[name="password"]').type(password)
   cy.get('button[type="submit"]').click()
+
+  // Wait for redirect to dashboard
+  cy.url().should('match', /\/(dashboard|home)/, { timeout: 10000 })
+
+  // Verify cookies are set
+  cy.getCookie('access_token').should('exist')
 })
 
 Cypress.Commands.add('loginViaAPI', (email: string, password: string) => {
-  cy.request({
+  return cy.request({
     method: 'POST',
     url: `${API_URL}/auth/login`,
     body: { email, password },
@@ -93,5 +99,13 @@ Cypress.Commands.add('loginViaAPI', (email: string, password: string) => {
     expect(response.status).to.eq(200)
     expect(response.body).to.have.property('access_token')
     expect(response.body).to.have.property('refresh_token')
+    expect(response.body).to.have.property('user_id')
+
+    return {
+      user_id: response.body.user_id,
+      accessToken: response.body.access_token,
+      refreshToken: response.body.refresh_token,
+      email: response.body.email,
+    }
   })
 })

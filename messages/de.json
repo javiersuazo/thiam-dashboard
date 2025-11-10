@@ -1,0 +1,127 @@
+{
+  "common": {
+    "loading": "Laden...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "cancel": "Abbrechen",
+    "continue": "Weiter",
+    "back": "Zurück",
+    "next": "Weiter",
+    "submit": "Absenden",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "close": "Schließen",
+    "confirm": "Bestätigen",
+    "yes": "Ja",
+    "no": "Nein",
+    "ok": "OK"
+  },
+  "inventory": {
+    "ingredients": {
+      "title": "Zutaten",
+      "subtitle": "Verwalten Sie Ihr Zutaten-Inventar",
+      "addButton": "Zutat hinzufügen",
+      "importCSV": "CSV importieren",
+      "search": "Zutaten suchen...",
+      "filterCategory": "Kategorie",
+      "allCategories": "Alle Kategorien",
+      "statusAll": "Alle",
+      "statusActive": "Aktiv",
+      "statusLowStock": "Niedriger Bestand",
+      "emptyState": "Keine Zutaten gefunden. Fügen Sie Ihre erste Zutat hinzu, um zu beginnen.",
+      "loading": "Zutaten werden geladen...",
+      "error": "Fehler beim Laden der Zutaten. Bitte versuchen Sie es erneut.",
+      "table": {
+        "name": "Name",
+        "category": "Kategorie",
+        "stock": "Bestand",
+        "unit": "Einheit",
+        "costPerUnit": "Kosten/Einheit",
+        "supplier": "Lieferant",
+        "status": "Status",
+        "active": "Aktiv",
+        "actions": "Aktionen",
+        "reorderLevel": "Nachbestellungsgrenze"
+      },
+      "stockStatus": {
+        "outOfStock": "Nicht auf Lager",
+        "lowStock": "Niedriger Bestand",
+        "inStock": "Auf Lager"
+      },
+      "actions": {
+        "add": "Zutat hinzufügen",
+        "importCSV": "CSV importieren",
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "save": "Speichern",
+        "cancel": "Abbrechen",
+        "viewBatches": "Chargen anzeigen",
+        "confirmDelete": "Sind Sie sicher, dass Sie \"{name}\" löschen möchten?",
+        "confirmDeleteDescription": "Diese Aktion kann nicht rückgängig gemacht werden."
+      },
+      "searchPlaceholder": "Zutaten suchen...",
+      "saveChanges": "Änderungen speichern",
+      "cancelChanges": "Änderungen verwerfen",
+      "bulkSaveSuccess": "Alle Änderungen erfolgreich gespeichert",
+      "bulkSaveFailed": "Fehler beim Speichern der Änderungen. Bitte versuchen Sie es erneut.",
+      "changesDiscarded": "Änderungen verworfen",
+      "confirmDelete": "{name} löschen?",
+      "confirmBulkDelete": "{count} Zutaten löschen?",
+      "confirmDeleteDescription": "Diese Aktion kann nicht rückgängig gemacht werden. Diese Zutat wird dauerhaft gelöscht.",
+      "confirmBulkDeleteDescription": "Diese Aktion kann nicht rückgängig gemacht werden. {count} Zutaten werden dauerhaft gelöscht.",
+      "delete": "Löschen",
+      "cancel": "Abbrechen",
+      "deleteSuccess": "Zutat(en) erfolgreich gelöscht",
+      "deleteFailed": "Fehler beim Löschen der Zutat(en)",
+      "inlineEdit": {
+        "doubleClickHint": "Doppelklicken Sie auf eine Zeile zum Bearbeiten",
+        "validation": {
+          "nameRequired": "Name ist erforderlich",
+          "stockPositive": "Aktueller Bestand muss eine positive Zahl sein",
+          "reorderLevelPositive": "Nachbestellungsgrenze muss eine positive Zahl sein",
+          "costPositive": "Kosten müssen eine positive Zahl sein"
+        },
+        "success": "Zutat erfolgreich aktualisiert",
+        "error": "Fehler beim Aktualisieren der Zutat"
+      },
+      "filters": {
+        "activeFilters": "Aktive Filter:",
+        "search": "Suchen",
+        "category": "Kategorie",
+        "status": "Status",
+        "clearAll": "Alle löschen"
+      },
+      "categories": {
+        "vegetables": "Gemüse",
+        "fruits": "Obst",
+        "meat": "Fleisch",
+        "seafood": "Meeresfrüchte",
+        "dairy": "Milchprodukte",
+        "grains": "Getreide",
+        "bakery": "Backwaren",
+        "spices": "Gewürze",
+        "oils": "Öle",
+        "condiments": "Würzmittel",
+        "beverages": "Getränke",
+        "canned": "Konserven",
+        "frozen": "Tiefkühlkost",
+        "supplies": "Vorräte",
+        "other": "Sonstiges"
+      },
+      "units": {
+        "kg": "Kilogramm (kg)",
+        "g": "Gramm (g)",
+        "l": "Liter (l)",
+        "ml": "Milliliter (ml)",
+        "piece": "Stück"
+      },
+      "pagination": {
+        "showing": "Zeigt",
+        "to": "bis",
+        "of": "von",
+        "page": "Seite {current} von {total}"
+      }
+    }
+  }
+}

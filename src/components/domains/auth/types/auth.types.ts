@@ -58,6 +58,7 @@ export interface SignUpData {
   firstName: string
   lastName: string
   phone?: string
+  accountName?: string
   accountType: 'customer' | 'caterer'
   terms: boolean
 }

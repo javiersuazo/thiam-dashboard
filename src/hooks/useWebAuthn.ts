@@ -121,7 +121,7 @@ export function useWebAuthn() {
       // Step 1: Begin registration - get challenge from server
       // @ts-expect-error - WebAuthn route not in generated OpenAPI schema
       const { data: response, error: beginError } = await api.POST(
-        '/auth/webauthn/register/begin'
+        '/v1/auth/webauthn/register/begin'
       )
 
       if (beginError || !response) {
@@ -149,7 +149,7 @@ export function useWebAuthn() {
       // Step 3: Send credential to server for verification
       const { data: credential, error: finishError } =
         // @ts-expect-error - WebAuthn route not in generated OpenAPI schema
-        await api.POST('/auth/webauthn/register/finish', {
+        await api.POST('/v1/auth/webauthn/register/finish', {
           body: {
             name: credentialName,
             response: attResp,
@@ -249,7 +249,7 @@ export function useWebAuthn() {
   const deleteMutation = useMutation({
     mutationFn: async (credentialId: string) => {
       // @ts-expect-error - WebAuthn route not in generated OpenAPI schema
-      const { error } = await api.DELETE('/auth/webauthn/credentials/{id}', {
+      const { error } = await api.DELETE('/v1/auth/webauthn/credentials/{id}', {
         params: { path: { id: credentialId } },
       })
 

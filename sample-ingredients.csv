@@ -1,0 +1,31 @@
+name,category,unit,current_stock,reorder_level,cost_per_unit_cents,currency,supplier,description
+Premium Olive Oil,oils,l,50.5,10.0,1250,USD,Mediterranean Imports,Extra virgin cold-pressed olive oil
+Fresh Tomatoes,vegetables,kg,100.0,20.0,350,USD,Local Farm Co,Organic vine-ripened tomatoes
+Basil Leaves,spices,g,5.0,1.0,850,USD,Herb Garden,Fresh Italian basil
+Mozzarella Cheese,dairy,kg,25.0,5.0,1850,USD,Dairy Delight,Fresh buffalo mozzarella
+Penne Pasta,grains,kg,150.0,30.0,280,USD,Pasta Masters,Italian durum wheat pasta
+Salmon Fillets,seafood,kg,20.0,5.0,3500,USD,Ocean Fresh,Wild-caught Atlantic salmon
+Chicken Breast,meat,kg,75.0,15.0,1200,USD,Quality Meats,Free-range chicken breast
+Heavy Cream,dairy,l,30.0,8.0,650,USD,Dairy Delight,35% fat content cream
+Garlic Cloves,vegetables,kg,15.0,3.0,420,USD,Local Farm Co,Fresh organic garlic
+Black Pepper,spices,g,3.0,0.5,1200,USD,Spice World,Whole black peppercorns
+Sea Salt,spices,kg,50.0,10.0,180,USD,Salt Co,Fine sea salt
+Balsamic Vinegar,condiments,l,20.0,5.0,1850,USD,Italian Imports,Aged balsamic vinegar from Modena
+Honey,condiments,kg,12.0,3.0,950,USD,Bee Happy,Raw wildflower honey
+Flour,grains,kg,200.0,40.0,120,USD,Mill & Co,All-purpose wheat flour
+Butter,dairy,kg,40.0,10.0,850,USD,Dairy Delight,Unsalted butter
+Eggs,dairy,piece,500.0,100.0,30,USD,Farm Fresh,Free-range eggs
+Parmesan Cheese,dairy,kg,18.0,4.0,2850,USD,Italian Cheese Co,Aged Parmigiano-Reggiano
+Lemons,fruits,kg,25.0,5.0,280,USD,Citrus Grove,Fresh organic lemons
+Fresh Parsley,spices,g,8.0,2.0,650,USD,Herb Garden,Italian flat-leaf parsley
+White Wine,beverages,l,35.0,10.0,1250,USD,Wine Merchants,Dry white wine for cooking
+Onions,vegetables,kg,60.0,15.0,180,USD,Local Farm Co,Yellow onions
+Carrots,vegetables,kg,45.0,10.0,220,USD,Local Farm Co,Fresh organic carrots
+Celery,vegetables,kg,20.0,5.0,280,USD,Local Farm Co,Fresh celery stalks
+Thyme,spices,g,2.0,0.5,950,USD,Herb Garden,Fresh thyme sprigs
+Rosemary,spices,g,2.5,0.5,950,USD,Herb Garden,Fresh rosemary
+Bay Leaves,spices,g,1.0,0.2,1350,USD,Spice World,Dried bay leaves
+Canned Tomatoes,canned,kg,80.0,20.0,220,USD,Italian Imports,San Marzano tomatoes
+Mushrooms,vegetables,kg,15.0,3.0,850,USD,Fungi Farm,Fresh cremini mushrooms
+Bell Peppers,vegetables,kg,30.0,8.0,450,USD,Local Farm Co,Mixed color bell peppers
+Spaghetti,grains,kg,120.0,25.0,260,USD,Pasta Masters,Italian spaghetti

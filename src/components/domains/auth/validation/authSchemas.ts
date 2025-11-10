@@ -101,6 +101,7 @@ export const signupSchema = z
     firstName: nameSchema,
     lastName: nameSchema,
     phone: phoneSchema.optional(),
+    accountName: z.string().min(1).max(200).optional(),
     accountType: z.enum(['customer', 'caterer'], {
       message: 'Please select an account type (customer or caterer)',
     }),

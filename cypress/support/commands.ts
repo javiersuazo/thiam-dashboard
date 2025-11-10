@@ -60,6 +60,19 @@ declare global {
        * @example cy.get('input').tab()
        */
       tab(): Chainable<Element>
+
+      /**
+       * Get a toast notification by message (supports regex)
+       * @example cy.getToast(/success/i)
+       * @example cy.getToast('Email verified successfully!')
+       */
+      getToast(message: string | RegExp): Chainable<JQuery<HTMLElement>>
+
+      /**
+       * Check if a toast notification exists
+       * @example cy.toastExists(/error/i).should('be.true')
+       */
+      toastExists(message: string | RegExp): Chainable<boolean>
     }
   }
 }
@@ -178,6 +191,42 @@ Cypress.Commands.add('tab', { prevSubject: 'optional' }, (subject) => {
     cy.focused().trigger('keydown', { key: 'Tab', keyCode: 9 })
     return cy.focused()
   }
+})
+
+// Get toast notification by message
+Cypress.Commands.add('getToast', (message: string | RegExp) => {
+  // Sonner toasts have data-sonner-toast attribute
+  // Wait for toast to appear, then find message
+  return cy.get('[data-sonner-toast]', { timeout: 10000 }).contains(message)
+})
+
+// Check if toast exists
+Cypress.Commands.add('toastExists', (message: string | RegExp) => {
+  return cy
+    .get('body')
+    .then(($body) => {
+      const toastExists = $body.find('[data-sonner-toast]').length > 0
+      if (!toastExists) {
+        return false
+      }
+
+      // Check if any toast contains the message
+      const toasts = $body.find('[data-sonner-toast]')
+      for (let i = 0; i < toasts.length; i++) {
+        const text = toasts.eq(i).text()
+        if (typeof message === 'string') {
+          if (text.includes(message)) {
+            return true
+          }
+        } else {
+          // RegExp
+          if (message.test(text)) {
+            return true
+          }
+        }
+      }
+      return false
+    })
 })
 
 // Prevent TypeScript errors

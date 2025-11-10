@@ -64,6 +64,7 @@ export default function PasskeySignInButton({ disabled }: PasskeySignInButtonPro
       }
 
       const options = beginResult.data.publicKey as PublicKeyCredentialRequestOptionsJSON
+      const sessionId = beginResult.data.sessionId
 
       // Step 2: Prompt user for biometric/security key
       console.log('🔐 PasskeySignInButton - calling startAuthentication (browser prompt)')
@@ -72,7 +73,7 @@ export default function PasskeySignInButton({ disabled }: PasskeySignInButtonPro
 
       // Step 3: Send authentication response to server (via Server Action)
       console.log('🔐 PasskeySignInButton - calling passkeyLoginFinishAction')
-      const finishResult = await passkeyLoginFinishAction(authResponse)
+      const finishResult = await passkeyLoginFinishAction(authResponse, sessionId)
 
       if (!finishResult.success) {
         throw new Error((finishResult as { error?: string }).error || 'Authentication failed')

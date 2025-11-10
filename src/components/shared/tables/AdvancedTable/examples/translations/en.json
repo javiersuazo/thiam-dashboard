@@ -1,0 +1,62 @@
+{
+  "table": {
+    "show": "Show",
+    "entries": "entries",
+    "showing": "Showing",
+    "to": "to",
+    "of": "of",
+    "page": "Page",
+    "exportCSV": "Export CSV",
+    "columns": "Columns",
+    "manageColumns": "Manage Columns",
+    "showAll": "Show All",
+    "apply": "Apply",
+    "clear": "Clear",
+    "cancel": "Cancel",
+    "saveAllChanges": "Save All Changes",
+    "filterBy": "Filter by",
+    "search": "Search",
+    "searchPlaceholder": "Search...",
+    "min": "Min",
+    "max": "Max",
+    "from": "From",
+    "to": "To",
+    "all": "All",
+    "yes": "Yes",
+    "no": "No",
+    "selectValue": "Select value...",
+    "selected": "Selected",
+    "availableOptions": "Available options",
+    "dragToReorder": "💡 Drag items to reorder columns",
+    "clearSearch": "Clear search"
+  },
+  "products": {
+    "columns": {
+      "id": "ID",
+      "name": "Product Name",
+      "category": "Category",
+      "status": "Status",
+      "price": "Price",
+      "stock": "Stock",
+      "rating": "Rating",
+      "createdAt": "Created Date"
+    }
+  },
+  "categories": {
+    "electronics": "Electronics",
+    "clothing": "Clothing",
+    "food": "Food & Beverages",
+    "books": "Books",
+    "toys": "Toys & Games",
+    "sports": "Sports & Outdoors",
+    "home": "Home & Garden",
+    "beauty": "Health & Beauty"
+  },
+  "statuses": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "pending": "Pending Approval",
+    "archived": "Archived",
+    "draft": "Draft"
+  }
+}

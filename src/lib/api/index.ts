@@ -40,12 +40,13 @@ import {
   contentTypeMiddleware,
 } from './middleware'
 
-const API_BASE_URL = 'http://localhost:8080'
+const API_BASE_URL = 'http://localhost:8080/api'
 
 // Log API configuration in development
 if (process.env.NODE_ENV === 'development') {
   console.log('🔧 API Client Configuration:', {
-    baseUrl: `${API_BASE_URL}/v1`,
+    baseUrl: API_BASE_URL,
+    note: 'Schema paths include /v1/ prefix (e.g., /v1/accounts/{id})',
     env: process.env.NEXT_PUBLIC_API_URL,
   })
 }
@@ -62,7 +63,7 @@ if (process.env.NODE_ENV === 'development') {
  * - Retry logic for failed requests
  */
 const client = createClient<paths>({
-  baseUrl: `${API_BASE_URL}/v1`,
+  baseUrl: API_BASE_URL,
   credentials: 'include', // CRITICAL: Send cookies with cross-origin requests
 })
 
@@ -134,7 +135,7 @@ export function logout(): void {
  */
 export function createAuthenticatedClient(token: string) {
   const authenticatedClient = createClient<paths>({
-    baseUrl: `${API_BASE_URL}/v1`,
+    baseUrl: API_BASE_URL,
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -165,7 +166,7 @@ export function createAuthenticatedClient(token: string) {
  *
  * export async function loginAction(credentials) {
  *   const api = createPublicServerClient()
- *   const { data, error } = await api.POST('/auth/login', {
+ *   const { data, error } = await api.POST('/v1/auth/login', {
  *     body: credentials
  *   })
  *   return data
@@ -174,7 +175,7 @@ export function createAuthenticatedClient(token: string) {
  */
 export function createPublicServerClient() {
   const publicClient = createClient<paths>({
-    baseUrl: `${API_BASE_URL}/v1`,
+    baseUrl: API_BASE_URL,
   })
 
   // Add middleware (no auth middleware for public endpoints)

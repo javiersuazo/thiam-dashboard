@@ -24,6 +24,10 @@ const PUBLIC_ROUTES = [
   '/signup',
   '/forgot-password',
   '/reset-password',
+  '/passwordless',
+  '/check-email',
+  '/verify-email',
+  '/email-verified',
   '/two-step-verification',
   '/oauth-callback',
   '/success',
@@ -32,6 +36,13 @@ const PUBLIC_ROUTES = [
   '/error-500',
   '/error-503',
   '/maintenance',
+  '/table-test',
+  '/menu-builder-test',
+  '/marketplace-enhanced',
+  '/marketplace-checkout',
+  '/offers/builder/demo',
+  '/offers',
+  '/omni-chat-test'
 ]
 
 /**

@@ -35,6 +35,15 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   {
+    icon: <BoxCubeIcon />,
+    name: "Inventory",
+    new: true,
+    subItems: [
+      { name: "Ingredients", path: "/inventory/ingredients", new: true },
+      { name: "Menu Items", path: "/menu-items", new: true },
+    ],
+  },
+  {
     icon: <GridIcon />,
     name: "Dashboard",
     subItems: [

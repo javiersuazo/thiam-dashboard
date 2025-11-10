@@ -39,7 +39,7 @@ import {
  * Login and store auth token
  */
 export async function loginExample(email: string, password: string) {
-  const { data, error } = await api.POST('/auth/login', {
+  const { data, error } = await api.POST('/v1/auth/login', {
     body: { email, password },
   })
 

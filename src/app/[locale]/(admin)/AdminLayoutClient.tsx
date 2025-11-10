@@ -6,6 +6,7 @@ import AppSidebar from "@/layout/AppSidebar";
 import Backdrop from "@/layout/Backdrop";
 import React from "react";
 import { usePathname } from "next/navigation";
+import { OmniChatLayout } from "@/components/domains/omni-chat";
 
 /**
  * Admin Layout Client Component
@@ -21,7 +22,6 @@ export default function AdminLayoutClient({
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
   const pathname = usePathname();
 
-  // Route-specific styles for the main content container
   const getRouteSpecificStyles = () => {
     switch (pathname) {
       case "/text-generator":
@@ -37,7 +37,6 @@ export default function AdminLayoutClient({
     }
   };
 
-  // Dynamic class for main content margin based on sidebar state
   const mainContentMargin = isMobileOpen
     ? "ml-0"
     : isExpanded || isHovered
@@ -49,15 +48,18 @@ export default function AdminLayoutClient({
       {/* Sidebar and Backdrop */}
       <AppSidebar />
       <Backdrop />
-      {/* Main Content Area */}
-      <div
-        className={`flex-1 transition-all  duration-300 ease-in-out ${mainContentMargin}`}
-      >
-        {/* Header */}
-        <AppHeader />
-        {/* Page Content */}
-        <div className={getRouteSpecificStyles()}>{children}</div>
-      </div>
+
+      {/* Main Content Area with OmniChat Layout */}
+      <OmniChatLayout initialMode="minimized">
+        <div
+          className={`flex-1 transition-all duration-300 ease-in-out ${mainContentMargin}`}
+        >
+          {/* Header */}
+          <AppHeader />
+          {/* Page Content */}
+          <div className={getRouteSpecificStyles()}>{children}</div>
+        </div>
+      </OmniChatLayout>
     </div>
   );
 }

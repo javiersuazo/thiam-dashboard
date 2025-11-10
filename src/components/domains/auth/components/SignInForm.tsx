@@ -110,7 +110,7 @@ export default function SignInForm() {
 
         // Check for callback URL (where user tried to go before login)
         const callbackUrl = searchParams.get('callbackUrl')
-        const redirectUrl = callbackUrl || '/'
+        const redirectUrl = callbackUrl || '/dashboard'
 
         // Full page navigation to ensure fresh request with new cookies
         // Server Action has completed, cookies are set, safe to navigate

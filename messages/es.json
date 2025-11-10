@@ -1,17 +1,4 @@
 {
-  "common": {
-    "errors": {
-      "network": "Error de red. Por favor verifica tu conexión e intenta de nuevo.",
-      "unknown": "Ocurrió un error inesperado. Por favor intenta de nuevo.",
-      "validation": "Por favor verifica tu información e intenta de nuevo.",
-      "invalidRequest": "Solicitud inválida. Por favor verifica tu información e intenta de nuevo.",
-      "conflict": "Esta información ya está en uso.",
-      "unauthorized": "Debes iniciar sesión para acceder a esto.",
-      "forbidden": "No tienes permiso para realizar esta acción.",
-      "notFound": "No se encontró el recurso solicitado.",
-      "serverError": "Ocurrió un error en el servidor. Por favor intenta más tarde."
-    }
-  },
   "auth": {
     "errors": {
       "rateLimitExceeded": "Demasiadas solicitudes. Por favor intenta de nuevo en unos minutos.",
@@ -700,6 +687,177 @@
     "confirm": "Confirmar",
     "yes": "Sí",
     "no": "No",
-    "ok": "OK"
+    "ok": "OK",
+    "errors": {
+      "network": "Error de red. Por favor verifica tu conexión e intenta de nuevo.",
+      "unknown": "Ocurrió un error inesperado. Por favor intenta de nuevo.",
+      "validation": "Por favor verifica tu información e intenta de nuevo.",
+      "invalidRequest": "Solicitud inválida. Por favor verifica tu información e intenta de nuevo.",
+      "conflict": "Esta información ya está en uso.",
+      "unauthorized": "Debes iniciar sesión para acceder a esto.",
+      "forbidden": "No tienes permiso para realizar esta acción.",
+      "notFound": "No se encontró el recurso solicitado.",
+      "serverError": "Ocurrió un error en el servidor. Por favor intenta más tarde."
+    }
+  },
+  "inventory": {
+    "ingredients": {
+      "title": "Ingredientes",
+      "subtitle": "Gestiona tu inventario de ingredientes",
+      "addButton": "Añadir Ingrediente",
+      "importCSV": "Importar CSV",
+      "search": "Buscar ingredientes...",
+      "filterCategory": "Categoría",
+      "allCategories": "Todas las Categorías",
+      "statusAll": "Todos",
+      "statusActive": "Activos",
+      "statusLowStock": "Stock Bajo",
+      "emptyState": "No se encontraron ingredientes. Añade tu primer ingrediente para comenzar.",
+      "loading": "Cargando ingredientes...",
+      "error": "Error al cargar ingredientes. Por favor intenta de nuevo.",
+      "table": {
+        "name": "Nombre",
+        "category": "Categoría",
+        "stock": "Stock",
+        "unit": "Unidad",
+        "costPerUnit": "Costo/Unidad",
+        "supplier": "Proveedor",
+        "status": "Estado",
+        "active": "Activo",
+        "actions": "Acciones",
+        "reorderLevel": "Nivel de reorden"
+      },
+      "stockStatus": {
+        "outOfStock": "Sin Stock",
+        "lowStock": "Stock Bajo",
+        "inStock": "En Stock"
+      },
+      "actions": {
+        "edit": "Editar",
+        "delete": "Eliminar",
+        "save": "Guardar",
+        "cancel": "Cancelar",
+        "viewBatches": "Ver Lotes",
+        "confirmDelete": "¿Estás seguro de que quieres eliminar \"{name}\"?",
+        "confirmDeleteDescription": "Esta acción no se puede deshacer."
+      },
+      "searchPlaceholder": "Buscar ingredientes...",
+      "saveChanges": "Guardar Cambios",
+      "cancelChanges": "Cancelar Cambios",
+      "bulkSaveSuccess": "Todos los cambios guardados exitosamente",
+      "bulkSaveFailed": "Error al guardar los cambios. Por favor intenta de nuevo.",
+      "changesDiscarded": "Cambios descartados",
+      "confirmDelete": "¿Estás seguro de que quieres eliminar este ingrediente?",
+      "confirmBulkDelete": "¿Estás seguro de que quieres eliminar {count} ingrediente(s)?",
+      "confirmDeleteDescription": "Esta acción no se puede deshacer. El ingrediente será eliminado permanentemente.",
+      "confirmBulkDeleteDescription": "Esta acción no se puede deshacer. Los {count} ingredientes serán eliminados permanentemente.",
+      "delete": "Eliminar",
+      "cancel": "Cancelar",
+      "deleteSuccess": "Ingrediente(s) eliminado(s) exitosamente",
+      "deleteFailed": "Error al eliminar ingrediente(s)",
+      "inlineEdit": {
+        "doubleClickHint": "Haz doble clic en una fila para editar",
+        "validation": {
+          "nameRequired": "El nombre es obligatorio",
+          "stockPositive": "El stock actual debe ser un número positivo",
+          "reorderLevelPositive": "El nivel de reorden debe ser un número positivo",
+          "costPositive": "El costo debe ser un número positivo"
+        },
+        "success": "Ingrediente actualizado correctamente",
+        "error": "Error al actualizar ingrediente"
+      },
+      "filters": {
+        "activeFilters": "Filtros activos:",
+        "search": "Buscar",
+        "category": "Categoría",
+        "status": "Estado",
+        "clearAll": "Limpiar todo"
+      },
+      "categories": {
+        "vegetables": "Vegetales",
+        "fruits": "Frutas",
+        "meat": "Carnes",
+        "seafood": "Mariscos",
+        "dairy": "Lácteos",
+        "grains": "Granos",
+        "bakery": "Panadería",
+        "spices": "Especias",
+        "oils": "Aceites",
+        "condiments": "Condimentos",
+        "beverages": "Bebidas",
+        "canned": "Enlatados",
+        "frozen": "Congelados",
+        "supplies": "Suministros",
+        "other": "Otros"
+      },
+      "units": {
+        "kg": "Kilogramos (kg)",
+        "g": "Gramos (g)",
+        "l": "Litros (l)",
+        "ml": "Mililitros (ml)",
+        "piece": "Piezas"
+      },
+      "deleteSuccess": "Ingrediente eliminado correctamente",
+      "deleteFailed": "Error al eliminar ingrediente"
+    }
+  },
+  "table": {
+    "show": "Mostrar",
+    "entries": "entradas",
+    "showing": "Mostrando",
+    "to": "a",
+    "of": "de",
+    "page": "Página",
+    "exportCSV": "Exportar CSV",
+    "columns": "Columnas",
+    "manageColumns": "Gestionar Columnas",
+    "showAll": "Mostrar Todas",
+    "apply": "Aplicar",
+    "clear": "Limpiar",
+    "cancel": "Cancelar",
+    "saveAllChanges": "Guardar Todos los Cambios",
+    "filterBy": "Filtrar por",
+    "search": "Buscar",
+    "searchPlaceholder": "Buscar...",
+    "min": "Mín",
+    "max": "Máx",
+    "from": "Desde",
+    "all": "Todos",
+    "yes": "Sí",
+    "no": "No",
+    "selectValue": "Seleccionar valor...",
+    "selected": "Seleccionado",
+    "availableOptions": "Opciones disponibles",
+    "dragToReorder": "Arrastra elementos para reordenar columnas",
+    "clearSearch": "Limpiar búsqueda"
+  },
+  "products": {
+    "columns": {
+      "id": "ID",
+      "name": "Nombre del Producto",
+      "category": "Categoría",
+      "status": "Estado",
+      "price": "Precio",
+      "stock": "Inventario",
+      "rating": "Calificación",
+      "createdAt": "Fecha de Creación"
+    }
+  },
+  "categories": {
+    "electronics": "Electrónica",
+    "clothing": "Ropa",
+    "food": "Alimentos",
+    "books": "Libros",
+    "toys": "Juguetes",
+    "sports": "Deportes",
+    "home": "Hogar",
+    "beauty": "Belleza"
+  },
+  "statuses": {
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "pending": "Pendiente",
+    "archived": "Archivado",
+    "draft": "Borrador"
   }
 }

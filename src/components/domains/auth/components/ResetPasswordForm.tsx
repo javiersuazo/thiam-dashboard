@@ -76,7 +76,7 @@ export default function ResetPasswordForm({ initialToken }: ResetPasswordFormPro
       }
 
       // Success! Auto-logged in, redirect to dashboard
-      router.push('/')
+      router.push('/dashboard')
       router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to reset password')

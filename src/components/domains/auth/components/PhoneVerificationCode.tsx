@@ -54,16 +54,13 @@ export default function PhoneVerificationCode({
     try {
       setLoading(true)
 
-      // TODO: Implement verifyPhoneCodeAction when backend is ready
-      // const result = await verifyPhoneCodeAction({ phone, code })
+      const { verifyPhoneOTPAction } = await import('../actions')
+      const result = await verifyPhoneOTPAction({ otp: code })
 
-      // if (!result.success) {
-      //   setError(result.error)
-      //   return
-      // }
-
-      // Mock success for now
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      if (!result.success) {
+        setError(result.error)
+        return
+      }
 
       // Notify parent component
       onVerifySuccess()

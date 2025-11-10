@@ -54,16 +54,13 @@ export default function PhoneVerificationRequest({
       // Format phone for API
       const formattedPhone = formatPhone(cleanedPhone)
 
-      // TODO: Implement sendPhoneVerificationAction when backend is ready
-      // const result = await sendPhoneVerificationAction({ phone: formattedPhone })
+      const { sendPhoneVerificationAction } = await import('../actions')
+      const result = await sendPhoneVerificationAction({ phone: formattedPhone })
 
-      // if (!result.success) {
-      //   setError(result.error)
-      //   return
-      // }
-
-      // Mock success for now
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      if (!result.success) {
+        setError(result.error)
+        return
+      }
 
       // Notify parent component
       onCodeSent(formattedPhone)

@@ -1,17 +1,4 @@
 {
-  "common": {
-    "errors": {
-      "network": "Network error. Please check your connection and try again.",
-      "unknown": "An unexpected error occurred. Please try again.",
-      "validation": "Please check your input and try again.",
-      "invalidRequest": "Invalid request. Please check your information and try again.",
-      "conflict": "This information is already in use.",
-      "unauthorized": "You must be logged in to access this.",
-      "forbidden": "You don't have permission to perform this action.",
-      "notFound": "The requested resource was not found.",
-      "serverError": "A server error occurred. Please try again later."
-    }
-  },
   "auth": {
     "errors": {
       "rateLimitExceeded": "Too many requests. Please try again in a few minutes.",
@@ -702,6 +689,521 @@
     "confirm": "Confirm",
     "yes": "Yes",
     "no": "No",
-    "ok": "OK"
+    "ok": "OK",
+    "errors": {
+      "network": "Network error. Please check your connection and try again.",
+      "unknown": "An unexpected error occurred. Please try again.",
+      "validation": "Please check your input and try again.",
+      "invalidRequest": "Invalid request. Please check your information and try again.",
+      "conflict": "This information is already in use.",
+      "unauthorized": "You must be logged in to access this.",
+      "forbidden": "You don't have permission to perform this action.",
+      "notFound": "The requested resource was not found.",
+      "serverError": "A server error occurred. Please try again later."
+    }
+  },
+  "inventory": {
+    "ingredients": {
+      "title": "Ingredients",
+      "subtitle": "Manage your ingredient inventory",
+      "addButton": "Add Ingredient",
+      "importCSV": "Import CSV",
+      "search": "Search ingredients...",
+      "filterCategory": "Category",
+      "allCategories": "All Categories",
+      "statusAll": "All",
+      "statusActive": "Active",
+      "statusLowStock": "Low Stock",
+      "emptyState": "No ingredients found. Add your first ingredient to get started.",
+      "loading": "Loading ingredients...",
+      "error": "Failed to load ingredients. Please try again.",
+      "table": {
+        "name": "Name",
+        "category": "Category",
+        "stock": "Stock",
+        "unit": "Unit",
+        "costPerUnit": "Cost/Unit",
+        "supplier": "Supplier",
+        "status": "Status",
+        "active": "Active",
+        "actions": "Actions",
+        "reorderLevel": "Reorder level"
+      },
+      "stockStatus": {
+        "outOfStock": "Out of Stock",
+        "lowStock": "Low Stock",
+        "inStock": "In Stock"
+      },
+      "actions": {
+        "add": "Add Ingredient",
+        "importCSV": "Import CSV",
+        "edit": "Edit",
+        "delete": "Delete",
+        "save": "Save",
+        "cancel": "Cancel",
+        "viewBatches": "View Batches",
+        "confirmDelete": "Are you sure you want to delete \"{name}\"?",
+        "confirmDeleteDescription": "This action cannot be undone."
+      },
+      "searchPlaceholder": "Search ingredients...",
+      "saveChanges": "Save Changes",
+      "cancelChanges": "Cancel Changes",
+      "bulkSaveSuccess": "All changes saved successfully",
+      "bulkSaveFailed": "Failed to save changes. Please try again.",
+      "changesDiscarded": "Changes discarded",
+      "confirmDelete": "Delete {name}?",
+      "confirmBulkDelete": "Delete {count} ingredients?",
+      "confirmDeleteDescription": "This action cannot be undone. This ingredient will be permanently deleted.",
+      "confirmBulkDeleteDescription": "This action cannot be undone. {count} ingredients will be permanently deleted.",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "deleteSuccess": "Ingredient(s) deleted successfully",
+      "deleteFailed": "Failed to delete ingredient(s)",
+      "inlineEdit": {
+        "doubleClickHint": "Double-click a row to edit",
+        "validation": {
+          "nameRequired": "Name is required",
+          "stockPositive": "Current stock must be a positive number",
+          "reorderLevelPositive": "Reorder level must be a positive number",
+          "costPositive": "Cost must be a positive number"
+        },
+        "success": "Ingredient updated successfully",
+        "error": "Failed to update ingredient"
+      },
+      "filters": {
+        "activeFilters": "Active filters:",
+        "search": "Search",
+        "category": "Category",
+        "status": "Status",
+        "clearAll": "Clear all"
+      },
+      "categories": {
+        "vegetables": "Vegetables",
+        "fruits": "Fruits",
+        "meat": "Meat",
+        "seafood": "Seafood",
+        "dairy": "Dairy",
+        "grains": "Grains",
+        "bakery": "Bakery",
+        "spices": "Spices",
+        "oils": "Oils",
+        "condiments": "Condiments",
+        "beverages": "Beverages",
+        "canned": "Canned",
+        "frozen": "Frozen",
+        "supplies": "Supplies",
+        "other": "Other"
+      },
+      "units": {
+        "kg": "Kilograms (kg)",
+        "g": "Grams (g)",
+        "l": "Liters (l)",
+        "ml": "Milliliters (ml)",
+        "piece": "Pieces"
+      },
+      "form": {
+        "createTitle": "Add New Ingredient",
+        "editTitle": "Edit Ingredient",
+        "fields": {
+          "name": {
+            "label": "Ingredient Name",
+            "placeholder": "e.g., Organic Tomatoes"
+          },
+          "category": {
+            "label": "Category",
+            "placeholder": "Select category"
+          },
+          "unit": {
+            "label": "Unit",
+            "placeholder": "Select unit"
+          },
+          "currentStock": {
+            "label": "Current Stock"
+          },
+          "reorderLevel": {
+            "label": "Reorder Level"
+          },
+          "costPerUnit": {
+            "label": "Cost per Unit",
+            "placeholder": "0.00"
+          },
+          "currency": {
+            "label": "Currency",
+            "placeholder": "USD"
+          },
+          "supplier": {
+            "label": "Supplier",
+            "placeholder": "e.g., Fresh Farms Co."
+          },
+          "description": {
+            "label": "Description",
+            "placeholder": "Optional notes about this ingredient"
+          },
+          "isActive": {
+            "label": "Active ingredient"
+          }
+        },
+        "required": "Required",
+        "cancel": "Cancel",
+        "create": "Create Ingredient",
+        "update": "Update Ingredient",
+        "creating": "Creating...",
+        "updating": "Updating...",
+        "success": {
+          "created": "Ingredient created successfully",
+          "updated": "Ingredient updated successfully"
+        },
+        "errors": {
+          "createFailed": "Failed to create ingredient",
+          "updateFailed": "Failed to update ingredient"
+        }
+      },
+      "batches": {
+        "title": "Batches for {name}",
+        "subtitle": "View and manage stock batches (FIFO consumption)",
+        "emptyState": "No batches found. Add a batch to track stock.",
+        "addButton": "Add Batch",
+        "close": "Close",
+        "batchNumber": "Batch #{number}",
+        "received": "Received",
+        "expires": "Expires",
+        "current": "Current",
+        "reserved": "Reserved",
+        "supplier": "Supplier",
+        "unitCost": "Unit Cost",
+        "notes": "Notes",
+        "expiresIn": "Expires in {days} days",
+        "expiredAgo": "Expired {days} days ago",
+        "qualityStatus": {
+          "good": "Good",
+          "nearExpiry": "Near Expiry",
+          "expired": "Expired",
+          "damaged": "Damaged",
+          "recalled": "Recalled"
+        }
+      },
+      "csvImport": {
+        "title": "Import Ingredients from CSV",
+        "subtitle": "Upload a CSV file to bulk import ingredients",
+        "instructions": {
+          "title": "CSV Format Requirements",
+          "required": "Required columns: name, category, unit, current_stock, reorder_level",
+          "optional": "Optional columns: cost_per_unit, currency, supplier, description, is_active",
+          "categories": "Categories: vegetables, fruits, meat, seafood, dairy, grains, bakery, spices, oils, condiments, beverages, canned, frozen, supplies, other",
+          "units": "Units: kg, g, l, ml, piece"
+        },
+        "downloadTemplate": "Download template CSV",
+        "selectFile": "Select CSV File",
+        "chooseFile": "Choose File",
+        "fileSize": "{size} KB",
+        "preview": "Preview ({count} ingredient)",
+        "preview_plural": "Preview ({count} ingredients)",
+        "cancel": "Cancel",
+        "import": "Import {count} Ingredient",
+        "import_plural": "Import {count} Ingredients",
+        "importing": "Importing...",
+        "success": "Successfully imported {imported} ingredient(s). {skipped, plural, =0 {} other {Skipped # duplicate(s).}}",
+        "errors": {
+          "invalidFile": "Please select a CSV file",
+          "emptyFile": "CSV file is empty or has no data rows",
+          "missingColumns": "Missing required columns: {columns}",
+          "parseFailed": "Failed to parse CSV file. Please check the format.",
+          "importFailed": "Failed to import ingredients",
+          "noData": "No ingredients to import"
+        }
+      },
+      "pagination": {
+        "showing": "Showing",
+        "to": "to",
+        "of": "of",
+        "page": "Page {current} of {total}"
+      },
+      "deleteSuccess": "Ingredient deleted successfully",
+      "deleteFailed": "Failed to delete ingredient"
+    }
+  },
+  "menu": {
+    "items": {
+      "title": "Menu Items",
+      "subtitle": "Manage your menu items and recipes",
+      "addButton": "Add Menu Item",
+      "search": "Search menu items...",
+      "emptyState": "No menu items found. Add your first menu item to get started.",
+      "loading": "Loading menu items...",
+      "error": "Failed to load menu items. Please try again.",
+      "table": {
+        "name": "Name",
+        "courseType": "Course Type",
+        "price": "Price",
+        "portionSize": "Portion Size",
+        "servings": "Servings",
+        "deliveryType": "Delivery Type",
+        "visibility": "Visibility",
+        "active": "Active",
+        "actions": "Actions"
+      },
+      "actions": {
+        "edit": "Edit",
+        "delete": "Delete",
+        "save": "Save",
+        "cancel": "Cancel",
+        "viewIngredients": "View Ingredients",
+        "viewMedia": "View Media"
+      },
+      "inlineEdit": {
+        "validation": {
+          "nameRequired": "Name is required",
+          "pricePositive": "Price must be a positive number"
+        },
+        "success": "Menu item updated successfully",
+        "error": "Failed to update menu item"
+      },
+      "deleteSuccess": "Menu item deleted successfully",
+      "deleteFailed": "Failed to delete menu item",
+      "ingredients": {
+        "title": "Ingredients",
+        "subtitle": "Manage recipe ingredients for this menu item",
+        "emptyState": "No ingredients added yet. Add your first ingredient to start building your recipe.",
+        "table": {
+          "name": "Ingredient",
+          "quantity": "Quantity",
+          "costPerUnit": "Cost/Unit",
+          "totalCost": "Total Cost",
+          "available": "Available"
+        },
+        "summary": {
+          "ingredientCost": "Ingredient Cost",
+          "sellingPrice": "Selling Price",
+          "margin": "Margin"
+        },
+        "actions": {
+          "addIngredient": "Add Ingredient",
+          "remove": "Remove"
+        },
+        "deleteSuccess": "Ingredient removed successfully",
+        "deleteFailed": "Failed to remove ingredient"
+      },
+      "media": {
+        "title": "Media Gallery",
+        "subtitle": "Manage images and videos for this menu item",
+        "attachSuccess": "Media attached successfully",
+        "attachFailed": "Failed to attach media",
+        "removeSuccess": "Media removed successfully",
+        "removeFailed": "Failed to remove media",
+        "setPrimarySuccess": "Primary image set successfully",
+        "setPrimaryFailed": "Failed to set primary image",
+        "reorderSuccess": "Media reordered successfully",
+        "reorderFailed": "Failed to reorder media"
+      }
+    },
+    "builder": {
+      "title": "Menu Builder",
+      "menuDetails": "Menu Details",
+      "editName": "Edit menu name",
+      "pricingStrategy": {
+        "label": "Pricing Strategy",
+        "sum": "Sum",
+        "sumTooltip": "Menu price is the sum of all item prices",
+        "fixed": "Fixed",
+        "fixedTooltip": "Menu has one fixed price regardless of items",
+        "fixedPlaceholder": "0.00"
+      },
+      "status": {
+        "published": "Published",
+        "draft": "Draft"
+      },
+      "search": {
+        "placeholder": "Search items to add...",
+        "browseButton": "Browse All Items"
+      },
+      "course": {
+        "default": "Course",
+        "removeTooltip": "Remove course"
+      },
+      "item": {
+        "removeTooltip": "Remove item from course"
+      },
+      "emptyState": {
+        "title": "No courses yet",
+        "description": "Start building your menu by searching and adding items above"
+      },
+      "bottomBar": {
+        "courses": "courses",
+        "items": "items",
+        "fixedPrice": "(Fixed)",
+        "saveButton": "Save Menu",
+        "savingButton": "Saving..."
+      },
+      "details": {
+        "backButton": "Menu Builder",
+        "title": "Menu Details",
+        "name": {
+          "label": "Menu Name",
+          "placeholder": "Enter menu name"
+        },
+        "description": {
+          "label": "Description",
+          "placeholder": "Describe your menu..."
+        },
+        "imageUrl": {
+          "label": "Image URL",
+          "placeholder": "https://example.com/image.jpg"
+        },
+        "tags": {
+          "label": "Tags",
+          "placeholder": "Add a tag...",
+          "addButton": "Add"
+        },
+        "availability": {
+          "label": "Availability Schedule",
+          "placeholder": "e.g., Monday-Friday, 9AM-5PM"
+        },
+        "status": {
+          "label": "Status",
+          "active": "Active (Published)",
+          "inactive": "Inactive (Draft)"
+        }
+      },
+      "browse": {
+        "title": "Browse Menu Items",
+        "closeButton": "Close",
+        "filter": {
+          "all": "All Items",
+          "appetizers": "Appetizers",
+          "mains": "Mains",
+          "sides": "Sides",
+          "desserts": "Desserts",
+          "beverages": "Beverages"
+        },
+        "search": "Search items...",
+        "addButton": "Add",
+        "addedButton": "Added",
+        "emptyState": "No items found",
+        "pagination": {
+          "showing": "Showing",
+          "of": "of",
+          "items": "items",
+          "previous": "Previous",
+          "next": "Next"
+        }
+      },
+      "validation": {
+        "nameRequired": "Menu name is required",
+        "courseRequired": "At least one course with items is required"
+      },
+      "messages": {
+        "saveSuccess": "Menu saved successfully",
+        "saveError": "Failed to save menu. Please try again."
+      }
+    }
+  },
+  "media": {
+    "uploadSuccess": "Files uploaded successfully",
+    "uploadFailed": "Failed to upload files",
+    "deleteSuccess": "Media deleted successfully",
+    "deleteFailed": "Failed to delete media"
+  },
+  "table": {
+    "show": "Show",
+    "entries": "entries",
+    "showing": "Showing",
+    "to": "to",
+    "of": "of",
+    "page": "Page",
+    "exportCSV": "Export CSV",
+    "columns": "Columns",
+    "manageColumns": "Manage Columns",
+    "showAll": "Show All",
+    "apply": "Apply",
+    "clear": "Clear",
+    "cancel": "Cancel",
+    "saveAllChanges": "Save All Changes",
+    "filterBy": "Filter by",
+    "search": "Search",
+    "searchPlaceholder": "Search...",
+    "min": "Min",
+    "max": "Max",
+    "from": "From",
+    "all": "All",
+    "yes": "Yes",
+    "no": "No",
+    "selectValue": "Select value...",
+    "selected": "Selected",
+    "availableOptions": "Available options",
+    "dragToReorder": "Drag items to reorder columns",
+    "clearSearch": "Clear search"
+  },
+  "products": {
+    "columns": {
+      "id": "ID",
+      "name": "Product Name",
+      "category": "Category",
+      "status": "Status",
+      "price": "Price",
+      "stock": "Stock",
+      "rating": "Rating",
+      "createdAt": "Created Date"
+    }
+  },
+  "categories": {
+    "electronics": "Electronics",
+    "clothing": "Clothing",
+    "food": "Food",
+    "books": "Books",
+    "toys": "Toys",
+    "sports": "Sports",
+    "home": "Home",
+    "beauty": "Beauty"
+  },
+  "statuses": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "pending": "Pending",
+    "archived": "Archived",
+    "draft": "Draft"
+  },
+  "offers": {
+    "builder": {
+      "title": "Offer Builder",
+      "addBlock": "Add Block",
+      "addBlockShort": "+ Add Block",
+      "subtotal": "Subtotal",
+      "discount": "Discount",
+      "total": "Total",
+      "items": "items",
+      "totalPrice": "Total Price",
+      "browseCatalog": "Browse Catalog",
+      "searchItems": "Search items...",
+      "noResults": "No items found",
+      "block": {
+        "addTitle": "Add Service Block",
+        "addDescription": "Create a new time slot for your offer",
+        "name": "Block Name",
+        "namePlaceholder": "e.g., Breakfast Service, Lunch Service",
+        "description": "Description",
+        "descriptionPlaceholder": "Brief description of this service block",
+        "date": "Date",
+        "timingSchedule": "Timing Schedule",
+        "timingFlow": "Timing Flow: Delivery → Service Start → Service End → Pickup",
+        "delivery": "Delivery",
+        "start": "Start",
+        "end": "End",
+        "pickup": "Pickup",
+        "cancel": "Cancel",
+        "add": "Add Block",
+        "blockSubtotal": "Block Subtotal"
+      },
+      "categories": {
+        "appetizer": "Appetizer",
+        "mainCourse": "Main Course",
+        "side": "Side",
+        "dessert": "Dessert",
+        "beverage": "Beverage",
+        "equipment": "Equipment",
+        "service": "Service",
+        "delivery": "Delivery",
+        "other": "Other"
+      }
+    }
   }
 }

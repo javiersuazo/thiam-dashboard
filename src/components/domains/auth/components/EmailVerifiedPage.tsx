@@ -24,7 +24,7 @@ export default function EmailVerifiedPage() {
   const [isSupported, setIsSupported] = useState(false)
   const [hasPlatformAuthenticator, setHasPlatformAuthenticator] = useState(false)
   const [showPasskeyPrompt, setShowPasskeyPrompt] = useState(true)
-  const [autoRedirectCountdown, setAutoRedirectCountdown] = useState(10)
+  const [autoRedirectCountdown, setAutoRedirectCountdown] = useState(5)
 
   // Check WebAuthn support on mount
   useEffect(() => {
@@ -45,7 +45,7 @@ export default function EmailVerifiedPage() {
       }, 1000)
       return () => clearTimeout(timer)
     } else if (autoRedirectCountdown === 0) {
-      router.push('/')
+      router.push('/dashboard')
     }
   }, [autoRedirectCountdown, showPasskeyPrompt, router])
 
@@ -94,7 +94,7 @@ export default function EmailVerifiedPage() {
   }
 
   const handleContinueToDashboard = () => {
-    router.push('/')
+    router.push('/dashboard')
   }
 
   return (
